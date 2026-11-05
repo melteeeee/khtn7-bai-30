@@ -1,0 +1,2947 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <link rel="icon" href="data:,">
+  <title>Các yếu tố ảnh hưởng | Khoa học tự nhiên 7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <script type="importmap">{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}</script>
+  <style>
+    :root {
+      --brand: #195856;
+      --brand-dark: #0f3f3d;
+      --brand-light: #2f827d;
+      --brand-soft: #e6f0ee;
+      --ink: #10302d;
+      --muted: #5f8b89;
+      --line: #dbe8e5;
+      --bg: #195658;
+      --gold: #a8814a;
+      --stage-mid: #f1f9f7;
+      --stage-bottom: #dcebe7;
+      --art: #d8514a;
+      --vein: #3f7fc4;
+      --ok: #6fa85b;
+      --bad: #c96a4f;
+      --r: 16px;
+      --r-sm: 11px;
+      --sh-1: 0 1px 2px rgba(13, 42, 40, .05);
+      --sh-2: 0 2px 6px rgba(13, 42, 40, .06), 0 18px 34px -22px rgba(13, 42, 40, .45);
+      --sh-3: 0 10px 30px -12px rgba(13, 42, 40, .32);
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0
+    }
+
+    body {
+      font-family: 'Roboto', system-ui, -apple-system, Segoe UI, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--ink);
+      background: #195658;
+      overflow: hidden;
+      overscroll-behavior: none;
+      -webkit-tap-highlight-color: transparent
+    }
+
+    button {
+      font-family: inherit
+    }
+
+    .app {
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #195658
+    }
+
+    /* topbar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      box-shadow: var(--sh-1);
+      z-index: 20;
+      flex: 0 0 auto;
+    }
+
+    .logoclip {
+      height: 27px;
+      display: flex;
+      align-items: center;
+      flex: 0 0 auto
+    }
+
+    .logoclip .logo {
+      height: 27px;
+      display: block
+    }
+
+    .titles {
+      flex: 1;
+      min-width: 0
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .02em;
+      color: var(--brand);
+      background: var(--brand-soft);
+      border-radius: 99px;
+      padding: 2px 9px;
+      margin-bottom: 2px;
+    }
+
+    .titles h1 {
+      margin: 0;
+      font-weight: 700;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .titles h1.lg {
+      font-size: 18px
+    }
+
+    .tb-right {
+      display: flex;
+      gap: 8px;
+      flex: 0 0 auto
+    }
+
+    .tb-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      border: 1px solid var(--line);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--brand-dark);
+      transition: background .15s, border-color .15s;
+    }
+
+    .tb-btn:hover {
+      background: var(--brand-soft);
+      border-color: var(--brand-light)
+    }
+
+    .tb-btn svg {
+      width: 18px;
+      height: 18px
+    }
+
+    /* layout */
+
+    #gl {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+      outline: none
+    }
+
+    #lines {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 3
+    }
+
+    #lines line {
+      stroke: #fff;
+      stroke-width: 1.6;
+      opacity: .9
+    }
+
+    #lines circle {
+      fill: #fff;
+      stroke: var(--brand);
+      stroke-width: 2
+    }
+
+    .tag {
+      position: absolute;
+      z-index: 4;
+      transform: translate(-50%, -50%);
+      padding: 7px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #e9c9a4;
+      background: #fdebd5;
+      color: #6b3f17;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: var(--sh-3);
+      white-space: nowrap;
+      display: none
+    }
+
+    .tag.show {
+      display: block
+    }
+
+    .tag:hover {
+      background: #fff4e4
+    }
+
+    .lyr {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 13px;
+      border-radius: 99px;
+      border: 1.5px solid rgba(255, 255, 255, .55);
+      background: rgba(15, 63, 61, .72);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(6px)
+    }
+
+    .lyr i {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #fff;
+      display: inline-block
+    }
+
+    .lyr[data-l="heart"] i {
+      background: #ff8a7a
+    }
+
+    .lyr[data-l="art"] i {
+      background: var(--art)
+    }
+
+    .lyr[data-l="vein"] i {
+      background: #6fa7e6
+    }
+
+    .lyr[data-l="body"] i {
+      background: #cfd8d6
+    }
+
+    .lyr.off {
+      background: rgba(255, 255, 255, .88);
+      color: var(--muted);
+      border-color: transparent;
+      text-decoration: line-through
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0)
+    }
+
+    /* kính lúp mạch máu */
+
+    #lines polygon {
+      fill: rgba(246, 200, 90, .42);
+      stroke: none
+    }
+
+    /* side */
+
+    .sec {
+      display: none
+    }
+
+    .sec.on {
+      display: block;
+      animation: fade .3s ease
+    }
+
+    @keyframes fade {
+      from {
+        opacity: 0;
+        transform: translateY(6px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .eyebrow {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--brand-light);
+      margin: 0 0 4px
+    }
+
+    .sec h2 {
+      margin: 0 0 8px;
+      font-size: 21px;
+      line-height: 1.3;
+      color: var(--brand-dark)
+    }
+
+    .lead {
+      font-size: 15px;
+      line-height: 1.65;
+      margin: 8px 0
+    }
+
+    .muted {
+      color: var(--muted)
+    }
+
+    .chip {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand);
+      background: var(--brand-soft);
+      border-radius: 99px;
+      padding: 3px 11px;
+      margin-bottom: 6px
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--sh-1);
+      padding: 14px 16px;
+      margin: 12px 0
+    }
+
+    .card h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      color: var(--brand-dark)
+    }
+
+    .kcard {
+      border-radius: var(--r-sm);
+      padding: 12px 14px;
+      margin-top: 10px;
+      border: 1.5px solid var(--line);
+      background: #fff;
+      box-shadow: var(--sh-1);
+      cursor: default;
+      transition: .15s
+    }
+
+    .kcard .kh {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--brand-light);
+      margin-bottom: 5px
+    }
+
+    .kcard .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--brand-light);
+      flex: 0 0 auto
+    }
+
+    .kcard p {
+      margin: 0;
+      font-size: 14.5px;
+      line-height: 1.6
+    }
+
+    .kcard.vein .dot {
+      background: var(--vein)
+    }
+
+    .kcard.vein .kh {
+      color: #2c629f
+    }
+
+    .kcard.cap .dot {
+      background: #b86fc2
+    }
+
+    .kcard.cap .kh {
+      color: #8a4795
+    }
+
+    .kcard.sel {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(47, 130, 125, .22)
+    }
+
+    .kcard.click {
+      cursor: pointer
+    }
+
+    .kcard.click:hover {
+      border-color: var(--brand-light)
+    }
+
+    .opts {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 10px 0 0
+    }
+
+    .opt {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      width: 100%;
+      text-align: left;
+      padding: 11px 13px;
+      border-radius: var(--r-sm);
+      border: 1.5px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      font-size: 14.5px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s
+    }
+
+    .opt i {
+      font-style: normal;
+      flex: 0 0 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-weight: 700;
+      font-size: 12.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .opt:hover:not(:disabled) {
+      border-color: var(--brand-light);
+      background: var(--stage-mid)
+    }
+
+    .opt:disabled {
+      cursor: default
+    }
+
+    .opt.ok {
+      border-color: var(--brand);
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+      font-weight: 600
+    }
+
+    .opt.ok i {
+      background: var(--brand);
+      color: #fff
+    }
+
+    .opt.no {
+      border-color: var(--bad);
+      background: #fbeae4;
+      color: #a54527
+    }
+
+    .opt.no i {
+      background: var(--bad);
+      color: #fff
+    }
+
+    .fb {
+      display: none;
+      margin: 9px 0 0;
+      padding: 10px 13px;
+      border-radius: var(--r-sm);
+      font-size: 14px;
+      line-height: 1.6
+    }
+
+    .fb.show {
+      display: block
+    }
+
+    .fb.ok {
+      background: var(--brand-soft);
+      color: var(--brand-dark)
+    }
+
+    .fb.no {
+      background: #fbeae4;
+      color: #a54527
+    }
+
+    .fb.info {
+      background: #fff6dd;
+      color: #6b4d13
+    }
+
+    .qbtn {
+      border: 0;
+      border-radius: 11px;
+      padding: 10px 18px;
+      font-size: 14.5px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--brand);
+      color: #fff;
+      margin: 10px 8px 0 0
+    }
+
+    .qbtn:hover {
+      background: var(--brand-dark)
+    }
+
+    .qbtn.alt {
+      background: #fff;
+      color: var(--brand);
+      border: 1.5px solid var(--brand)
+    }
+
+    .qbtn.alt:hover {
+      background: var(--brand-soft)
+    }
+
+    .seg {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px
+    }
+
+    .seg button {
+      border: 1.5px solid var(--line);
+      background: #fff;
+      border-radius: 99px;
+      padding: 7px 14px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer
+    }
+
+    .seg button.on {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff
+    }
+
+    .res {
+      text-align: center;
+      padding: 6px 0
+    }
+
+    /* loader */
+    .intro-loader {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      overflow: hidden;
+      transition: opacity .5s;
+      background: radial-gradient(80% 70% at 50% 40%, #2f827d 0, #195856 58%, #0b2a29 100%)
+    }
+
+    .intro-loader::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(6, 20, 23, .08), rgba(6, 20, 23, .52));
+      pointer-events: none
+    }
+
+    .intro-loader.gone {
+      opacity: 0;
+      pointer-events: none
+    }
+
+    .intro-loader__inner {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 920px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      text-align: center
+    }
+
+    .intro-card {
+      width: min(92vw, 980px);
+      padding: 8px 12px 12px;
+      text-align: center;
+      color: #fff
+    }
+
+    .intro-kicker {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .20em;
+      text-transform: uppercase;
+      color: rgba(248, 252, 252, .92)
+    }
+
+    .intro-card h1 {
+      font-size: clamp(32px, 5vw, 66px);
+      margin: 10px 0 12px;
+      color: #fff;
+      line-height: 1.08;
+      font-weight: 800;
+      text-shadow: 0 4px 18px rgba(0, 0, 0, .26);
+      text-wrap: balance
+    }
+
+    .intro-sub {
+      max-width: 720px;
+      margin: 0 auto 22px;
+      font-size: clamp(13px, 1.8vw, 20px);
+      color: rgba(244, 249, 249, .96);
+      line-height: 1.72;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, .22)
+    }
+
+    .intro-explore {
+      width: min(280px, 88vw);
+      padding: 14px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      cursor: pointer;
+      background: rgba(21, 92, 88, .76);
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: .02em;
+      visibility: hidden;
+      pointer-events: none;
+      box-shadow: 0 16px 42px -20px rgba(0, 0, 0, .6)
+    }
+
+    .intro-loader.ready .intro-explore {
+      visibility: visible;
+      pointer-events: auto
+    }
+
+    .intro-explore:hover {
+      background: rgba(21, 92, 88, .9)
+    }
+
+    .intro-progress {
+      height: 4px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, .28);
+      overflow: hidden;
+      margin: 18px auto 0;
+      max-width: 430px
+    }
+
+    .intro-progress span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: #d7e779;
+      transition: width .25s linear
+    }
+
+    .intro-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      max-width: 430px;
+      margin: 12px auto 0;
+      font-size: 12px;
+      color: rgba(255, 255, 255, .96)
+    }
+
+    .intro-status {
+      display: flex;
+      align-items: center;
+      gap: 7px
+    }
+
+    .intro-ready-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: #d7e779;
+      flex: 0 0 auto;
+      box-shadow: 0 0 0 4px rgba(215, 231, 121, .18)
+    }
+
+    .intro-loader.ready .intro-ready-dot {
+      background: #9ff5d7;
+      box-shadow: 0 0 0 4px rgba(159, 245, 215, .16)
+    }
+
+    .intro-credit {
+      color: rgba(255, 255, 255, .88);
+      font-size: 12px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, .24)
+    }
+
+    @media (max-width:620px) {
+      .intro-card h1 {
+        font-size: 38px
+      }
+
+      .intro-sub {
+        font-size: 14px;
+        line-height: 1.65
+      }
+
+      .intro-meta {
+        flex-direction: column;
+        gap: 8px
+      }
+    }
+
+    /* ===== bố cục theo template: một khung 3D + thanh bước ===== */
+    .main {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 14px;
+      overflow: hidden;
+      background: #195658
+    }
+
+    .stagecol {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      min-width: 0
+    }
+
+    .frame {
+      background: #fff;
+      border-radius: var(--r);
+      box-shadow: var(--sh-2);
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden
+    }
+
+    .stage {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      background: #195658;
+      overflow: hidden
+    }
+
+    .vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      box-shadow: inset 0 0 90px rgba(15, 63, 61, .10)
+    }
+
+    .stage-tools {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      z-index: 5;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .ghost {
+      background: rgba(255, 255, 255, .88);
+      backdrop-filter: blur(8px) saturate(1.3);
+      border: 1px solid var(--line);
+      border-radius: var(--r-sm);
+      padding: 7px 11px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--brand-dark);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--sh-1)
+    }
+
+    .ghost:hover {
+      background: #fff
+    }
+
+    .ghost.on,
+    .ghost[aria-pressed="true"] {
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand)
+    }
+
+    .card.nudge {
+      animation: nudgePulse 1.2s ease infinite
+    }
+
+    .qbtn.nudge {
+      animation: nudgePulse 1.2s ease infinite
+    }
+
+    .kcard.nudge {
+      animation: nudgePulse 1.2s ease infinite
+    }
+
+    .finger {
+      position: absolute;
+      z-index: 8;
+      font-size: 38px;
+      line-height: 1;
+      pointer-events: none;
+      display: none;
+      filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .35));
+      animation: tapHint 1s ease-in-out infinite
+    }
+
+    .finger.show {
+      display: block
+    }
+
+    @keyframes tapHint {
+
+      0%,
+      100% {
+        transform: translateY(0) scale(1)
+      }
+
+      50% {
+        transform: translateY(-10px) scale(.92)
+      }
+    }
+
+    .ghost.nudge {
+      animation: nudgePulse 1.2s ease infinite
+    }
+
+    @keyframes nudgePulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(25, 88, 86, .55)
+      }
+
+      50% {
+        box-shadow: 0 0 0 9px rgba(25, 88, 86, 0)
+      }
+    }
+
+    .stage-hint {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      z-index: 5;
+      background: rgba(255, 255, 255, .88);
+      backdrop-filter: blur(8px) saturate(1.3);
+      border-radius: 99px;
+      padding: 7px 13px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--brand-dark);
+      box-shadow: var(--sh-1);
+      max-width: min(60%, 520px);
+      transition: opacity .6s;
+      pointer-events: none
+    }
+
+    .stage-nav {
+      position: absolute;
+      top: 50%;
+      z-index: 6;
+      transform: translateY(-50%);
+      width: 38px;
+      height: 38px;
+      border-radius: 99px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .88);
+      backdrop-filter: blur(8px) saturate(1.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--brand-dark);
+      box-shadow: var(--sh-1);
+      font-size: 16px
+    }
+
+    .stage-nav:hover {
+      background: var(--brand-soft)
+    }
+
+    .stage-nav.prev {
+      left: 12px
+    }
+
+    .stage-nav.next {
+      right: 12px
+    }
+
+    .stage-nav[disabled] {
+      opacity: .3;
+      pointer-events: none
+    }
+
+    .layers {
+      position: absolute;
+      z-index: 5;
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      left: 12px;
+      bottom: 52px;
+      transform: none;
+      justify-content: flex-start;
+      width: auto;
+      max-width: calc(100% - 24px)
+    }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      z-index: 40;
+      background: rgba(15, 63, 61, .95);
+      color: #fff;
+      border-radius: 99px;
+      padding: 9px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      max-width: 92%;
+      text-align: center;
+      bottom: 52px
+    }
+
+    /* thẻ nội dung bài học nổi trên khung 3D */
+    .lesson {
+      position: absolute;
+      z-index: 7;
+      right: 60px;
+      top: 12px;
+      bottom: 12px;
+      width: min(390px, 38%);
+      display: flex;
+      flex-direction: column;
+      background: rgba(255, 255, 255, .94);
+      backdrop-filter: blur(12px) saturate(1.3);
+      border-radius: var(--r);
+      box-shadow: var(--sh-3);
+      overflow: hidden
+    }
+
+    .lesson-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px 8px 16px;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      flex: 0 0 auto
+    }
+
+    .lesson-head span {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .lesson-head button {
+      width: 28px;
+      height: 28px;
+      border-radius: 99px;
+      border: none;
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+      cursor: pointer;
+      font-size: 13px
+    }
+
+    .lesson .sidebody {
+      position: relative;
+      background: transparent
+    }
+
+    .lesson.collapsed {
+      bottom: auto
+    }
+
+    .lesson.collapsed .sidebody {
+      display: none
+    }
+
+    /* thanh các bước trong khung */
+    .steps {
+      display: flex;
+      gap: 8px;
+      padding: 10px 12px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-top: 1px solid var(--line);
+      scrollbar-width: none;
+      flex: 0 0 auto
+    }
+
+    .steps::-webkit-scrollbar {
+      display: none
+    }
+
+    .step {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 13px 7px 8px;
+      border-radius: 99px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      white-space: nowrap;
+      transition: background .15s, border-color .15s, color .15s
+    }
+
+    .step b {
+      width: 20px;
+      height: 20px;
+      border-radius: 99px;
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto
+    }
+
+    .step:hover {
+      border-color: var(--brand-light)
+    }
+
+    .step[aria-pressed="true"] {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff
+    }
+
+    .step[aria-pressed="true"] b {
+      background: rgba(255, 255, 255, .25);
+      color: #fff
+    }
+
+    .step.done b {
+      background: var(--brand);
+      color: #fff
+    }
+
+    @media (max-width:900px) {
+      .main {
+        padding: 10px
+      }
+
+      .stage-nav {
+        width: 34px;
+        height: 34px;
+        font-size: 14px;
+        top: 30%
+      }
+
+      .lesson {
+        left: 8px;
+        right: 8px;
+        top: auto;
+        bottom: 8px;
+        width: auto;
+        height: 46%
+      }
+
+      .lesson.collapsed {
+        height: auto
+      }
+
+      .layers {
+        bottom: calc(46% + 14px)
+      }
+
+      .lyr {
+        padding: 5px 9px;
+        font-size: 11.5px;
+        gap: 5px
+      }
+
+      .lyr i {
+        width: 9px;
+        height: 9px
+      }
+
+      .stage-hint {
+        display: none
+      }
+
+      .toast {
+        bottom: calc(46% + 50px)
+      }
+
+      .tag {
+        font-size: 12px;
+        padding: 5px 10px
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      * {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important
+      }
+    }
+
+    /* ghép nhãn: giao diện mới */
+
+    .matchbtns {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px
+    }
+
+    .matchbtns .qbtn {
+      flex: 1;
+      margin: 10px 0 0
+    }
+
+    .qbtn:disabled {
+      opacity: .45;
+      cursor: default
+    }
+  
+    /* ===== bổ sung cho KHTN 7 – Phần 1 ===== */
+    .tag.info {
+      cursor: default;
+      background: #fff;
+      border-color: #cfe1dd;
+      color: var(--brand-dark);
+      font-size: 12.5px;
+      padding: 5px 11px;
+      pointer-events: none
+    }
+
+    .tag.water {
+      background: #e3f1ff;
+      border-color: #9cc8f2;
+      color: #1f5a92
+    }
+
+    .tag.nudge {
+      animation: tagBlink 1s ease-in-out infinite
+    }
+
+    @keyframes tagBlink {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(253, 235, 213, .9), var(--sh-3);
+        transform: translate(-50%, -50%) scale(1)
+      }
+
+      50% {
+        box-shadow: 0 0 0 10px rgba(253, 235, 213, 0), var(--sh-3);
+        transform: translate(-50%, -50%) scale(1.08)
+      }
+    }
+
+    .lyr[data-l="soil"] i {
+      background: #a8784a
+    }
+
+    .lyr[data-l="water"] i {
+      background: #3fa3ff
+    }
+
+    .lyr[data-l="ion"] i {
+      background: #f7c53c
+    }
+
+    .fade {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: #195658;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .28s
+    }
+
+    .fade.on {
+      opacity: 1
+    }
+
+    .counter {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      background: #fff6dd;
+      border: 1px solid #efd99c;
+      border-radius: 99px;
+      padding: 3px 11px;
+      margin-left: 6px
+    }
+
+    .hide {
+      display: none !important
+    }
+
+    /* sắp xếp thứ tự */
+
+    /* sơ đồ ghép thẻ */
+
+    /* nhiệm vụ tìm kiếm */
+
+    .opt .src {
+      display: block;
+      font-size: 12px;
+      color: #1d6b3a;
+      font-weight: 500
+    }
+
+    /* ===== Phần 2 – bổ sung ===== */
+    .seg button:disabled {
+      opacity: .45;
+      cursor: not-allowed
+    }
+
+    .lyr[data-l="xy"] i {
+      background: #3f8ef0
+    }
+
+    .lyr[data-l="ph"] i {
+      background: #ff9a3c
+    }
+
+    .kcard.ph .dot {
+      background: #ff9a3c
+    }
+
+    .kcard.ph .kh {
+      color: #a8530f
+    }
+
+    /* Bảng 30.1 */
+
+    /* Bước 2: thẻ bài học rộng hơn để Bảng 30.1 chia 2 cột */
+    .lesson.wide {
+      width: min(720px, 58%)
+    }
+
+    @media (max-width:900px) {
+      .lesson.wide {
+        width: auto
+      }
+    }
+
+    .sidebody {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 18px 20px 12px;
+      background: linear-gradient(#fff, var(--stage-mid) 70%, var(--stage-bottom));
+      -webkit-overflow-scrolling: touch;
+      container-type: inline-size
+    }
+
+    .ghostchip {
+      position: fixed;
+      z-index: 60;
+      pointer-events: none;
+      transform: translate(-50%, -50%) rotate(-3deg);
+      box-shadow: var(--sh-3);
+      opacity: .95;
+      margin: 0
+    }
+
+    /* thanh thời gian thí nghiệm */
+
+    /* sơ đồ ghi nhớ */
+
+    .seg button.nudge {
+      animation: nudgePulse 1.2s ease infinite
+    }
+
+    /* ===== Các yếu tố ảnh hưởng – bổ sung ===== */
+    .lyr[data-l="vap"] i {
+      background: #cfe6ff;
+      box-shadow: inset 0 0 0 2px #7fb6ec
+    }
+
+    .lyr[data-l="glass"] i {
+      background: #bfe6e0
+    }
+
+    .tag.sun {
+      background: #fff5cc;
+      border-color: #f0d36b;
+      color: #7a5a00
+    }
+
+    .tag.hot {
+      background: #ffe3d6;
+      border-color: #f3a585;
+      color: #9a3b12
+    }
+
+    .tag.mist {
+      background: #eef7ff;
+      border-color: #b7d8f5;
+      color: #285f8f
+    }
+
+    .tag.soil {
+      background: #f3e6d6;
+      border-color: #d4b48c;
+      color: #6b3f17
+    }
+
+    .ctl {
+      display: grid;
+      gap: 9px;
+      margin-top: 6px
+    }
+
+    .crow {
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      padding: 8px 11px 6px;
+      background: #fff;
+      transition: border-color .2s, background .2s, box-shadow .2s
+    }
+
+    .crow.tried {
+      border-color: #a9d4c9;
+      background: #f6fbfa
+    }
+
+    .crow.flash {
+      box-shadow: 0 0 0 4px rgba(47, 130, 125, .28)
+    }
+
+    .crow.nudge {
+      animation: crowPulse 1.3s ease infinite
+    }
+
+    @keyframes crowPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(47, 130, 125, .35)
+      }
+
+      50% {
+        box-shadow: 0 0 0 6px rgba(47, 130, 125, 0)
+      }
+    }
+
+    .crow .ch {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--brand-dark)
+    }
+
+    .crow .ch .ic {
+      font-size: 16px;
+      line-height: 1
+    }
+
+    .crow .ch b {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--brand);
+      background: var(--brand-soft);
+      border-radius: 99px;
+      padding: 2px 9px;
+      white-space: nowrap
+    }
+
+    .crow .tk {
+      width: 17px;
+      height: 17px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: #e5ecea;
+      color: #fff;
+      font-size: 10.5px;
+      display: grid;
+      place-items: center
+    }
+
+    .crow.tried .tk {
+      background: var(--ok)
+    }
+
+    .crow input[type=range] {
+      width: 100%;
+      margin: 7px 0 0;
+      accent-color: var(--brand);
+      cursor: pointer
+    }
+
+    .crow .ends {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11.5px;
+      color: var(--muted)
+    }
+
+    .tog {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin: 7px 0 3px
+    }
+
+    .tog button {
+      border: 1.5px solid var(--line);
+      background: #fff;
+      border-radius: 10px;
+      padding: 7px 6px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--ink)
+    }
+
+    .tog button.on {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff
+    }
+
+    .meters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 4px
+    }
+
+    .meter {
+      background: #fff;
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      padding: 6px 6px 7px;
+      text-align: center
+    }
+
+    .meter svg {
+      width: 100%;
+      max-width: 140px;
+      display: block;
+      margin: 0 auto
+    }
+
+    .meter .needle {
+      transition: none
+    }
+
+    .meter small {
+      display: block;
+      margin-top: 5px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      line-height: 1.3
+    }
+
+    .meter .mv {
+      display: inline-block;
+      margin-top: 3px;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 1px 9px;
+      border-radius: 99px;
+      background: #eef3f2;
+      color: var(--muted)
+    }
+
+    .meter .mv.lv1 {
+      background: #dcecfb;
+      color: #1f5a92
+    }
+
+    .meter .mv.lv2 {
+      background: #2f7fe0;
+      color: #fff
+    }
+
+    .pstate {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 9px;
+      font-size: 13.5px;
+      font-weight: 700
+    }
+
+    .pstate span {
+      padding: 3px 11px;
+      border-radius: 99px;
+      background: #e6f4dd;
+      color: #3f6b32;
+      transition: .2s
+    }
+
+    .pstate span.w1 {
+      background: #fff2c9;
+      color: #7a5a00
+    }
+
+    .pstate span.w2 {
+      background: #fbe0d6;
+      color: #a54527
+    }
+
+    /* nối thẻ */
+    .mt {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 30px;
+      margin-top: 8px
+    }
+
+    .mt>svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+      z-index: 2
+    }
+
+    .mt>svg line {
+      stroke-width: 3.5;
+      stroke-linecap: round
+    }
+
+    .mt>svg line.ok {
+      stroke: #6fa85b
+    }
+
+    .mt>svg line.no {
+      stroke: #d24a3a;
+      stroke-dasharray: 6 5
+    }
+
+    .mt .col {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      gap: 8px
+    }
+
+    .mcard {
+      position: relative;
+      border: 1.5px solid var(--line);
+      background: #fff;
+      border-radius: 11px;
+      padding: 9px 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      color: var(--ink);
+      line-height: 1.4;
+      min-height: 50px;
+      transition: border-color .15s, background .15s, box-shadow .15s
+    }
+
+    .mcard.l {
+      background: var(--brand-soft);
+      border-color: #b9d6d0;
+      color: var(--brand-dark);
+      font-weight: 700
+    }
+
+    .mcard::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid var(--brand-light);
+      transform: translateY(-50%)
+    }
+
+    .mcard.l::after {
+      right: -7px
+    }
+
+    .mcard.r::after {
+      left: -7px
+    }
+
+    .mcard:hover {
+      border-color: var(--brand-light)
+    }
+
+    .mcard.sel {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(47, 130, 125, .3)
+    }
+
+    .mcard.lock {
+      border-color: var(--ok);
+      background: #eef7e9;
+      color: #3f6b32;
+      cursor: default
+    }
+
+    .mcard.lock::after {
+      border-color: var(--ok);
+      background: var(--ok)
+    }
+
+    .mcard.bad {
+      border-color: var(--bad);
+      background: #fbeae4;
+      animation: shake .35s
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: none
+      }
+
+      25% {
+        transform: translateX(-4px)
+      }
+
+      75% {
+        transform: translateX(4px)
+      }
+    }
+
+    /* phân loại Nên / Không nên */
+    .pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 12px;
+      background: var(--stage-mid);
+      border: 1px dashed #b9d6d0;
+      min-height: 54px
+    }
+
+    .pool:empty::before {
+      content: "Đã xếp hết thẻ – bấm Kiểm tra nhé!";
+      font-size: 13px;
+      color: var(--muted);
+      margin: auto
+    }
+
+    .scard {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1.5px solid var(--line);
+      background: #fff;
+      border-radius: 11px;
+      padding: 6px 11px 6px 6px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: grab;
+      color: var(--ink);
+      text-align: left;
+      touch-action: none;
+      user-select: none;
+      line-height: 1.3
+    }
+
+    .scard .em {
+      font-size: 19px;
+      width: 32px;
+      height: 32px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: #f3efe4
+    }
+
+    .scard.sel {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(47, 130, 125, .3)
+    }
+
+    .scard.good {
+      border-color: var(--ok);
+      background: #eef7e9;
+      cursor: default
+    }
+
+    .scard.bad {
+      border-color: var(--bad);
+      background: #fbeae4;
+      animation: shake .35s
+    }
+
+    .scard.ghostchip {
+      position: fixed;
+      z-index: 99;
+      pointer-events: none;
+      transform: translate(-50%, -50%) rotate(-3deg);
+      box-shadow: var(--sh-3)
+    }
+
+    .bins {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px
+    }
+
+    .bin {
+      border: 2px dashed;
+      border-radius: 12px;
+      padding: 8px;
+      min-height: 130px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      transition: box-shadow .15s
+    }
+
+    .bin h4 {
+      margin: 0 0 2px;
+      font-size: 14px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      justify-content: center
+    }
+
+    .bin.yes {
+      border-color: #9fd08c;
+      background: #f5fbf1
+    }
+
+    .bin.yes h4 {
+      color: #3f6b32
+    }
+
+    .bin.no {
+      border-color: #eab3a0;
+      background: #fdf5f2
+    }
+
+    .bin.no h4 {
+      color: #a54527
+    }
+
+    .bin.over,
+    .bin.ready {
+      box-shadow: 0 0 0 3px rgba(47, 130, 125, .3)
+    }
+
+    .bin .scard {
+      width: 100%
+    }
+
+    .memo {
+      display: grid;
+      gap: 6px;
+      margin: 6px 0 0;
+      padding: 0;
+      list-style: none
+    }
+
+    .memo li {
+      display: flex;
+      gap: 8px;
+      font-size: 14px;
+      line-height: 1.5
+    }
+
+    .memo li .ico {
+      flex: 0 0 auto;
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--brand-soft);
+      font-size: 14px
+    }
+  </style>
+</head>
+
+<body>
+  <div id="introLoader" class="intro-loader" aria-live="polite">
+    <div class="intro-loader__inner">
+      <section class="intro-card">
+        <div class="intro-kicker">Khoa học tự nhiên 7</div>
+        <h1>Các yếu tố ảnh hưởng</h1>
+        <p class="intro-sub">Làm kĩ sư nhà kính: thay đổi ánh sáng, nhiệt độ, độ ẩm và đất trồng để xem cây hút nước,
+          thoát hơi nước thay đổi thế nào; rồi nối thẻ và chọn việc nên làm để đất tơi xốp.</p>
+        <button id="btnExplore" class="intro-explore" type="button">Bắt đầu</button>
+        <div class="intro-progress" aria-hidden="true"><span id="introBar"></span></div>
+        <div class="intro-meta">
+          <div class="intro-status"><span class="intro-ready-dot"></span><span id="introStatus">Đang dựng mô hình
+              3D…</span></div>
+        </div>
+      </section>
+      <div class="intro-credit">Được phát triển bởi <strong>YooBook</strong></div>
+    </div>
+  </div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="logoclip"><img class="logo" alt="YooBook" src="data:image/png;base64,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"></div>
+      <div class="titles">
+        <div class="badge">Khoa học tự nhiên 7</div>
+        <h1 class="lg" id="titleLg">Các yếu tố ảnh hưởng đến trao đổi nước và chất dinh dưỡng</h1>
+      </div>
+      <div class="tb-right">
+        <button class="tb-btn" id="btnFull" aria-label="Toàn màn hình" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="stagecol">
+        <div class="frame">
+          <div class="stage" id="viewer">
+            <canvas id="gl" tabindex="0" aria-label="Mô hình 3D nhà kính có chậu cây cắt dọc"
+              style="position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none"></canvas>
+            <div class="vignette" aria-hidden="true"></div>
+            <div class="fade" id="fade"></div>
+            <svg id="lines"></svg>
+            <div id="tags"></div>
+            <div class="stage-tools">
+              <button class="ghost" id="btnReset" type="button">⤢ <span>Toàn cảnh</span></button>
+              <button class="ghost" id="btnSpin" type="button">↻ <span>Tự xoay</span></button>
+              <button class="ghost" id="btnNarration" type="button" aria-pressed="true">🔊 <span>Thuyết minh</span></button>
+            </div>
+            <button class="stage-nav prev" id="btnPrev" type="button" aria-label="Bước trước">◀</button>
+            <button class="stage-nav next" id="btnNext" type="button" aria-label="Bước sau">▶</button>
+            <div class="finger" id="finger" aria-hidden="true">👆</div>
+            <div class="stage-hint" id="hint">↻ Chạm và kéo để xoay mô hình • cuộn / chụm để phóng to</div>
+            <div class="layers" id="layers">
+              <button class="lyr" data-l="water"><i></i>Dòng nước</button>
+              <button class="lyr" data-l="vap"><i></i>Hơi nước</button>
+              <button class="lyr" data-l="glass"><i></i>Kính nhà kính</button>
+            </div>
+            <div class="toast" id="toast"></div>
+
+            <aside class="lesson" id="lesson">
+              <div class="lesson-head"><span id="lessonTitle">Bài học</span><button id="lessonToggle" type="button"
+                  aria-label="Thu gọn / mở rộng nội dung">▾</button></div>
+              <div class="sidebody" id="sidebody">
+
+                <!-- Bước 1 · Hoạt động 4a -->
+                <section class="sec on" data-step="0">
+                  <div class="eyebrow">Mô phỏng</div>
+                  <h2>Phòng điều khiển nhà kính</h2>
+                  <p class="lead">Khoảng <b>90%</b> lượng nước cây hút vào được thoát ra ngoài qua lá. Hôm nay em là
+                    <b>kĩ sư nhà kính</b>! Em hãy thay đổi <b>từng yếu tố</b> và quan sát cây nhé.</p>
+                  <div class="card">
+                    <span class="chip">Đồng hồ</span>
+                    <div class="meters">
+                      <div class="meter" id="mE"></div>
+                      <div class="meter" id="mU"></div>
+                    </div>
+                    <div class="pstate">🌱 Cây: <span id="pState">Tươi</span></div>
+                  </div>
+                  <div class="card">
+                    <span class="chip">Bảng điều khiển</span><span class="counter" id="cntF">Đã thử 0/5 yếu tố</span>
+                    <div class="ctl">
+                      <div class="crow" data-f="light">
+                        <div class="ch"><span class="tk">✓</span><span class="ic">☀️</span>Ánh sáng<b id="vLight"></b></div>
+                        <input type="range" id="rLight" min="0" max="1" step="0.01" value="0.5" aria-label="Ánh sáng">
+                        <div class="ends"><span>Yếu</span><span>Mạnh</span></div>
+                      </div>
+                      <div class="crow" data-f="temp">
+                        <div class="ch"><span class="tk">✓</span><span class="ic">🌡️</span>Nhiệt độ<b id="vTemp"></b></div>
+                        <input type="range" id="rTemp" min="15" max="40" step="1" value="25" aria-label="Nhiệt độ">
+                        <div class="ends"><span>15°C</span><span>40°C</span></div>
+                      </div>
+                      <div class="crow" data-f="air">
+                        <div class="ch"><span class="tk">✓</span><span class="ic">🌫️</span>Độ ẩm không khí<b id="vAir"></b></div>
+                        <input type="range" id="rAir" min="0" max="1" step="0.01" value="0.5" aria-label="Độ ẩm không khí">
+                        <div class="ends"><span>Thấp</span><span>Cao</span></div>
+                      </div>
+                      <div class="crow" data-f="soil">
+                        <div class="ch"><span class="tk">✓</span><span class="ic">💧</span>Độ ẩm đất<b id="vSoil"></b></div>
+                        <input type="range" id="rSoil" min="0" max="2" step="0.02" value="1" aria-label="Độ ẩm đất">
+                        <div class="ends"><span>Khô</span><span>Ẩm</span><span>Ngập úng</span></div>
+                      </div>
+                      <div class="crow" data-f="struct">
+                        <div class="ch"><span class="tk">✓</span><span class="ic">🟫</span>Cấu tạo đất</div>
+                        <div class="tog" id="togSoil">
+                          <button type="button" data-s="loose" class="on">Đất tơi xốp</button>
+                          <button type="button" data-s="compact">Đất nén chặt</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="fb" id="fbE"></div>
+                    <div class="matchbtns"><button class="qbtn alt" id="btnEnvReset" type="button">↺ Đặt lại</button></div>
+                  </div>
+                  <div class="kcard hide" id="kcE">
+                    <div class="kh"><span class="dot"></span>Hoàn thành</div>
+                    <p>Em đã thử đủ <b>5 yếu tố</b>: ánh sáng, nhiệt độ, độ ẩm không khí, độ ẩm đất và cấu tạo đất.</p>
+                  </div>
+                </section>
+
+                <!-- Bước 2 · Hoạt động 4b -->
+                <section class="sec" data-step="1">
+                  <div class="eyebrow">Nối thẻ</div>
+                  <h2>Ghép yếu tố – ảnh hưởng</h2>
+                  <p class="lead">Em hãy nối mỗi <b>yếu tố</b> với <b>ảnh hưởng</b> của nó: chạm một thẻ ở cột trái rồi
+                    chạm thẻ phù hợp ở cột phải. Cẩn thận, có một thẻ <b>không đúng</b> với yếu tố nào!</p>
+                  <div class="card">
+                    <span class="chip">Nối thẻ</span><span class="counter" id="cntM">Đã nối 0/4</span>
+                    <div class="mt" id="mt">
+                      <svg id="mtSvg" aria-hidden="true"></svg>
+                      <div class="col" id="mtL"></div>
+                      <div class="col" id="mtR"></div>
+                    </div>
+                    <div class="fb" id="fbM"></div>
+                    <div class="matchbtns"><button class="qbtn alt" id="mBack" type="button">↩ Quay lại nhà kính</button><button
+                        class="qbtn alt" id="mReset" type="button">Làm lại</button></div>
+                  </div>
+                  <div class="kcard hide" id="kcM">
+                    <div class="kh"><span class="dot"></span>Chốt lại</div>
+                    <p><b>Ánh sáng</b> làm mở khí khổng → ảnh hưởng chủ yếu đến thoát hơi nước.<br>
+                      <b>Nhiệt độ</b> ảnh hưởng đến cả hút nước, vận chuyển nước và thoát hơi nước.<br>
+                      <b>Độ ẩm không khí</b> càng thấp → thoát hơi nước càng mạnh.<br>
+                      <b>Độ ẩm và lượng oxygen trong đất</b> ảnh hưởng trực tiếp đến khả năng hút nước và chất dinh dưỡng
+                      của rễ.</p>
+                  </div>
+                  <div class="card hide" id="q2card">
+                    <h3>Chọn đáp án đúng</h3>
+                    <p style="margin:0">Vì sao trước khi trồng cây hoặc gieo hạt, người ta thường cày, bừa đất rất kĩ và
+                      bón lót một số loại phân?</p>
+                    <div class="opts" id="q2">
+                      <button class="opt" data-c="1"><i>A</i><span>Để đất tơi xốp, giữ nước và chất dinh dưỡng</span></button>
+                      <button class="opt" data-c="0"><i>B</i><span>Để đất cứng chắc hơn</span></button>
+                      <button class="opt" data-c="0"><i>C</i><span>Để diệt hết sinh vật trong đất</span></button>
+                    </div>
+                    <div class="fb" id="fbq2"></div>
+                  </div>
+                  <button class="qbtn hide" id="btnToSort" type="button" style="width:100%;margin-top:10px">Sang bước 3:
+                    Nên / Không nên ▶</button>
+                </section>
+
+                <!-- Bước 3 · Hoạt động 4c -->
+                <section class="sec" data-step="2">
+                  <div class="eyebrow">Phân loại</div>
+                  <h2>Làm đất tơi xốp – Nên / Không nên</h2>
+                  <p class="lead">Em hãy giúp bác nông dân chọn những việc <b>nên làm</b> để đất tơi xốp, thoáng khí nhé.
+                    Kéo mỗi thẻ vào cột <b>Nên</b> hoặc <b>Không nên</b> (hoặc chạm thẻ rồi chạm cột), sau đó bấm
+                    <b>Kiểm tra</b>.</p>
+                  <div class="card">
+                    <span class="chip">Việc làm</span><span class="counter" id="cntS">Đã xếp 0/7</span>
+                    <div class="pool" id="sPool"></div>
+                    <div class="bins">
+                      <div class="bin yes" data-b="yes" role="button" tabindex="0" aria-label="Cột Nên">
+                        <h4>✅ Nên</h4>
+                      </div>
+                      <div class="bin no" data-b="no" role="button" tabindex="0" aria-label="Cột Không nên">
+                        <h4>⛔ Không nên</h4>
+                      </div>
+                    </div>
+                    <div class="fb" id="fbS"></div>
+                    <div class="matchbtns"><button class="qbtn" id="sCheck" type="button" disabled>Kiểm tra</button><button
+                        class="qbtn alt" id="sReset" type="button">Làm lại</button></div>
+                  </div>
+                  <div class="kcard hide" id="kcS">
+                    <div class="kh"><span class="dot"></span>Ghi nhớ</div>
+                    <ul class="memo">
+                      <li><span class="ico">☀️</span><span><b>Ánh sáng</b> làm mở khí khổng, ảnh hưởng chủ yếu đến thoát
+                          hơi nước.</span></li>
+                      <li><span class="ico">🌡️</span><span><b>Nhiệt độ</b> ảnh hưởng đến hút nước, vận chuyển nước và thoát
+                          hơi nước.</span></li>
+                      <li><span class="ico">🌫️</span><span><b>Độ ẩm không khí</b> càng thấp, thoát hơi nước càng
+                          mạnh.</span></li>
+                      <li><span class="ico">🟫</span><span><b>Đất đủ ẩm, tơi xốp, thoáng khí</b> giúp rễ hút nước và chất
+                          khoáng tốt. Nên cày bừa, xới xáo, làm cỏ, sục bùn, phơi ải; không để đất ngập úng lâu ngày hay
+                          bị nén chặt.</span></li>
+                    </ul>
+                  </div>
+                </section>
+              </div>
+            </aside>
+          </div>
+          <div class="steps" id="steps" role="tablist" aria-label="Các bước học"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+    import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+    const $ = id => document.getElementById(id);
+    const STEP_NAMES = ['Nhà kính', 'Ghép yếu tố', 'Nên / Không nên'];
+
+    let seed = 400417;
+    const rand = () => {seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296;};
+    const R = (a, b) => a + (b - a) * rand();
+    const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+    const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp;
+    const qE = (x, y, z) => new THREE.Quaternion().setFromEuler(new THREE.Euler(x, y, z));
+
+    /* ---------- câu phản hồi hiện trên màn hình (lời đọc đầy đủ: loi-thuyet-minh-phan-N.md) ---------- */
+    const V = {
+      lightUp: 'Ánh sáng làm khí khổng mở, cây thoát hơi nước nhiều hơn.',
+      lightDn: 'Ánh sáng yếu, khí khổng khép bớt lại, cây thoát hơi nước ít hơn.', // bổ sung
+      temp: 'Nhiệt độ ảnh hưởng đến việc hút nước ở rễ, vận chuyển nước trong thân và thoát hơi nước ở lá.',
+      airDn: 'Không khí càng khô, cây thoát hơi nước càng mạnh.',
+      airUp: 'Không khí ẩm, cây thoát hơi nước chậm lại.', // bổ sung
+      soilDry: 'Đất khô, rễ không hút đủ nước, cây bắt đầu héo.',
+      soilOk: 'Đất đủ ẩm, rễ hút nước tốt, cây tươi trở lại.', // bổ sung
+      soilFlood: 'Đất ngập úng, thiếu khí oxygen, rễ hút nước và chất khoáng kém.', // bổ sung
+      compact: 'Đất nén chặt, thiếu khí oxygen, rễ hút nước và chất khoáng kém.',
+      loose: 'Đất tơi xốp, thoáng khí giúp rễ hút nước tốt hơn.',
+      all: 'Giỏi lắm, em đã thử đủ 5 yếu tố rồi!',
+      mOk: 'Chính xác! Ánh sáng là tác nhân làm mở khí khổng nên ảnh hưởng chủ yếu đến thoát hơi nước. Nhiệt độ ảnh hưởng đến cả hút nước, vận chuyển nước và thoát hơi nước. Độ ẩm không khí càng thấp thì thoát hơi nước càng mạnh. Độ ẩm của đất và lượng oxygen trong đất ảnh hưởng trực tiếp đến khả năng hút nước và chất dinh dưỡng của rễ.',
+      mNo: 'Có thẻ chưa đúng, em quay lại nhà kính thử lại yếu tố đó nhé.',
+      q2ok: 'Đúng rồi! Để đất tơi xốp, thoáng khí, tăng khả năng giữ nước và chất dinh dưỡng, giúp cây sinh trưởng tốt, cho năng suất cao.',
+      q2no: 'Chưa đúng rồi, em nhớ lại: đất tơi xốp hay đất nén chặt giúp rễ hút nước tốt hơn?',
+      sOk: 'Giỏi lắm! Cày bừa kĩ, xới xáo, làm cỏ, sục bùn, phơi ải giúp đất tơi xốp, thoáng khí. Không nên để đất ngập úng lâu ngày hay giẫm nén chặt đất quanh gốc cây, vì đất thiếu oxygen, rễ hút nước kém.',
+      sNo: 'Chưa đúng rồi, việc này làm đất bị bí, thiếu khí. Em thử chọn lại nhé.',
+      sNo2: 'Chưa đúng rồi, có việc làm giúp đất tơi xốp, thoáng khí đang nằm ở cột Không nên. Em thử chọn lại nhé.', // bổ sung
+    };
+    /* ---------- file voice thuyết minh: dán đường dẫn mp3 vào đúng khoá; để trống = không phát ---------- */
+    const AUDIO = {
+      step0: 'https://assets.yoolife.com.vn/yootek/1793862587155-5052.mp3',
+      step1: 'https://assets.yoolife.com.vn/yootek/1793862648937-6226.mp3',
+      step2: 'https://assets.yoolife.com.vn/yootek/1793862674656-2753.mp3',
+      lightUp: 'https://assets.yoolife.com.vn/yootek/1793862591400-9472.mp3',
+      lightDn: 'https://assets.yoolife.com.vn/yootek/1793862595266-4113.mp3',
+      temp: 'https://assets.yoolife.com.vn/yootek/1793862599078-7104.mp3',
+      airDn: 'https://assets.yoolife.com.vn/yootek/1793862602970-3739.mp3',
+      airUp: 'https://assets.yoolife.com.vn/yootek/1793862607664-3626.mp3',
+      soilDry: 'https://assets.yoolife.com.vn/yootek/1793862612969-8053.mp3',
+      soilOk: 'https://assets.yoolife.com.vn/yootek/1793862616701-6821.mp3',
+      soilFlood: 'https://assets.yoolife.com.vn/yootek/1793862620603-5423.mp3',
+      compact: 'https://assets.yoolife.com.vn/yootek/1793862628442-5392.mp3',
+      loose: 'https://assets.yoolife.com.vn/yootek/1793862636201-9148.mp3',
+      all: 'https://assets.yoolife.com.vn/yootek/1793862644101-4720.mp3',
+      mOk: 'https://assets.yoolife.com.vn/yootek/1793862652974-3259.mp3',
+      mNo: 'https://assets.yoolife.com.vn/yootek/1793862657026-6470.mp3',
+      q2: 'https://assets.yoolife.com.vn/yootek/1793862660902-8564.mp3',
+      q2ok: 'https://assets.yoolife.com.vn/yootek/1793862666429-8578.mp3',
+      q2no: 'https://assets.yoolife.com.vn/yootek/1793862670729-4179.mp3',
+      sOk: 'https://assets.yoolife.com.vn/yootek/1793862679698-1095.mp3',
+      sNo: 'https://assets.yoolife.com.vn/yootek/1793862683908-8016.mp3',
+      sNo2: 'https://assets.yoolife.com.vn/yootek/1793862688509-2305.mp3',
+    };
+
+    /* ---------- renderer / scene ---------- */
+    const canvas = $('gl'), viewer = $('viewer');
+    const renderer = new THREE.WebGLRenderer({canvas, antialias: true, alpha: true, powerPreference: 'high-performance'});
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    const scene = new THREE.Scene();
+    scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x9fc9c4, 0.85); scene.add(hemi);
+    const keyL = new THREE.DirectionalLight(0xffffff, 1.5); keyL.position.set(3, 6, 5); scene.add(keyL);
+    const rimL = new THREE.DirectionalLight(0x9fe5de, 0.7); rimL.position.set(-4, 2, -4); scene.add(rimL);
+
+    const camera = new THREE.PerspectiveCamera(32, 1, 0.01, 200);
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true; controls.dampingFactor = 0.08;
+    controls.enablePan = true; controls.screenSpacePanning = true;
+    controls.minDistance = 0.6; controls.maxDistance = 22; controls.maxPolarAngle = Math.PI * .52;
+    controls.autoRotateSpeed = 1.0;
+
+    /* ---------- vật liệu ---------- */
+    const std = (color, o = {}) => new THREE.MeshStandardMaterial({color, roughness: .65, ...o});
+    const tr = (color, opacity, o = {}) => new THREE.MeshStandardMaterial({color, transparent: true, opacity, depthWrite: false, side: THREE.DoubleSide, ...o});
+    const M = {
+      pot: std(0xc0673f, {roughness: .8, side: THREE.DoubleSide}),
+      potIn: std(0x8f4a2c, {roughness: .9, side: THREE.DoubleSide}),
+      potFront: tr(0xd88a5f, .16, {roughness: .4}),
+      soil: tr(0x5a3a1e, .4, {roughness: 1, side: THREE.FrontSide}),
+      soilTop: std(0x5a3a1e, {roughness: 1}),
+      grain: std(0x7a4f2a, {roughness: 1}),
+      grainC: std(0x4a2f17, {roughness: 1}),
+      air: new THREE.MeshStandardMaterial({color: 0xffffff, transparent: true, opacity: .75, roughness: .15, emissive: 0xcfeeff, emissiveIntensity: .35}),
+      drop: new THREE.MeshStandardMaterial({color: 0x3fa3ff, transparent: true, opacity: .8, roughness: .2}),
+      flood: tr(0x4aa8ff, 0, {roughness: .05, side: THREE.FrontSide}),
+      root: std(0xe8d3a8, {roughness: .8}),
+      stem: std(0x5e9e3c, {roughness: .7}),
+      leaf: std(0x3e9a45, {roughness: .75, side: THREE.DoubleSide}),
+      vein: std(0x9ccf7e, {roughness: .9, side: THREE.DoubleSide}),
+      frame: std(0xf2f6f5, {roughness: .45, metalness: .25}),
+      glass: tr(0xd9f3ee, .14, {roughness: .05}),
+      floor: std(0xffffff, {roughness: .95}),
+      metal: std(0x9aa7ad, {roughness: .35, metalness: .6}),
+      dark: std(0x2f4a46, {roughness: .5, metalness: .3}),
+      white: std(0xf4f6f5, {roughness: .5}),
+    };
+    const ball = new THREE.SphereGeometry(1, 12, 9);
+    const rock = new THREE.IcosahedronGeometry(1, 1);
+    function instanced(geo, mat, list) {
+      const im = new THREE.InstancedMesh(geo, mat, list.length), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3();
+      list.forEach((o, i) => {s.copy(typeof o.s === 'number' ? V3(o.s, o.s, o.s) : o.s); m4.compose(o.p, o.q || q.identity(), s); im.setMatrixAt(i, m4);});
+      im.instanceMatrix.needsUpdate = true; return im;
+    }
+    function taperTube(pts, r0, r1, mat, opt = {}) {
+      const curve = new THREE.CatmullRomCurve3(pts.map(p => p.isVector3 ? p : V3(...p)));
+      const tub = opt.seg || 24, rad = opt.rad || 8;
+      const geo = new THREE.TubeGeometry(curve, tub, 1, rad, false);
+      const pos = geo.attributes.position, v = new THREE.Vector3(), c = new THREE.Vector3();
+      for (let i = 0; i <= tub; i++) {
+        const t = i / tub; curve.getPointAt(t, c); const r = lerp(r0, r1, t);
+        for (let j = 0; j <= rad; j++) {const k = i * (rad + 1) + j; v.fromBufferAttribute(pos, k).sub(c).normalize().multiplyScalar(r).add(c); pos.setXYZ(k, v.x, v.y, v.z);}
+      }
+      geo.computeVertexNormals();
+      const mesh = new THREE.Mesh(geo, mat); mesh.userData.curve = curve;
+      if (opt.cap !== false) {const tip = new THREE.Mesh(ball, mat); tip.scale.setScalar(Math.max(r1, .002)); tip.position.copy(curve.getPointAt(1)); mesh.add(tip);}
+      return mesh;
+    }
+    function beam(a, b, t, mat = M.frame) {
+      const len = a.distanceTo(b), m = new THREE.Mesh(new THREE.BoxGeometry(t, t, len), mat);
+      m.position.copy(a).lerp(b, .5); m.lookAt(b); return m;
+    }
+    function poly(points) {
+      const L = [0]; for (let i = 1; i < points.length; i++) L.push(L[i - 1] + points[i].distanceTo(points[i - 1]));
+      return {points, L, len: L[L.length - 1], at(u, out = new THREE.Vector3()) {
+        const d = clamp(u, 0, 1) * this.len; let i = 1; while (i < L.length - 1 && L[i] < d) i++;
+        const k = (d - L[i - 1]) / ((L[i] - L[i - 1]) || 1); return out.lerpVectors(points[i - 1], points[i], k);
+      }};
+    }
+    function bend(g, len, k = .32, cup = 1.2) {
+      const p = g.attributes.position;
+      for (let i = 0; i < p.count; i++) {const x = p.getX(i), y = p.getY(i); p.setZ(i, k * len * (y / len) ** 2 - cup * x * x);}
+      g.computeVertexNormals(); return g;
+    }
+    function leafGeo(len, w) {
+      const s = new THREE.Shape(); s.moveTo(0, 0); s.bezierCurveTo(w, len * .25, w * .9, len * .75, 0, len); s.bezierCurveTo(-w * .9, len * .75, -w, len * .25, 0, 0);
+      return bend(new THREE.ShapeGeometry(s, 16), len);
+    }
+    const softTex = (() => {
+      const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+      const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.45, 'rgba(255,255,255,.75)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = gr; g.fillRect(0, 0, 64, 64); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+    })();
+
+    /* =====================================================================
+       NHÀ KÍNH
+       ===================================================================== */
+    const gHouse = new THREE.Group(); scene.add(gHouse);
+    const HW = 6.4, HD = 4.6, HH = 2.55, HR = 3.45;
+    {
+      const base = new THREE.Mesh(new RoundedBoxGeometry(HW + .5, .16, HD + .5, 2, .05), std(0xb9c9c2, {roughness: .9})); base.position.y = -.09; gHouse.add(base);
+      const tiles = []; for (let i = 0; i < 8; i++) for (let j = 0; j < 6; j++) tiles.push({p: V3(-HW / 2 + .4 + i * (HW - .8) / 7, .005, -HD / 2 + .4 + j * (HD - .8) / 5), s: V3(.74, .02, .7)});
+      const im = instanced(new THREE.BoxGeometry(1, 1, 1), M.floor, tiles);
+      tiles.forEach((_, i) => im.setColorAt(i, new THREE.Color((i + Math.floor(i / 6)) % 2 ? 0xdfe6e1 : 0xd2dcd6))); gHouse.add(im);
+      // khung
+      const posts = [];
+      for (const x of [-HW / 2, -HW / 6, HW / 6, HW / 2]) for (const z of [-HD / 2, HD / 2]) posts.push([x, z]);
+      for (const z of [-HD / 6, HD / 6]) for (const x of [-HW / 2, HW / 2]) posts.push([x, z]);
+      posts.forEach(([x, z]) => gHouse.add(beam(V3(x, 0, z), V3(x, HH, z), .07)));
+      for (const z of [-HD / 2, HD / 2]) gHouse.add(beam(V3(-HW / 2, HH, z), V3(HW / 2, HH, z), .07));
+      for (const x of [-HW / 2, HW / 2]) gHouse.add(beam(V3(x, HH, -HD / 2), V3(x, HH, HD / 2), .07));
+      gHouse.add(beam(V3(-HW / 2, HR, 0), V3(HW / 2, HR, 0), .08));
+      for (const x of [-HW / 2, -HW / 6, HW / 6, HW / 2]) {gHouse.add(beam(V3(x, HH, -HD / 2), V3(x, HR, 0), .06)); gHouse.add(beam(V3(x, HH, HD / 2), V3(x, HR, 0), .06));}
+      for (const z of [-HD / 2]) gHouse.add(beam(V3(-HW / 2, 1.1, z), V3(HW / 2, 1.1, z), .04));
+    }
+    // kính
+    const glassMeshes = [];
+    {
+      const add = (geo, pos, rot) => {const m = new THREE.Mesh(geo, M.glass); m.position.copy(pos); m.rotation.copy(rot); m.renderOrder = 9; gHouse.add(m); glassMeshes.push(m);};
+      add(new THREE.PlaneGeometry(HW, HH), V3(0, HH / 2, -HD / 2), new THREE.Euler());
+      add(new THREE.PlaneGeometry(HD, HH), V3(-HW / 2, HH / 2, 0), new THREE.Euler(0, Math.PI / 2, 0));
+      add(new THREE.PlaneGeometry(HD, HH), V3(HW / 2, HH / 2, 0), new THREE.Euler(0, Math.PI / 2, 0));
+      const sl = Math.hypot(HD / 2, HR - HH), ang = Math.atan2(HR - HH, HD / 2);
+      add(new THREE.PlaneGeometry(HW, sl), V3(0, (HH + HR) / 2, -HD / 4), new THREE.Euler(Math.PI / 2 - ang, 0, 0));
+      add(new THREE.PlaneGeometry(HW, sl), V3(0, (HH + HR) / 2, HD / 4), new THREE.Euler(-Math.PI / 2 + ang, 0, 0));
+      const tri = new THREE.Shape(); tri.moveTo(-HD / 2, 0); tri.lineTo(HD / 2, 0); tri.lineTo(0, HR - HH); tri.lineTo(-HD / 2, 0);
+      for (const x of [-HW / 2, HW / 2]) add(new THREE.ShapeGeometry(tri), V3(x, HH, 0), new THREE.Euler(0, Math.PI / 2, 0));
+    }
+    // bàn kê + vài chậu cây nhỏ ở góc
+    {
+      const bench = new THREE.Group(); bench.position.set(1.75, 0, -1.75); gHouse.add(bench);
+      const top = new THREE.Mesh(new RoundedBoxGeometry(2.1, .07, .62, 2, .02), std(0xa77a4f, {roughness: .8})); top.position.y = .62; bench.add(top);
+      for (const x of [-.95, .95]) for (const z of [-.25, .25]) {const l = new THREE.Mesh(new THREE.BoxGeometry(.05, .62, .05), M.metal); l.position.set(x, .31, z); bench.add(l);}
+      [-.65, 0, .65].forEach((x, i) => {
+        const p = new THREE.Mesh(new THREE.CylinderGeometry(.16, .12, .24, 20), M.pot); p.position.set(x, .78, 0); bench.add(p);
+        const n = 7 + i; for (let k = 0; k < n; k++) {const b = new THREE.Mesh(ball, std([0x4f9a45, 0x5fae4f, 0x3f8a3a][k % 3], {roughness: .8})); b.scale.setScalar(R(.09, .14)); b.position.set(x + R(-.12, .12), .98 + R(0, .2), R(-.1, .1)); bench.add(b);}
+      });
+    }
+
+    /* ---------- chậu cây lớn, cắt dọc thấy rễ ---------- */
+    const gPot = new THREE.Group(); gPot.position.y = .07; scene.add(gPot);
+    const PH = 1.0, PRT = .82, PRB = .6, WALL = .05;
+    const rAt = y => PRB + (PRT - PRB) * y / PH;
+    {
+      const sau = new THREE.Mesh(new THREE.CylinderGeometry(PRB + .14, PRB + .08, .07, 48), M.pot); sau.position.y = -.035; gPot.add(sau);
+      const back = new THREE.Mesh(new THREE.CylinderGeometry(PRT, PRB, PH, 48, 1, true, Math.PI / 2, Math.PI), M.pot); back.position.y = PH / 2; gPot.add(back);
+      const backIn = new THREE.Mesh(new THREE.CylinderGeometry(PRT - WALL, PRB - WALL, PH, 48, 1, true, Math.PI / 2, Math.PI), M.potIn); backIn.position.y = PH / 2; gPot.add(backIn);
+      const front = new THREE.Mesh(new THREE.CylinderGeometry(PRT, PRB, PH, 48, 1, true, -Math.PI / 2, Math.PI), M.potFront); front.position.y = PH / 2; front.renderOrder = 8; gPot.add(front);
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(PRT - .015, .04, 10, 72), M.pot); rim.rotation.x = Math.PI / 2; rim.position.y = PH; gPot.add(rim);
+      const bot = new THREE.Mesh(new THREE.CylinderGeometry(PRB, PRB, .04, 48), M.potIn); bot.position.y = .02; gPot.add(bot);
+      // mép cắt hai bên (độ dày thành chậu)
+      for (const sx of [-1, 1]) {
+        const s = new THREE.Shape(); s.moveTo(PRB - WALL, 0); s.lineTo(PRB, 0); s.lineTo(PRT, PH); s.lineTo(PRT - WALL, PH); s.lineTo(PRB - WALL, 0);
+        const m = new THREE.Mesh(new THREE.ShapeGeometry(s), M.pot); m.scale.x = sx; gPot.add(m);
+      }
+    }
+    // đất
+    const SOIL_LOOSE = .9, SOIL_COMPACT = .82;
+    const soilBody = new THREE.Mesh(new THREE.CylinderGeometry(rAt(.86) - WALL, PRB - WALL, .82, 48).translate(0, .41, 0), M.soil); soilBody.renderOrder = 7; gPot.add(soilBody);
+    const soilTop = new THREE.Mesh(new THREE.CircleGeometry(1, 48), M.soilTop); soilTop.rotation.x = -Math.PI / 2; gPot.add(soilTop);
+    const crackTex = (() => {
+      const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'); g.strokeStyle = 'rgba(70,40,15,.9)'; g.lineCap = 'round';
+      for (let i = 0; i < 16; i++) {let x = R(20, 236), y = R(20, 236), a = R(0, 6.3); g.lineWidth = R(1.5, 3.2); g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 7; k++) {a += R(-.8, .8); x += Math.cos(a) * 14; y += Math.sin(a) * 14; g.lineTo(x, y);} g.stroke();}
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+    })();
+    const crack = new THREE.Mesh(new THREE.CircleGeometry(1, 48), new THREE.MeshBasicMaterial({map: crackTex, transparent: true, opacity: 0, depthWrite: false}));
+    crack.rotation.x = -Math.PI / 2; gPot.add(crack);
+    const floodM = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 48).translate(0, .5, 0), M.flood); floodM.renderOrder = 9; gPot.add(floodM);
+    function inSoil(y, pad) {const a = R(0, Math.PI * 2), r = Math.sqrt(rand()) * (rAt(y) - WALL - pad); return V3(Math.cos(a) * r, y, Math.sin(a) * r);}
+    // đất tơi xốp: hạt to thành cụm, nhiều khe khí; đất nén chặt: hạt nhỏ, xếp sít
+    const gLoose = new THREE.Group(), gCompact = new THREE.Group(); gPot.add(gLoose, gCompact);
+    let airIM, dropIM;
+    {
+      const L = [], A = [];
+      for (let i = 0; i < 70; i++) {const c = inSoil(R(.1, SOIL_LOOSE - .06), .1); const n = 2 + Math.floor(rand() * 3); for (let k = 0; k < n; k++) L.push({p: c.clone().add(V3(R(-.06, .06), R(-.05, .05), R(-.06, .06))), s: R(.04, .065), q: qE(R(0, 3), R(0, 3), 0)});}
+      for (let i = 0; i < 70; i++) A.push({p: inSoil(R(.1, SOIL_LOOSE - .04), .06), s: R(.018, .03)});
+      gLoose.add(instanced(rock, M.grain, L)); airIM = instanced(ball, M.air, A); gLoose.add(airIM); airIM.userData.list = A;
+      const C = []; for (let i = 0; i < 520; i++) C.push({p: inSoil(R(.07, SOIL_COMPACT - .03), .06), s: R(.028, .042), q: qE(R(0, 3), R(0, 3), 0)});
+      gCompact.add(instanced(rock, M.grainC, C)); gCompact.visible = false;
+      const D = []; for (let i = 0; i < 80; i++) D.push({p: inSoil(R(.08, SOIL_COMPACT - .04), .07), s: R(.016, .024)});
+      dropIM = instanced(ball, M.drop, D); dropIM.userData.list = D; gPot.add(dropIM);
+    }
+    // rễ (trong đất, nhìn thấy qua mặt cắt)
+    const rootPaths = [], rootTips = [];
+    {
+      const top = SOIL_LOOSE - .1;
+      gPot.add(taperTube([[0, top, 0], [.02, .62, .01], [-.03, .38, 0], [.01, .14, .02]], .05, .008, M.root));
+      for (let i = 0; i < 7; i++) {
+        const a = i * Math.PI * 2 / 7 + .3, y = top - .02 - i * .06, rr = Math.min(.55, rAt(y - .35) - .14);
+        const pts = [V3(0, y, 0), V3(Math.cos(a) * .2, y - .07, Math.sin(a) * .2), V3(Math.cos(a) * rr * .7, y - .2, Math.sin(a) * rr * .7), V3(Math.cos(a) * rr, y - .36, Math.sin(a) * rr)];
+        const m = taperTube(pts, .026, .004, M.root); gPot.add(m);
+        const c = m.userData.curve;
+        for (let k = 0; k < 2; k++) {
+          const p = c.getPointAt(.45 + k * .25), b = a + (k ? .7 : -.7), e = p.clone().add(V3(Math.cos(b) * .14, -.1, Math.sin(b) * .14));
+          gPot.add(taperTube([p, p.clone().lerp(e, .5).add(V3(0, .02, 0)), e], .01, .002, M.root, {seg: 8, rad: 5}));
+        }
+        rootTips.push(pts[3]);
+        rootPaths.push(poly([...c.getSpacedPoints(30)].reverse().concat([V3(0, y + .05, 0), V3(0, SOIL_LOOSE + .1, 0), V3(0, SOIL_LOOSE + .42, 0)])));
+      }
+    }
+
+    /* ---------- cây (thân thảo, có thể héo) ---------- */
+    const SEG_L = [.55, .3, .3, .28, .25, .2], SEG_R = [.055, .048, .042, .036, .03, .024, .017];
+    const BEND = [0, .1, .2, .3, .36, .42];
+    const segs = [];
+    {
+      let parent = gPot, y0 = SOIL_LOOSE - .12;
+      SEG_L.forEach((len, i) => {
+        const g = new THREE.Group(); g.position.y = i === 0 ? y0 : SEG_L[i - 1]; parent.add(g);
+        const m = new THREE.Mesh(new THREE.CylinderGeometry(SEG_R[i + 1], SEG_R[i], len, 12).translate(0, len / 2, 0), M.stem); g.add(m);
+        const knot = new THREE.Mesh(ball, M.stem); knot.scale.setScalar(SEG_R[i] * 1.05); g.add(knot);
+        segs.push(g); parent = g;
+      });
+      const bud = new THREE.Mesh(new THREE.ConeGeometry(.035, .12, 10).translate(0, .06, 0), M.stem); bud.position.y = SEG_L[5]; segs[5].add(bud);
+    }
+    const leaves = [];
+    {
+      const LL = [0, .5, .46, .42, .36, .3, .22];
+      for (let i = 1; i <= 6; i++) {
+        const parent = i === 6 ? segs[5] : segs[i], yAt = i === 6 ? SEG_L[5] : 0, len = LL[i];
+        for (const side of [0, 1]) {
+          const piv = new THREE.Group(); piv.position.y = yAt; piv.rotation.y = (i % 2 ? 0 : Math.PI / 2) + side * Math.PI + (i === 6 ? .8 : 0); parent.add(piv);
+          const tilt = new THREE.Group(); piv.add(tilt);
+          const pet = new THREE.Mesh(new THREE.CylinderGeometry(.008, .012, .1, 6).translate(0, .05, 0), M.stem); tilt.add(pet);
+          const bladeG = leafGeo(len, len * .5); bladeG.rotateY(Math.PI / 2);
+          const veinG = new THREE.PlaneGeometry(.012, len * .92).translate(0, len * .46, .004); bend(veinG, len); veinG.rotateY(Math.PI / 2);
+          const blade = new THREE.Group(); blade.position.y = .09; tilt.add(blade);
+          blade.add(new THREE.Mesh(bladeG, M.leaf), new THREE.Mesh(veinG, M.vein));
+          const mark = new THREE.Object3D(); mark.position.set(0, len * .6, 0); blade.add(mark);
+          leaves.push({tilt, blade, mark, base: i === 6 ? .55 : .9 + i * .03, ph: rand() * 6.3});
+        }
+      }
+    }
+
+    /* ---------- thiết bị: đèn, máy sưởi, nhiệt kế, máy phun sương, bình tưới ---------- */
+    const LAMP_Y = 3.05;
+    const gLamp = new THREE.Group(); gLamp.position.set(0, LAMP_Y, 0); scene.add(gLamp);
+    const bulbM = new THREE.MeshStandardMaterial({color: 0xfff6d8, emissive: 0xffe08a, emissiveIntensity: 1});
+    const beamM = new THREE.MeshBasicMaterial({color: 0xffe9a0, transparent: true, opacity: .1, depthWrite: false, side: THREE.DoubleSide});
+    const spot = new THREE.SpotLight(0xfff0c8, 20, 0, .62, .55, 1.4);
+    {
+      gLamp.add(beam(V3(0, .1, 0), V3(0, HR - LAMP_Y, 0), .015, M.dark));
+      const shade = new THREE.Mesh(new THREE.ConeGeometry(.42, .32, 36, 1, true).translate(0, -.06, 0), std(0x2f6f69, {metalness: .4, roughness: .4, side: THREE.DoubleSide})); gLamp.add(shade);
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(.06, .08, .1, 16), M.dark); cap.position.y = .13; gLamp.add(cap);
+      const bulb = new THREE.Mesh(ball, bulbM); bulb.scale.setScalar(.12); bulb.position.y = -.2; gLamp.add(bulb);
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(1.05, 1.8, 40, 1, true).translate(0, -.9 - .22, 0), beamM); cone.renderOrder = 10; gLamp.add(cone);
+      spot.position.set(0, -.2, 0); gLamp.add(spot); const tgt = new THREE.Object3D(); tgt.position.set(0, -2, 0); gLamp.add(tgt); spot.target = tgt;
+    }
+    const gHeat = new THREE.Group(); gHeat.position.set(-2.25, 0, .35); gHeat.rotation.y = -.8; scene.add(gHeat);
+    const heatBarM = new THREE.MeshStandardMaterial({color: 0x5a2a1a, emissive: 0xff5a1f, emissiveIntensity: .3, roughness: .4});
+    {
+      const body = new THREE.Mesh(new RoundedBoxGeometry(.4, .8, .95, 3, .06), M.white); body.position.y = .5; gHeat.add(body);
+      const panel = new THREE.Mesh(new THREE.BoxGeometry(.02, .5, .75), M.dark); panel.position.set(.205, .5, 0); gHeat.add(panel);
+      for (let i = 0; i < 6; i++) {const b = new THREE.Mesh(new THREE.BoxGeometry(.03, .04, .68), heatBarM); b.position.set(.22, .3 + i * .08, 0); gHeat.add(b);}
+      for (const z of [-.35, .35]) {const f = new THREE.Mesh(new THREE.BoxGeometry(.5, .06, .08), M.dark); f.position.set(0, .05, z); gHeat.add(f);}
+      const knob = new THREE.Mesh(new THREE.CylinderGeometry(.04, .04, .03, 16), std(0xd8514a)); knob.rotation.z = Math.PI / 2; knob.position.set(.21, .84, .3); gHeat.add(knob);
+    }
+    const gThermo = new THREE.Group(); gThermo.position.set(-1.05, 1.55, -HD / 2 + .06); scene.add(gThermo);
+    const thermoCol = new THREE.Mesh(new THREE.CylinderGeometry(.016, .016, 1, 10).translate(0, .5, 0), std(0xe0442e, {roughness: .3}));
+    {
+      const board = new THREE.Mesh(new RoundedBoxGeometry(.2, .8, .03, 2, .02), M.white); gThermo.add(board);
+      const tube = new THREE.Mesh(new THREE.CylinderGeometry(.026, .026, .62, 12), tr(0xffffff, .35)); tube.position.set(0, .03, .03); gThermo.add(tube);
+      const bulb = new THREE.Mesh(ball, std(0xe0442e, {roughness: .3})); bulb.scale.setScalar(.045); bulb.position.set(0, -.3, .03); gThermo.add(bulb);
+      thermoCol.position.set(0, -.28, .03); gThermo.add(thermoCol);
+      for (let i = 0; i < 6; i++) {const t = new THREE.Mesh(new THREE.BoxGeometry(.05, .006, .01), M.dark); t.position.set(-.06, -.22 + i * .1, .02); gThermo.add(t);}
+    }
+    const gMist = new THREE.Group(); gMist.position.set(2.35, 0, .2); scene.add(gMist);
+    const NOZZLE = V3(2.15, 2.12, .2);
+    {
+      const tank = new THREE.Mesh(new THREE.CylinderGeometry(.24, .26, .5, 28), tr(0x9fd2f5, .55, {roughness: .1, side: THREE.FrontSide})); tank.position.y = .26; gMist.add(tank);
+      const water = new THREE.Mesh(new THREE.CylinderGeometry(.22, .24, .34, 28), std(0x4aa8ff, {transparent: true, opacity: .55})); water.position.y = .19; gMist.add(water);
+      const lid = new THREE.Mesh(new THREE.CylinderGeometry(.25, .25, .05, 28), M.white); lid.position.y = .53; gMist.add(lid);
+      gMist.add(beam(V3(0, .55, 0), V3(0, 2.1, 0), .05, M.metal));
+      const head = new THREE.Mesh(new THREE.CylinderGeometry(.05, .07, .22, 16), M.white); head.rotation.z = Math.PI / 2; head.position.set(-.12, 2.12, 0); gMist.add(head);
+      const tip = new THREE.Mesh(new THREE.CylinderGeometry(.025, .04, .06, 12), M.dark); tip.rotation.z = Math.PI / 2; tip.position.set(-.25, 2.12, 0); gMist.add(tip);
+    }
+    const gCan = new THREE.Group(); scene.add(gCan);
+    const CAN_HOME = {p: V3(1.2, 0, 1.05), q: qE(0, -.5, 0)};
+    {
+      const cm = std(0x3f8fd8, {metalness: .35, roughness: .35});
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(.19, .21, .36, 28), cm); body.position.y = .18; gCan.add(body);
+      const spout = taperTube([[-.15, .1, 0], [-.32, .24, 0], [-.48, .42, 0]], .035, .022, cm, {cap: false}); gCan.add(spout);
+      const rose = new THREE.Mesh(new THREE.CylinderGeometry(.06, .035, .06, 16), cm); rose.position.set(-.5, .44, 0); rose.rotation.z = .7; gCan.add(rose);
+      const handle = new THREE.Mesh(new THREE.TorusGeometry(.17, .022, 8, 24, Math.PI), cm); handle.position.set(.05, .36, 0); gCan.add(handle);
+      gCan.userData.rose = rose;
+    }
+    gCan.position.copy(CAN_HOME.p); gCan.quaternion.copy(CAN_HOME.q);
+
+    /* ---------- hạt: hơi nước, sương, hơi nóng, nước tưới ---------- */
+    function puffs(n, color) {
+      const g = new THREE.Group(); scene.add(g); const P = [];
+      for (let i = 0; i < n; i++) {const s = new THREE.Sprite(new THREE.SpriteMaterial({map: softTex, color, transparent: true, depthWrite: false, opacity: 0})); s.visible = false; s.renderOrder = 11; g.add(s); P.push({s, life: 0, max: 1, v: V3(0, 0, 0), s0: .05, s1: .1, op: .6, g: 0});}
+      let next = 0;
+      return {g, acc: 0,
+        emit(pos, vel, life, s0, s1, op, grav = 0) {const p = P[next]; next = (next + 1) % n; p.s.position.copy(pos); p.v.copy(vel); p.life = p.max = life; p.s0 = s0; p.s1 = s1; p.op = op; p.g = grav; p.s.visible = true;},
+        update(dt) {P.forEach(p => {if (p.life <= 0) return; p.life -= dt; if (p.life <= 0) {p.s.visible = false; return;} p.v.y += p.g * dt; p.s.position.addScaledVector(p.v, dt); const k = 1 - p.life / p.max; p.s.scale.setScalar(p.s0 + (p.s1 - p.s0) * k); p.s.material.opacity = p.op * Math.sin(Math.PI * Math.min(1, k * 1.15));});},
+        clear() {P.forEach(p => {p.life = 0; p.s.visible = false;});}};
+    }
+    const vap = puffs(200, 0x5aa8f0), mist = puffs(130, 0xe4f3ff), heat = puffs(50, 0xffa27a), pourP = puffs(70, 0x3fa3ff);
+    // dòng nước trong rễ → thân (hạt xanh)
+    const upIM = (() => {
+      const per = 5, n = rootPaths.length * per;
+      const mat = new THREE.MeshBasicMaterial({color: 0x3fa3ff, transparent: true, opacity: 1, depthWrite: false});
+      const im = new THREE.InstancedMesh(ball, mat, n); im.renderOrder = 12; gPot.add(im);
+      const P = []; rootPaths.forEach(path => {for (let k = 0; k < per; k++) P.push({path, u: (k + rand() * .5) / per});});
+      const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3();
+      im.userData.update = (dt, speed) => {
+        P.forEach((o, i) => {o.u = (o.u + dt * speed / o.path.len) % 1; o.path.at(o.u, p); const k = Math.min(1, o.u * 12, (1 - o.u) * 12), r = .022 * (.35 + .65 * k); s.set(r, r, r); m4.compose(p, q, s); im.setMatrixAt(i, m4);});
+        im.instanceMatrix.needsUpdate = true;
+      };
+      return im;
+    })();
+
+    /* =====================================================================
+       MÔ PHỎNG (định tính, không phải số liệu thật)
+       ===================================================================== */
+    const DEF = {light: .5, temp: 25, air: .5, soil: 1, loose: true};
+    const env = {...DEF};
+    const sim = {E: 0, U: 0, wilt: 0, dE: .3, dU: .8, dW: 0, looseK: 1, floodK: 0, wet: 1};
+    function compute() {
+      const T = env.temp;
+      const tUp = T <= 30 ? .5 + .5 * (T - 15) / 15 : 1 - .4 * (T - 30) / 10;
+      const tE = T <= 35 ? .35 + .65 * (T - 15) / 20 : 1;
+      const water = Math.min(1, env.soil);
+      const oxy = (env.loose ? 1 : .25) * (env.soil > 1 ? 1 - .65 * (env.soil - 1) : 1);
+      const U = clamp((.25 + .75 * water) * (.25 + .75 * oxy) * tUp, 0, 1);
+      const open = .2 + .8 * env.light;
+      const E = clamp(open * tE * (.3 + .7 * (1 - env.air)) * 1.25 * (.55 + .45 * U), 0, 1);
+      const wilt = clamp((E + .35 - U) * 2.2, 0, 1);
+      Object.assign(sim, {E, U, wilt});
+    }
+    const lvl = v => v < .34 ? 0 : v < .67 ? 1 : 2;
+    const LV = ['Thấp', 'Trung bình', 'Cao'];
+    function meterSVG(id, title) {
+      $(id).innerHTML = `<svg viewBox="0 0 120 72" aria-hidden="true">
+        <defs><linearGradient id="g${id}" x1="0" x2="1"><stop offset="0" stop-color="#cfe6fb"/><stop offset="1" stop-color="#2f7fe0"/></linearGradient></defs>
+        <path d="M14 62 A46 46 0 0 1 106 62" fill="none" stroke="url(#g${id})" stroke-width="11" stroke-linecap="round"/>
+        <g fill="#5f8b89" font-size="9" font-weight="700"><text x="6" y="71">Thấp</text><text x="96" y="71">Cao</text></g>
+        <line class="needle" x1="60" y1="62" x2="60" y2="24" stroke="#10302d" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="60" cy="62" r="6" fill="#10302d"/></svg><small>${title}</small><span class="mv"></span>`;
+      return {needle: $(id).querySelector('.needle'), mv: $(id).querySelector('.mv')};
+    }
+    const GE = meterSVG('mE', 'Tốc độ thoát hơi nước'), GU = meterSVG('mU', 'Khả năng hút nước của rễ');
+    function drawMeters() {
+      [[GE, sim.dE], [GU, sim.dU]].forEach(([g, v]) => g.needle.setAttribute('transform', `rotate(${-90 + 180 * v} 60 62)`));
+      [[GE, sim.E], [GU, sim.U]].forEach(([g, v]) => {const l = lvl(v); g.mv.textContent = LV[l]; g.mv.className = 'mv lv' + l;});
+      const w = sim.wilt < .25 ? 0 : sim.wilt < .8 ? 1 : 2;
+      $('pState').textContent = ['Tươi', 'Hơi héo', 'Héo rũ'][w]; $('pState').className = w ? 'w' + w : '';
+    }
+    const word = {
+      light: v => v < .34 ? 'Yếu' : v < .67 ? 'Vừa' : 'Mạnh',
+      temp: v => v + '°C',
+      air: v => v < .34 ? 'Khô' : v < .67 ? 'Vừa' : 'Ẩm',
+      soil: v => v < .45 ? 'Khô' : v <= 1.35 ? 'Ẩm' : 'Ngập úng',
+    };
+    function syncCtl() {
+      $('rLight').value = env.light; $('rTemp').value = env.temp; $('rAir').value = env.air; $('rSoil').value = env.soil;
+      $('vLight').textContent = word.light(env.light); $('vTemp').textContent = word.temp(env.temp); $('vAir').textContent = word.air(env.air); $('vSoil').textContent = word.soil(env.soil);
+      document.querySelectorAll('#togSoil button').forEach(b => b.classList.toggle('on', (b.dataset.s === 'loose') === env.loose));
+      LBL.soilL.tag.textContent = env.soil > 1.35 ? 'Đất ngập úng – thiếu oxygen' : !env.loose ? 'Đất nén chặt – thiếu oxygen' : env.soil < .45 ? 'Đất khô – thiếu nước' : 'Đất tơi xốp, đủ ẩm';
+      compute(); drawMeters(); applyEnv();
+    }
+    // hiển thị môi trường lên cảnh 3D
+    const cSoilDry = new THREE.Color(0xc9a274), cSoilWet = new THREE.Color(0x5a3a1e), cSoilFlood = new THREE.Color(0x3b2814);
+    const cGrainDry = new THREE.Color(0xc59a68), cGrainWet = new THREE.Color(0x7a4f2a);
+    const cLeaf = new THREE.Color(0x3e9a45), cLeafW = new THREE.Color(0x9aa23e);
+    function applyEnv() {
+      const L = env.light, k = (env.temp - 15) / 25;
+      spot.intensity = 3 + 42 * L; bulbM.emissiveIntensity = .15 + 2.6 * L; beamM.opacity = .02 + .2 * L;
+      keyL.intensity = .75 + 1.0 * L; hemi.intensity = .6 + .4 * L;
+      heatBarM.emissiveIntensity = .1 + 2.6 * k * k; thermoCol.scale.y = .1 + .5 * k;
+      M.glass.opacity = .12 + .22 * env.air; M.glass.color.setRGB(.85 + .1 * env.air, .95, .93);
+    }
+    function soilVisual() {
+      const wet = sim.wet, fl = sim.floodK;
+      const top = lerp(SOIL_COMPACT, SOIL_LOOSE, sim.looseK);
+      soilBody.scale.set(1, (top - .04) / .82, 1); soilBody.position.y = .04;
+      soilTop.position.y = top; soilTop.scale.setScalar(rAt(top) - WALL);
+      crack.position.y = top + .003; crack.scale.setScalar(rAt(top) - WALL - .01); crack.material.opacity = clamp(1 - wet * 2.2, 0, 1) * .9;
+      const c = cSoilDry.clone().lerp(cSoilWet, clamp(wet, 0, 1)).lerp(cSoilFlood, fl);
+      M.soilTop.color.copy(c); M.soil.color.copy(c); M.soil.opacity = .32 + .15 * clamp(wet, 0, 1);
+      M.grain.color.copy(cGrainDry).lerp(cGrainWet, clamp(wet, 0, 1));
+      const fh = .1 * fl; floodM.visible = fl > .01; floodM.position.y = top; floodM.scale.set(rAt(top + fh) - WALL - .005, Math.max(.001, fh), rAt(top + fh) - WALL - .005); M.flood.opacity = .55 * fl;
+      gLoose.scale.setScalar(sim.looseK); gLoose.visible = sim.looseK > .02; gCompact.scale.setScalar(1 - sim.looseK); gCompact.visible = sim.looseK < .98;
+      gLoose.position.y = (1 - sim.looseK) * .45; gCompact.position.y = sim.looseK * .4;
+      // bọt khí (oxygen) trong đất tơi: mất dần khi ngập úng
+      const m4 = new THREE.Matrix4(), q = new THREE.Quaternion();
+      airIM.userData.list.forEach((o, i) => {const s = o.s * clamp(1 - fl * 1.15, 0, 1); m4.compose(o.p, q, V3(s, s, s)); airIM.setMatrixAt(i, m4);}); airIM.instanceMatrix.needsUpdate = true;
+      const nd = Math.round(dropIM.count * clamp(wet, 0, 1));
+      dropIM.userData.list.forEach((o, i) => {const s = i < nd ? o.s : 0; const p = o.p.clone(); p.y = Math.min(p.y, top - .03); m4.compose(p, q, V3(s, s, s)); dropIM.setMatrixAt(i, m4);}); dropIM.instanceMatrix.needsUpdate = true;
+    }
+    function plantVisual(t) {
+      const w = sim.dW;
+      segs.forEach((g, i) => {g.rotation.z = -w * BEND[i] + (i ? Math.sin(t * 1.3 + i) * .008 : 0); g.rotation.x = i ? Math.sin(t * .9 + i * .7) * .006 : 0;});
+      leaves.forEach(l => {l.tilt.rotation.z = -(l.base + w * 1.15 + Math.sin(t * 2.2 + l.ph) * .03 * (1 - w)); l.blade.scale.set(1, 1, 1 - .4 * w);});
+      M.leaf.color.copy(cLeaf).lerp(cLeafW, w * .85); M.stem.color.setHex(0x5e9e3c).lerp(new THREE.Color(0x8a9a4a), w * .6);
+    }
+
+    /* =====================================================================
+       CAMERA
+       ===================================================================== */
+    const avail = {w: 1, h: 1, top: 0, bottom: 1};
+    function fitView(target, radius, dir) {
+      const w = viewer.clientWidth || 1, h = viewer.clientHeight || 1, tv = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+      const d = radius / Math.min(tv * avail.h / h, tv * (w / h) * avail.w / w);
+      return {target, pos: target.clone().add(dir.clone().normalize().multiplyScalar(d))};
+    }
+    const VIEWS = {
+      house: () => fitView(V3(0, 1.5, -.1), 3.45, V3(.42, .32, 1)),
+      plant: () => fitView(V3(0, 1.45, 0), 1.75, V3(.3, .22, 1)),
+      pot: () => fitView(V3(0, .9, 0), 1.45, V3(.22, .3, 1)),
+    };
+    let tween = null, currentView = 'house';
+    function goView(name, instant) {
+      currentView = name; const v = VIEWS[name]();
+      if (instant) {tween = null; camera.position.copy(v.pos); controls.target.copy(v.target); controls.update(); return;}
+      tween = {t0: performance.now(), dur: 1000, p0: camera.position.clone(), q0: controls.target.clone(), p1: v.pos, q1: v.target};
+    }
+    function stepTween(now) {
+      if (!tween) return;
+      let k = Math.min(1, (now - tween.t0) / tween.dur); k = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+      camera.position.lerpVectors(tween.p0, tween.p1, k); controls.target.lerpVectors(tween.q0, tween.q1, k);
+      if (k >= 1) tween = null;
+    }
+    canvas.addEventListener('pointerdown', () => {tween = null; $('hint').style.opacity = 0;});
+    canvas.addEventListener('wheel', () => {tween = null;}, {passive: true});
+
+    /* ---------- hoạt ảnh nhỏ (promise) ---------- */
+    const anims = new Set();
+    const ease = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+    function play(dur, fn) {return new Promise(res => anims.add({t0: performance.now(), dur, fn, res}));}
+    function moveTo(obj, pos, quat, dur = 700) {const p0 = obj.position.clone(), q0 = obj.quaternion.clone(); return play(dur, k => {k = ease(k); obj.position.lerpVectors(p0, pos, k); obj.quaternion.slerpQuaternions(q0, quat, k);});}
+    function runAnims(now) {anims.forEach(a => {const k = Math.min(1, (now - a.t0) / a.dur); a.fn(k); if (k >= 1) {anims.delete(a); a.res();}});}
+
+    /* ---------- nhãn gắn với vị trí 3D ---------- */
+    const lines = $('lines'), NS = 'http://www.w3.org/2000/svg';
+    const PW = p => gPot.localToWorld(p.clone());
+    const LBL = {
+      lampL: {text: 'Đèn chiếu', anchor: () => V3(.3, LAMP_Y - .1, 0), off: [-1, -.3], cls: 'sun', click: () => focusCtl('light')},
+      heatL: {text: 'Máy sưởi', anchor: () => gHeat.localToWorld(V3(0, .9, 0)), off: [-1, -.7], cls: 'hot', click: () => focusCtl('temp')},
+      mistL: {text: 'Máy phun sương', anchor: () => NOZZLE.clone(), off: [1, -.7], cls: 'mist', click: () => focusCtl('air')},
+      canL: {text: 'Bình tưới', anchor: () => gCan.localToWorld(V3(0, .38, 0)), off: [1, .6], click: () => focusCtl('soil')},
+      soilL: {text: 'Đất tơi xốp, đủ ẩm', anchor: () => PW(V3(-.3, .45, .45)), off: [-1, .9], cls: 'soil', click: () => focusCtl('struct')},
+      rootL: {text: 'Rễ hút nước', anchor: () => PW(rootTips[1]), off: [1, .9], info: 1, cls: 'water'},
+      vapL: {text: 'Hơi nước thoát ra qua lá', anchor: () => V3(.25, 2.45, 0), off: [1, -.6], info: 1},
+    };
+    Object.entries(LBL).forEach(([k, o]) => {
+      o.tag = document.createElement('button'); o.tag.type = 'button'; o.tag.className = 'tag' + (o.info ? ' info' : '') + (o.cls ? ' ' + o.cls : ''); o.tag.textContent = o.text;
+      if (o.click) o.tag.onclick = o.click; $('tags').append(o.tag);
+      o.ln = document.createElementNS(NS, 'line'); o.dot = document.createElementNS(NS, 'circle'); o.dot.setAttribute('r', 4.5); lines.append(o.ln, o.dot);
+    });
+    let shownLabels = new Set();
+    const setLabels = arr => {shownLabels = new Set(arr);};
+    const tmp = new THREE.Vector3();
+    function updateLabels() {
+      const w = viewer.clientWidth, h = viewer.clientHeight, narrow = w < 600, side = narrow ? 50 : 8, placed = [];
+      Object.entries(LBL).forEach(([k, o]) => {
+        let show = shownLabels.has(k);
+        if (show) {tmp.copy(o.anchor()).project(camera); if (tmp.z > 1 || Math.abs(tmp.x) > 1.2 || Math.abs(tmp.y) > 1.2) show = false;}
+        o.tag.classList.toggle('show', show); o.ln.style.display = o.dot.style.display = show ? '' : 'none';
+        if (!show) return;
+        const x = (tmp.x * .5 + .5) * w, y = (-tmp.y * .5 + .5) * h;
+        const tw = o.tag.offsetWidth, th = o.tag.offsetHeight, gap = Math.min(90, w * .12);
+        let tx = x + o.off[0] * (gap + tw / 2); tx = Math.max(tw / 2 + side, Math.min(w - tw / 2 - side, tx));
+        let ty = Math.max(th / 2 + avail.top + 52, Math.min(avail.bottom - 12 - th / 2, y + o.off[1] * (narrow ? 30 : 40)));
+        // đẩy nhãn xuống nếu chồng lên nhãn đã đặt (màn hình hẹp)
+        for (let moved = true, n = 0; moved && n < 6; n++) {
+          moved = false;
+          for (const r of placed) if (Math.abs(tx - r.x) < (tw + r.w) / 2 + 4 && Math.abs(ty - r.y) < (th + r.h) / 2 + 4) {ty = r.y + (r.h + th) / 2 + 6; moved = true;}
+        }
+        placed.push({x: tx, y: ty, w: tw, h: th});
+        o.tag.style.left = tx + 'px'; o.tag.style.top = ty + 'px';
+        const ex = tx + (tx < x ? tw / 2 : -tw / 2);
+        o.ln.setAttribute('x1', ex); o.ln.setAttribute('y1', ty); o.ln.setAttribute('x2', x); o.ln.setAttribute('y2', y);
+        o.dot.setAttribute('cx', x); o.dot.setAttribute('cy', y);
+      });
+    }
+
+    /* ---------- toast / phản hồi ---------- */
+    let toastT;
+    function toast(msg) {const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600);}
+    function fb(id, kind, html) {const f = $(id); f.className = 'fb show ' + kind; f.innerHTML = html;}
+
+    /* ---------- thuyết minh ---------- */
+    let voice = null, muted = false, started = false, sayTok = 0;
+    function stopVoice() {if (voice) {voice.pause(); voice = null;}}
+    function say(key, then) {
+      stopVoice(); const tok = ++sayTok; if (muted || !started) return;
+      const done = () => {if (tok === sayTok && then) then();};
+      if (!AUDIO[key]) return;
+      voice = new Audio(AUDIO[key]); voice.onended = done; voice.play().catch(() => {});
+    }
+    const sayV = (key, idx, then) => say(idx == null ? key : key + idx, then);
+    $('btnNarration').onclick = () => {
+      muted = !muted; stopVoice();
+      $('btnNarration').setAttribute('aria-pressed', !muted);
+      $('btnNarration').firstChild.textContent = muted ? '🔇 ' : '🔊 ';
+    };
+
+    /* ---------- hiệu ứng âm thanh (WebAudio) ---------- */
+    let ac = null;
+    function tone(f0, t0, dur, type = 'sine', vol = .12, f1 = null) {
+      const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + t0;
+      o.type = type; o.frequency.setValueAtTime(f0, t); if (f1) o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + dur + .02);
+    }
+    const SFX = {
+      click: () => tone(720, 0, .05, 'sine', .07),
+      pop: () => tone(420, 0, .09, 'sine', .1, 760),
+      place: () => {tone(300, 0, .08, 'triangle', .12, 200); tone(600, .05, .06, 'sine', .06);},
+      ding: () => {tone(988, 0, .18, 'triangle', .1); tone(1318, .1, .26, 'triangle', .08);},
+      pour: () => {for (let i = 0; i < 6; i++) tone(500 + i * 60, i * .12, .1, 'sine', .05, 300);},
+      correct: () => {tone(659, 0, .14, 'triangle', .13); tone(880, .12, .3, 'triangle', .13);},
+      wrong: () => {tone(240, 0, .22, 'sawtooth', .07, 150); tone(180, .1, .26, 'sawtooth', .06, 110);},
+      success: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, i * .1, .28, 'triangle', .12)),
+    };
+    function sfx(name) {if (muted) return; try {ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); SFX[name]();} catch (e) {} }
+    document.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.matches('.opt, .mcard, #btnExplore, #btnNarration, #sCheck')) return;
+      sfx('click');
+    }, true);
+
+    /* ---------- các bước ---------- */
+    const stepsEl = $('steps');
+    STEP_NAMES.forEach((n, i) => {
+      const b = document.createElement('button'); b.className = 'step'; b.innerHTML = `<b>${i + 1}</b><span>${n}</span>`; b.setAttribute('aria-pressed', 'false');
+      b.onclick = () => goStep(i); stepsEl.append(b);
+    });
+    const visited = new Set(); let cur = -1;
+    function goStep(i) {
+      i = Math.max(0, Math.min(STEP_NAMES.length - 1, i));
+      if (cur >= 0) visited.add(cur);
+      cur = i;
+      document.querySelectorAll('.sec').forEach(el => el.classList.toggle('on', +el.dataset.step === i));
+      [...stepsEl.children].forEach((b, k) => {b.setAttribute('aria-pressed', k === i); b.classList.toggle('done', visited.has(k) && k !== i);});
+      const act = stepsEl.children[i].getBoundingClientRect(), bar = stepsEl.getBoundingClientRect();
+      stepsEl.scrollTo({left: stepsEl.scrollLeft + act.left - bar.left - (bar.width - act.width) / 2, behavior: 'smooth'});
+      $('btnPrev').disabled = i === 0; $('btnNext').disabled = i === STEP_NAMES.length - 1;
+      $('lessonTitle').textContent = 'Bước ' + (i + 1) + ' · ' + STEP_NAMES[i];
+      $('sidebody').scrollTop = 0;
+      controls.autoRotate = i > 0; $('btnSpin').classList.toggle('on', controls.autoRotate);
+      $('lesson').classList.toggle('wide', i > 0); resize();
+      if (i === 0) {setLabels(['lampL', 'heatL', 'mistL', 'canL', 'soilL']); goView('house');}
+      if (i === 1) {setLabels(['vapL', 'rootL']); goView('plant'); requestAnimationFrame(drawLines);}
+      if (i === 2) {setLabels(['soilL', 'rootL']); goView('pot');}
+      if (started) sayV('step', i);
+    }
+    $('btnPrev').onclick = () => goStep(cur - 1);
+    $('btnNext').onclick = () => goStep(cur + 1);
+
+    /* ---------- trắc nghiệm ---------- */
+    function mcq(rootId, fbId, {ok, no, hint, okKey, noKey, onOk}) {
+      const root = $(rootId); let wrong = 0;
+      root.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+        if (+b.dataset.c) {
+          sfx('correct'); b.classList.add('ok'); root.querySelectorAll('.opt').forEach(x => x.disabled = true);
+          fb(fbId, 'ok', '👏 ' + ok); say(okKey); onOk && onOk();
+        } else {
+          wrong++; sfx('wrong'); b.classList.add('no'); b.disabled = true;
+          fb(fbId, 'no', no + (wrong >= 2 && hint ? '<br>💡 ' + hint : '')); say(noKey);
+        }
+      });
+      return () => {wrong = 0; root.querySelectorAll('.opt').forEach(x => {x.disabled = false; x.classList.remove('ok', 'no');}); $(fbId).className = 'fb';};
+    }
+
+    /* ===== Bước 1: phòng điều khiển nhà kính ===== */
+    const tried = new Set();
+    function markTried(f) {
+      const first = !tried.has(f); tried.add(f);
+      document.querySelector(`.crow[data-f="${f}"]`).classList.add('tried');
+      document.querySelectorAll('.crow.nudge').forEach(c => c.classList.remove('nudge'));
+      $('cntF').textContent = `Đã thử ${tried.size}/5 yếu tố`;
+      if (first) sfx('ding');
+      const nxt = ['light', 'temp', 'air', 'soil', 'struct'].find(k => !tried.has(k));
+      if (nxt) setTimeout(() => {if (cur === 0) document.querySelector(`.crow[data-f="${nxt}"]`).classList.add('nudge');}, 4000);
+      return first && tried.size === 5;
+    }
+    function react(f, key) {
+      const allNow = markTried(f), txt = V[key];
+      fb('fbE', 'info', txt);
+      if (allNow) {
+        say(key, () => sayV('all'));
+        setTimeout(() => {fb('fbE', 'ok', txt + '<br><b>' + V.all + '</b>'); $('kcE').classList.remove('hide'); $('kcE').scrollIntoView({block: 'nearest', behavior: 'smooth'});}, 300);
+      } else say(key);
+    }
+    let prev = {...env};
+    const VIEW_OF = {light: 'house', temp: 'house', air: 'house', soil: 'pot', struct: 'pot'};
+    function bindRange(id, f, prop, onCommit) {
+      const el = $(id);
+      el.oninput = () => {env[prop] = +el.value; syncCtl(); $('hint').style.opacity = 0;};
+      el.onchange = () => {env[prop] = +el.value; syncCtl(); if (env[prop] === prev[prop]) return; const key = onCommit(env[prop], prev[prop]); prev[prop] = env[prop]; if (currentView !== VIEW_OF[f] && cur === 0) goView(VIEW_OF[f]); react(f, key);};
+    }
+    bindRange('rLight', 'light', 'light', (v, p) => v > p ? 'lightUp' : 'lightDn');
+    bindRange('rTemp', 'temp', 'temp', () => 'temp');
+    bindRange('rAir', 'air', 'air', (v, p) => v < p ? 'airDn' : 'airUp');
+    bindRange('rSoil', 'soil', 'soil', (v, p) => {if (v > p && v > .1) pourCan(); return v < .45 ? 'soilDry' : v > 1.35 ? 'soilFlood' : 'soilOk';});
+    document.querySelectorAll('#togSoil button').forEach(b => b.onclick = () => {
+      const loose = b.dataset.s === 'loose'; if (loose === env.loose) return;
+      env.loose = prev.loose = loose; syncCtl(); if (currentView !== 'pot' && cur === 0) goView('pot');
+      toast(loose ? 'Đất tơi xốp: hạt đất to, nhiều khe chứa không khí' : 'Đất nén chặt: hạt đất sít nhau, không còn khe khí');
+      react('struct', loose ? 'loose' : 'compact');
+    });
+    $('btnEnvReset').onclick = () => {Object.assign(env, DEF); prev = {...env}; syncCtl(); $('fbE').className = 'fb'; goView('house'); stopVoice(); toast('Đã đặt lại các yếu tố về mức ban đầu');};
+    function focusCtl(f) {
+      if (cur !== 0) return;
+      const el = document.querySelector(`.crow[data-f="${f}"]`); if ($('lesson').classList.contains('collapsed')) $('lessonToggle').click();
+      el.scrollIntoView({block: 'center', behavior: 'smooth'}); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1400); sfx('pop');
+    }
+    let canBusy = false;
+    async function pourCan() {
+      if (canBusy) return; canBusy = true; sfx('pour');
+      await moveTo(gCan, V3(1.0, 1.25, .35), qE(0, -.35, 0), 600);
+      await moveTo(gCan, V3(1.0, 1.25, .35), qE(0, -.35, .62), 350);
+      await play(1300, () => {const p = gCan.userData.rose.getWorldPosition(new THREE.Vector3()); for (let i = 0; i < 2; i++) pourP.emit(p.clone().add(V3(R(-.03, .03), 0, R(-.03, .03))), V3(R(-.75, -.55), R(.1, .3), R(-.2, .0)), .7, .03, .02, .9, -4.5);});
+      await moveTo(gCan, V3(1.0, 1.25, .35), qE(0, -.35, 0), 300);
+      await moveTo(gCan, CAN_HOME.p, CAN_HOME.q, 650); canBusy = false;
+    }
+
+    // lớp hiển thị
+    const layerOn = {water: true, vap: true, glass: true};
+    function applyLayers() {
+      upIM.visible = layerOn.water; vap.g.visible = layerOn.vap; glassMeshes.forEach(m => m.visible = layerOn.glass);
+      document.querySelectorAll('.lyr').forEach(b => b.classList.toggle('off', !layerOn[b.dataset.l]));
+    }
+    document.querySelectorAll('.lyr').forEach(b => b.onclick = () => {layerOn[b.dataset.l] = !layerOn[b.dataset.l]; applyLayers();});
+
+    /* ===== Bước 2: nối yếu tố – ảnh hưởng ===== */
+    const FACT = [
+      {k: 'light', t: '☀️ Ánh sáng'}, {k: 'temp', t: '🌡️ Nhiệt độ'}, {k: 'air', t: '🌫️ Độ ẩm không khí'}, {k: 'soil', t: '🟫 Độ ẩm và lượng oxygen trong đất'},
+    ];
+    const EFF = [
+      {k: 'light', t: 'Làm mở khí khổng, ảnh hưởng chủ yếu đến thoát hơi nước'},
+      {k: 'temp', t: 'Ảnh hưởng đến cả hút nước, vận chuyển nước và thoát hơi nước'},
+      {k: 'air', t: 'Càng thấp thì thoát hơi nước càng mạnh'},
+      {k: 'soil', t: 'Ảnh hưởng trực tiếp đến khả năng hút nước và chất dinh dưỡng của rễ'},
+      {k: 'x', t: 'Làm lá cây đổi sang màu đỏ'},
+    ];
+    const mst = {sel: null, done: new Set(), bad: null, fails: 0};
+    const effOrder = [...EFF].sort(() => rand() - .5);
+    $('mtL').innerHTML = FACT.map(f => `<button type="button" class="mcard l" data-k="${f.k}">${f.t}</button>`).join('');
+    $('mtR').innerHTML = effOrder.map(f => `<button type="button" class="mcard r" data-k="${f.k}">${f.t}</button>`).join('');
+    const mcards = [...document.querySelectorAll('#mt .mcard')];
+    function drawLines() {
+      const svg = $('mtSvg'), box = $('mt').getBoundingClientRect(); if (!box.width) return;
+      const pt = (el, side) => {const r = el.getBoundingClientRect(); return [side ? r.left - box.left : r.right - box.left, r.top - box.top + r.height / 2];};
+      const seg = (k, cls, kr = k) => {const a = pt(document.querySelector(`#mtL [data-k="${k}"]`), 0), b = pt(document.querySelector(`#mtR [data-k="${kr}"]`), 1); return `<line class="${cls}" x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}"/>`;};
+      svg.innerHTML = [...mst.done].map(k => seg(k, 'ok')).join('') + (mst.bad ? seg(mst.bad[0], 'no', mst.bad[1]) : '');
+    }
+    new ResizeObserver(() => drawLines()).observe($('mt'));
+    function tryPair(l, r) {
+      const L = document.querySelector(`#mtL [data-k="${l}"]`), Rr = document.querySelector(`#mtR [data-k="${r}"]`);
+      mcards.forEach(c => c.classList.remove('sel')); mst.sel = null;
+      if (l === r) {
+        mst.done.add(l); L.classList.add('lock'); Rr.classList.add('lock'); sfx('correct'); drawLines();
+        $('cntM').textContent = `Đã nối ${mst.done.size}/4`; $('fbM').className = 'fb';
+        if (mst.done.size === 4) {
+          sfx('success'); fb('fbM', 'ok', '🎉 ' + V.mOk); $('kcM').classList.remove('hide'); $('q2card').classList.remove('hide');
+          const xr = document.querySelector('#mtR [data-k="x"]'); xr.disabled = true; xr.style.opacity = .45;
+          say('mOk', () => sayV('q2'));
+          setTimeout(() => $('q2card').scrollIntoView({block: 'nearest', behavior: 'smooth'}), 400);
+        }
+      } else {
+        mst.fails++; mst.bad = [l, r]; drawLines(); sfx('wrong'); L.classList.add('bad'); Rr.classList.add('bad');
+        const name = FACT.find(f => f.k === l).t.replace(/^\S+\s/, '');
+        fb('fbM', 'no', V.mNo + ` <button type="button" class="qbtn alt" id="mBackIn" style="margin:8px 0 0;padding:6px 12px;font-size:13px">↩ Thử lại yếu tố “${name}” ở nhà kính</button>`);
+        $('mBackIn').onclick = () => backToHouse(l);
+        say('mNo');
+        setTimeout(() => {mst.bad = null; drawLines(); L.classList.remove('bad'); Rr.classList.remove('bad');}, 700);
+      }
+    }
+    mcards.forEach(c => c.onclick = () => {
+      if (c.classList.contains('lock') || c.disabled) return;
+      const side = c.classList.contains('l') ? 'l' : 'r', k = c.dataset.k;
+      if (mst.sel && mst.sel.side !== side) return side === 'r' ? tryPair(mst.sel.k, k) : tryPair(k, mst.sel.k);
+      mcards.forEach(x => x.classList.toggle('sel', x === c && !(mst.sel && mst.sel.k === k && mst.sel.side === side)));
+      mst.sel = mst.sel && mst.sel.k === k && mst.sel.side === side ? null : {side, k}; sfx('pop');
+    });
+    function backToHouse(f) {goStep(0); setTimeout(() => focusCtl(f === 'soil' ? 'soil' : f), 350);}
+    $('mBack').onclick = () => goStep(0);
+    const resetQ2 = mcq('q2', 'fbq2', {ok: V.q2ok, no: V.q2no, hint: 'Cô gợi ý: ở nhà kính, đất tơi xốp có nhiều khe chứa không khí và nước, rễ hút nước tốt hơn.', okKey: 'q2ok', noKey: 'q2no', onOk: () => {$('btnToSort').classList.remove('hide'); Object.assign(env, {loose: true, soil: 1}); prev = {...env}; syncCtl();}});
+    $('mReset').onclick = () => {
+      mst.sel = null; mst.done.clear(); mst.bad = null; mcards.forEach(c => {c.classList.remove('lock', 'sel', 'bad'); c.disabled = false; c.style.opacity = '';});
+      $('cntM').textContent = 'Đã nối 0/4'; $('fbM').className = 'fb'; $('kcM').classList.add('hide'); $('q2card').classList.add('hide'); $('btnToSort').classList.add('hide'); resetQ2(); drawLines();
+    };
+    $('btnToSort').onclick = () => goStep(2);
+
+    /* ===== Bước 3: Nên / Không nên ===== */
+    const ACTS = [
+      {t: 'Cày bừa kĩ', e: '🚜', a: 'yes'},
+      {t: 'Xới xáo đất', e: '⛏️', a: 'yes'},
+      {t: 'Làm cỏ', e: '🌿', a: 'yes'},
+      {t: 'Sục bùn', e: '🌾', a: 'yes'},
+      {t: 'Phơi ải', e: '☀️', a: 'yes'},
+      {t: 'Để ruộng ngập úng lâu ngày', e: '🌊', a: 'no', fx: {soil: 1.9, loose: true}},
+      {t: 'Giẫm nén chặt đất quanh gốc', e: '👣', a: 'no', fx: {soil: 1, loose: false}},
+    ].map((o, i) => ({...o, id: i}));
+    const sst = {place: ACTS.map(() => null), sel: null, good: new Set(), won: false};
+    const order = [...ACTS].sort(() => rand() - .5);
+    const bins = {yes: document.querySelector('.bin.yes'), no: document.querySelector('.bin.no')};
+    function cardHTML(o) {return `<button type="button" class="scard ${sst.sel === o.id ? 'sel' : ''} ${sst.good.has(o.id) ? 'good' : ''}" data-id="${o.id}"><span class="em">${o.e}</span><span>${o.t}</span></button>`;}
+    function drawSort() {
+      $('sPool').innerHTML = order.filter(o => !sst.place[o.id]).map(cardHTML).join('');
+      Object.entries(bins).forEach(([b, el]) => {el.querySelectorAll('.scard').forEach(x => x.remove()); el.insertAdjacentHTML('beforeend', order.filter(o => sst.place[o.id] === b).map(cardHTML).join('')); el.classList.toggle('ready', sst.sel != null);});
+      const n = sst.place.filter(Boolean).length; $('cntS').textContent = `Đã xếp ${n}/7`; $('sCheck').disabled = n < 7 || sst.won;
+      document.querySelectorAll('.scard').forEach(c => {
+        const id = +c.dataset.id;
+        c.onclick = e => {e.stopPropagation(); if (sst.won || sst.good.has(id) || sdrag?.moved || sSuppress) return; sst.sel = sst.sel === id ? null : id; sfx('pop'); drawSort();};
+        c.onpointerdown = e => {if (sst.won || sst.good.has(id) || e.button > 0) return; sdrag = {id, x0: e.clientX, y0: e.clientY, moved: false, ghost: null};};
+      });
+    }
+    function placeCard(id, b) {
+      if (sst.good.has(id)) return; sst.place[id] = b; sst.sel = null; sfx('place'); $('fbS').className = 'fb'; drawSort();
+    }
+    Object.entries(bins).forEach(([b, el]) => {
+      el.onclick = () => {if (sst.won) return; if (sst.sel == null) return toast('Em chọn một thẻ việc làm trước nhé'); placeCard(sst.sel, b);};
+      el.onkeydown = e => {if (e.key === 'Enter' || e.key === ' ') {e.preventDefault(); el.onclick();}};
+    });
+    $('sPool').onclick = e => {if (e.target.closest('.scard') || sst.sel == null || sst.good.has(sst.sel)) return; sst.place[sst.sel] = null; sst.sel = null; drawSort();};
+    let sdrag = null, sSuppress = false;
+    addEventListener('pointermove', e => {
+      if (!sdrag) return;
+      if (!sdrag.ghost) {
+        if (Math.hypot(e.clientX - sdrag.x0, e.clientY - sdrag.y0) < 8) return;
+        sdrag.moved = true; const o = ACTS[sdrag.id];
+        sdrag.ghost = document.createElement('div'); sdrag.ghost.className = 'scard ghostchip'; sdrag.ghost.innerHTML = `<span class="em">${o.e}</span><span>${o.t}</span>`; document.body.append(sdrag.ghost);
+      }
+      sdrag.ghost.style.left = e.clientX + 'px'; sdrag.ghost.style.top = e.clientY + 'px';
+      const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('.bin');
+      Object.values(bins).forEach(b => b.classList.toggle('over', b === over));
+    });
+    addEventListener('pointerup', e => {
+      if (!sdrag) return; const d = sdrag; sdrag = null; if (!d.ghost) return;
+      d.ghost.remove(); Object.values(bins).forEach(b => b.classList.remove('over'));
+      sSuppress = true; setTimeout(() => sSuppress = false, 60);
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const bin = el?.closest('.bin'); if (bin) placeCard(d.id, bin.dataset.b); else if (el?.closest('#sPool')) {sst.place[d.id] = null; drawSort();}
+    });
+    addEventListener('pointercancel', () => {if (sdrag?.ghost) sdrag.ghost.remove(); sdrag = null;});
+    $('sCheck').onclick = () => {
+      if (sst.won) return;
+      const wrong = ACTS.filter(o => sst.place[o.id] !== o.a);
+      ACTS.forEach(o => {if (sst.place[o.id] === o.a) sst.good.add(o.id);});
+      if (!wrong.length) {
+        sst.won = true; sst.sel = null; drawSort(); sfx('success'); fb('fbS', 'ok', '🎉 ' + V.sOk); say('sOk');
+        Object.assign(env, DEF); prev = {...env}; syncCtl();
+        $('kcS').classList.remove('hide');
+        setTimeout(() => $('kcS').scrollIntoView({block: 'nearest', behavior: 'smooth'}), 400);
+        return;
+      }
+      sfx('wrong'); sst.sel = null; drawSort();
+      wrong.forEach(o => document.querySelector(`.scard[data-id="${o.id}"]`)?.classList.add('bad'));
+      const badNo = wrong.find(o => o.a === 'no'), key = badNo ? 'sNo' : 'sNo2';
+      fb('fbS', 'no', `Đúng ${7 - wrong.length}/7. ${V[key]}`); say(key);
+      if (badNo) {Object.assign(env, badNo.fx); syncCtl(); toast(badNo.fx.loose ? 'Xem mô hình: đất ngập úng, bọt khí oxygen biến mất' : 'Xem mô hình: đất bị nén chặt, không còn khe khí');}
+    };
+    $('sReset').onclick = () => {sst.place = ACTS.map(() => null); sst.sel = null; sst.good.clear(); sst.won = false; $('fbS').className = 'fb'; $('kcS').classList.add('hide'); Object.assign(env, {loose: true, soil: 1}); syncCtl(); drawSort();};
+    drawSort();
+
+    /* ---------- chạm vào thiết bị trên mô hình 3D ---------- */
+    const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+    const PICK = [[gLamp, 'light'], [gHeat, 'temp'], [gThermo, 'temp'], [gMist, 'air'], [gCan, 'soil'], [gPot, 'struct']];
+    let downAt = null;
+    canvas.addEventListener('pointerdown', e => {downAt = {x: e.clientX, y: e.clientY};});
+    canvas.addEventListener('pointerup', e => {
+      if (!downAt) return; const moved = Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y); downAt = null; if (moved > 6 || cur !== 0) return;
+      const r = canvas.getBoundingClientRect(); ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); ray.setFromCamera(ndc, camera);
+      const hits = ray.intersectObjects(PICK.map(p => p[0]), true).filter(h => h.object.isMesh && !(h.object.material === beamM));
+      if (!hits.length) return; let o = hits[0].object; const f = PICK.find(([g]) => {let x = o; while (x) {if (x === g) return true; x = x.parent;} return false;});
+      if (f) focusCtl(f[1]);
+    });
+
+    /* ---------- công cụ chung ---------- */
+    $('btnSpin').onclick = () => {controls.autoRotate = !controls.autoRotate; $('btnSpin').classList.toggle('on', controls.autoRotate); tween = null;};
+    $('btnReset').onclick = () => {goView(cur === 2 ? 'pot' : cur === 1 ? 'plant' : 'house');};
+    $('btnFull').onclick = () => {document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();};
+    addEventListener('keydown', e => {if (e.target.matches('input,textarea')) return; if (e.key === 'ArrowRight') goStep(cur + 1); if (e.key === 'ArrowLeft') goStep(cur - 1);});
+
+    /* ---------- vòng lặp ---------- */
+    function resize() {
+      const w = viewer.clientWidth, h = viewer.clientHeight; if (!w || !h) return;
+      renderer.setSize(w, h, false); camera.aspect = w / h;
+      const les = $('lesson'), wide = w > 900;
+      const cw = wide ? les.offsetWidth + 72 : 0, ch = wide ? 0 : (les.offsetHeight + 20);
+      avail.w = Math.max(1, w - cw); avail.h = Math.max(1, h - ch);
+      const lay = $('layers'), lh = !wide && lay.offsetHeight ? lay.offsetHeight + 8 : 0; // chừa hàng chú giải phía trên thẻ bài học
+      avail.top = 0; avail.bottom = wide ? h - 44 : h - ch - lh;
+      camera.setViewOffset(w, h, cw / 2, ch / 2, w, h); camera.updateProjectionMatrix();
+    }
+    new ResizeObserver(() => resize()).observe($('lesson'));
+    new ResizeObserver(() => resize()).observe(viewer);
+    $('lessonToggle').onclick = () => {const c = $('lesson').classList.toggle('collapsed'); $('lessonToggle').textContent = c ? '▴' : '▾'; resize();};
+    const clock = new THREE.Clock(); let simT = 0;
+    const app = (a, b, dt, rate) => a + (b - a) * Math.min(1, dt * rate);
+    function loop(now) {
+      requestAnimationFrame(loop);
+      const dt = Math.min(clock.getDelta(), .05); simT += dt;
+      stepTween(now); runAnims(now); controls.update();
+      // giá trị hiển thị trôi dần về giá trị mô phỏng
+      sim.dE = app(sim.dE, sim.E, dt, 2.5); sim.dU = app(sim.dU, sim.U, dt, 2.5); sim.dW = app(sim.dW, sim.wilt, dt, 1.2);
+      sim.looseK = app(sim.looseK, env.loose ? 1 : 0, dt, 3); sim.floodK = app(sim.floodK, clamp((env.soil - 1.35) / .6, 0, 1), dt, 2.5); sim.wet = app(sim.wet, env.soil, dt, 2.5);
+      soilVisual(); plantVisual(simT);
+      [[GE, sim.dE], [GU, sim.dU]].forEach(([g, v]) => g.needle.setAttribute('transform', `rotate(${-90 + 180 * v} 60 62)`));
+      // hơi nước thoát ra từ lá
+      vap.acc += dt * sim.dE * 70;
+      while (vap.acc > 1) {vap.acc--; const l = leaves[Math.floor(rand() * leaves.length)]; const p = l.mark.getWorldPosition(new THREE.Vector3()); vap.emit(p, V3(R(-.08, .08), R(.25, .45), R(-.08, .08)), R(1.4, 2.1), .06, .24, .5 + .3 * sim.dE);}
+      // sương từ máy phun
+      mist.acc += dt * env.air * 55;
+      while (mist.acc > 1) {mist.acc--; mist.emit(NOZZLE.clone().add(V3(-.18, 0, 0)), V3(R(-.9, -.55), R(-.15, .12), R(-.18, .18)), R(1.6, 2.4), .05, .3, .45);}
+      // hơi nóng từ máy sưởi
+      const hk = (env.temp - 15) / 25; heat.acc += dt * hk * hk * 18;
+      while (heat.acc > 1) {heat.acc--; heat.emit(gHeat.localToWorld(V3(R(-.1, .1), .95, R(-.4, .4))), V3(R(-.04, .04), R(.35, .55), R(-.04, .04)), R(1, 1.5), .05, .2, .35);}
+      vap.update(dt); mist.update(dt); heat.update(dt); pourP.update(dt);
+      if (upIM.visible) upIM.userData.update(dt, .05 + .5 * sim.dU);
+      upIM.material.opacity = .2 + .8 * sim.dU;
+      updateLabels();
+      renderer.render(scene, camera);
+    }
+
+    /* ---------- khởi động ---------- */
+    const bar = $('introBar'), status = $('introStatus');
+    applyLayers(); syncCtl(); sim.dE = sim.E; sim.dU = sim.U; resize(); goStep(0); goView('house', true);
+    let pct = 0; const prog = setInterval(() => {
+      pct = Math.min(100, pct + 9); bar.style.width = pct + '%'; status.textContent = `Đang dựng mô hình 3D… ${pct}%`;
+      if (pct >= 100) {clearInterval(prog); status.textContent = 'Sẵn sàng!'; $('introLoader').classList.add('ready');}
+    }, 60);
+    $('btnExplore').onclick = () => {
+      const l = $('introLoader'); l.classList.add('gone'); setTimeout(() => l.remove(), 600);
+      resize(); goView(currentView, true); started = true; sfx('click'); sayV('step', cur);
+      setTimeout(() => {if (cur === 0 && !tried.size) document.querySelector('.crow[data-f="light"]').classList.add('nudge');}, 2500);
+      setTimeout(() => {$('hint').style.opacity = 0;}, 9000);
+    };
+    requestAnimationFrame(loop);
+    window.__app = {goStep, env, sim, syncCtl, compute, camera, controls, scene, THREE, goView, ACTS, sst, mst};
+  </script>
+</body>
+
+</html>

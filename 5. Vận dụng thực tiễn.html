@@ -1,0 +1,3486 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <link rel="icon" href="data:,">
+  <title>Vận dụng vào thực tiễn | Khoa học tự nhiên 7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <script type="importmap">{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}</script>
+  <style>
+    :root {
+      --brand: #195856;
+      --brand-dark: #0f3f3d;
+      --brand-light: #2f827d;
+      --brand-soft: #e6f0ee;
+      --ink: #10302d;
+      --muted: #5f8b89;
+      --line: #dbe8e5;
+      --bg: #195658;
+      --gold: #a8814a;
+      --stage-mid: #f1f9f7;
+      --stage-bottom: #dcebe7;
+      --art: #d8514a;
+      --vein: #3f7fc4;
+      --ok: #6fa85b;
+      --bad: #c96a4f;
+      --r: 16px;
+      --r-sm: 11px;
+      --sh-1: 0 1px 2px rgba(13, 42, 40, .05);
+      --sh-2: 0 2px 6px rgba(13, 42, 40, .06), 0 18px 34px -22px rgba(13, 42, 40, .45);
+      --sh-3: 0 10px 30px -12px rgba(13, 42, 40, .32);
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0
+    }
+
+    body {
+      font-family: 'Roboto', system-ui, -apple-system, Segoe UI, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--ink);
+      background: #195658;
+      overflow: hidden;
+      overscroll-behavior: none;
+      -webkit-tap-highlight-color: transparent
+    }
+
+    button {
+      font-family: inherit
+    }
+
+    .app {
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #195658
+    }
+
+    /* topbar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      box-shadow: var(--sh-1);
+      z-index: 20;
+      flex: 0 0 auto;
+    }
+
+    .logoclip {
+      height: 27px;
+      display: flex;
+      align-items: center;
+      flex: 0 0 auto
+    }
+
+    .logoclip .logo {
+      height: 27px;
+      display: block
+    }
+
+    .titles {
+      flex: 1;
+      min-width: 0
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .02em;
+      color: var(--brand);
+      background: var(--brand-soft);
+      border-radius: 99px;
+      padding: 2px 9px;
+      margin-bottom: 2px;
+    }
+
+    .titles h1 {
+      margin: 0;
+      font-weight: 700;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .titles h1.lg {
+      font-size: 18px
+    }
+
+    .tb-right {
+      display: flex;
+      gap: 8px;
+      flex: 0 0 auto
+    }
+
+    .tb-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      border: 1px solid var(--line);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--brand-dark);
+      transition: background .15s, border-color .15s;
+    }
+
+    .tb-btn:hover {
+      background: var(--brand-soft);
+      border-color: var(--brand-light)
+    }
+
+    .tb-btn svg {
+      width: 18px;
+      height: 18px
+    }
+
+    /* layout */
+
+    #gl {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+      outline: none
+    }
+
+    #lines {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 3
+    }
+
+    #lines line {
+      stroke: #fff;
+      stroke-width: 1.6;
+      opacity: .9
+    }
+
+    #lines circle {
+      fill: #fff;
+      stroke: var(--brand);
+      stroke-width: 2
+    }
+
+    .tag {
+      position: absolute;
+      z-index: 4;
+      transform: translate(-50%, -50%);
+      padding: 7px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #e9c9a4;
+      background: #fdebd5;
+      color: #6b3f17;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: var(--sh-3);
+      white-space: nowrap;
+      display: none
+    }
+
+    .tag.show {
+      display: block
+    }
+
+    .tag:hover {
+      background: #fff4e4
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0)
+    }
+
+    /* kính lúp mạch máu */
+
+    #lines polygon {
+      fill: rgba(246, 200, 90, .42);
+      stroke: none
+    }
+
+    /* side */
+
+    .sec {
+      display: none
+    }
+
+    .sec.on {
+      display: block;
+      animation: fade .3s ease
+    }
+
+    @keyframes fade {
+      from {
+        opacity: 0;
+        transform: translateY(6px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .eyebrow {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--brand-light);
+      margin: 0 0 4px
+    }
+
+    .sec h2 {
+      margin: 0 0 8px;
+      font-size: 21px;
+      line-height: 1.3;
+      color: var(--brand-dark)
+    }
+
+    .lead {
+      font-size: 15px;
+      line-height: 1.65;
+      margin: 8px 0
+    }
+
+    .muted {
+      color: var(--muted)
+    }
+
+    .chip {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand);
+      background: var(--brand-soft);
+      border-radius: 99px;
+      padding: 3px 11px;
+      margin-bottom: 6px
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--sh-1);
+      padding: 14px 16px;
+      margin: 12px 0
+    }
+
+    .card h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      color: var(--brand-dark)
+    }
+
+    .kcard {
+      border-radius: var(--r-sm);
+      padding: 12px 14px;
+      margin-top: 10px;
+      border: 1.5px solid var(--line);
+      background: #fff;
+      box-shadow: var(--sh-1);
+      cursor: default;
+      transition: .15s
+    }
+
+    .kcard .kh {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--brand-light);
+      margin-bottom: 5px
+    }
+
+    .kcard .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--brand-light);
+      flex: 0 0 auto
+    }
+
+    .kcard p {
+      margin: 0;
+      font-size: 14.5px;
+      line-height: 1.6
+    }
+
+    .kcard.cap .dot {
+      background: #b86fc2
+    }
+
+    .kcard.cap .kh {
+      color: #8a4795
+    }
+
+    .kcard.sel {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(47, 130, 125, .22)
+    }
+
+    .kcard.click {
+      cursor: pointer
+    }
+
+    .kcard.click:hover {
+      border-color: var(--brand-light)
+    }
+
+    .opts {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 10px 0 0
+    }
+
+    .opt {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      width: 100%;
+      text-align: left;
+      padding: 11px 13px;
+      border-radius: var(--r-sm);
+      border: 1.5px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      font-size: 14.5px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s
+    }
+
+    .opt i {
+      font-style: normal;
+      flex: 0 0 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-weight: 700;
+      font-size: 12.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .opt:hover:not(:disabled) {
+      border-color: var(--brand-light);
+      background: var(--stage-mid)
+    }
+
+    .opt:disabled {
+      cursor: default
+    }
+
+    .opt.ok {
+      border-color: var(--brand);
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+      font-weight: 600
+    }
+
+    .opt.ok i {
+      background: var(--brand);
+      color: #fff
+    }
+
+    .opt.no {
+      border-color: var(--bad);
+      background: #fbeae4;
+      color: #a54527
+    }
+
+    .opt.no i {
+      background: var(--bad);
+      color: #fff
+    }
+
+    .fb {
+      display: none;
+      margin: 9px 0 0;
+      padding: 10px 13px;
+      border-radius: var(--r-sm);
+      font-size: 14px;
+      line-height: 1.6
+    }
+
+    .fb.show {
+      display: block
+    }
+
+    .fb.ok {
+      background: var(--brand-soft);
+      color: var(--brand-dark)
+    }
+
+    .fb.no {
+      background: #fbeae4;
+      color: #a54527
+    }
+
+    .fb.info {
+      background: #fff6dd;
+      color: #6b4d13
+    }
+
+    .qbtn {
+      border: 0;
+      border-radius: 11px;
+      padding: 10px 18px;
+      font-size: 14.5px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--brand);
+      color: #fff;
+      margin: 10px 8px 0 0
+    }
+
+    .qbtn:hover {
+      background: var(--brand-dark)
+    }
+
+    .qbtn.alt {
+      background: #fff;
+      color: var(--brand);
+      border: 1.5px solid var(--brand)
+    }
+
+    .qbtn.alt:hover {
+      background: var(--brand-soft)
+    }
+
+    .seg {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px
+    }
+
+    .seg button {
+      border: 1.5px solid var(--line);
+      background: #fff;
+      border-radius: 99px;
+      padding: 7px 14px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer
+    }
+
+    .seg button.on {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff
+    }
+
+    .res {
+      text-align: center;
+      padding: 6px 0
+    }
+
+    /* loader */
+    .intro-loader {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      overflow: hidden;
+      transition: opacity .5s;
+      background: radial-gradient(80% 70% at 50% 40%, #2f827d 0, #195856 58%, #0b2a29 100%)
+    }
+
+    .intro-loader::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(6, 20, 23, .08), rgba(6, 20, 23, .52));
+      pointer-events: none
+    }
+
+    .intro-loader.gone {
+      opacity: 0;
+      pointer-events: none
+    }
+
+    .intro-loader__inner {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 920px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      text-align: center
+    }
+
+    .intro-card {
+      width: min(92vw, 980px);
+      padding: 8px 12px 12px;
+      text-align: center;
+      color: #fff
+    }
+
+    .intro-kicker {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .20em;
+      text-transform: uppercase;
+      color: rgba(248, 252, 252, .92)
+    }
+
+    .intro-card h1 {
+      font-size: clamp(32px, 5vw, 66px);
+      margin: 10px 0 12px;
+      color: #fff;
+      line-height: 1.08;
+      font-weight: 800;
+      text-shadow: 0 4px 18px rgba(0, 0, 0, .26);
+      text-wrap: balance
+    }
+
+    .intro-sub {
+      max-width: 720px;
+      margin: 0 auto 22px;
+      font-size: clamp(13px, 1.8vw, 20px);
+      color: rgba(244, 249, 249, .96);
+      line-height: 1.72;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, .22)
+    }
+
+    .intro-explore {
+      width: min(280px, 88vw);
+      padding: 14px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      cursor: pointer;
+      background: rgba(21, 92, 88, .76);
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: .02em;
+      visibility: hidden;
+      pointer-events: none;
+      box-shadow: 0 16px 42px -20px rgba(0, 0, 0, .6)
+    }
+
+    .intro-loader.ready .intro-explore {
+      visibility: visible;
+      pointer-events: auto
+    }
+
+    .intro-explore:hover {
+      background: rgba(21, 92, 88, .9)
+    }
+
+    .intro-progress {
+      height: 4px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, .28);
+      overflow: hidden;
+      margin: 18px auto 0;
+      max-width: 430px
+    }
+
+    .intro-progress span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: #d7e779;
+      transition: width .25s linear
+    }
+
+    .intro-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      max-width: 430px;
+      margin: 12px auto 0;
+      font-size: 12px;
+      color: rgba(255, 255, 255, .96)
+    }
+
+    .intro-status {
+      display: flex;
+      align-items: center;
+      gap: 7px
+    }
+
+    .intro-ready-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: #d7e779;
+      flex: 0 0 auto;
+      box-shadow: 0 0 0 4px rgba(215, 231, 121, .18)
+    }
+
+    .intro-loader.ready .intro-ready-dot {
+      background: #9ff5d7;
+      box-shadow: 0 0 0 4px rgba(159, 245, 215, .16)
+    }
+
+    .intro-credit {
+      color: rgba(255, 255, 255, .88);
+      font-size: 12px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, .24)
+    }
+
+    @media (max-width:620px) {
+      .intro-card h1 {
+        font-size: 38px
+      }
+
+      .intro-sub {
+        font-size: 14px;
+        line-height: 1.65
+      }
+
+      .intro-meta {
+        flex-direction: column;
+        gap: 8px
+      }
+    }
+
+    /* ===== bố cục theo template: một khung 3D + thanh bước ===== */
+    .main {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 14px;
+      overflow: hidden;
+      background: #195658
+    }
+
+    .stagecol {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      min-width: 0
+    }
+
+    .frame {
+      background: #fff;
+      border-radius: var(--r);
+      box-shadow: var(--sh-2);
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden
+    }
+
+    .stage {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      background: #195658;
+      overflow: hidden
+    }
+
+    .vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      box-shadow: inset 0 0 90px rgba(15, 63, 61, .10)
+    }
+
+    .stage-tools {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      z-index: 5;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .ghost {
+      background: rgba(255, 255, 255, .88);
+      backdrop-filter: blur(8px) saturate(1.3);
+      border: 1px solid var(--line);
+      border-radius: var(--r-sm);
+      padding: 7px 11px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--brand-dark);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--sh-1)
+    }
+
+    .ghost:hover {
+      background: #fff
+    }
+
+    .ghost.on,
+    .ghost[aria-pressed="true"] {
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand)
+    }
+
+    .card.nudge {
+      animation: nudgePulse 1.2s ease infinite
+    }
+
+    .qbtn.nudge {
+      animation: nudgePulse 1.2s ease infinite
+    }
+
+    .kcard.nudge {
+      animation: nudgePulse 1.2s ease infinite
+    }
+
+    .finger {
+      position: absolute;
+      z-index: 8;
+      font-size: 38px;
+      line-height: 1;
+      pointer-events: none;
+      display: none;
+      filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .35));
+      animation: tapHint 1s ease-in-out infinite
+    }
+
+    .finger.show {
+      display: block
+    }
+
+    @keyframes tapHint {
+
+      0%,
+      100% {
+        transform: translateY(0) scale(1)
+      }
+
+      50% {
+        transform: translateY(-10px) scale(.92)
+      }
+    }
+
+    .ghost.nudge {
+      animation: nudgePulse 1.2s ease infinite
+    }
+
+    @keyframes nudgePulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(25, 88, 86, .55)
+      }
+
+      50% {
+        box-shadow: 0 0 0 9px rgba(25, 88, 86, 0)
+      }
+    }
+
+    .stage-hint {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      z-index: 5;
+      background: rgba(255, 255, 255, .88);
+      backdrop-filter: blur(8px) saturate(1.3);
+      border-radius: 99px;
+      padding: 7px 13px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--brand-dark);
+      box-shadow: var(--sh-1);
+      max-width: min(60%, 520px);
+      transition: opacity .6s;
+      pointer-events: none
+    }
+
+    .stage-nav {
+      position: absolute;
+      top: 50%;
+      z-index: 6;
+      transform: translateY(-50%);
+      width: 38px;
+      height: 38px;
+      border-radius: 99px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .88);
+      backdrop-filter: blur(8px) saturate(1.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--brand-dark);
+      box-shadow: var(--sh-1);
+      font-size: 16px
+    }
+
+    .stage-nav:hover {
+      background: var(--brand-soft)
+    }
+
+    .stage-nav.prev {
+      left: 12px
+    }
+
+    .stage-nav.next {
+      right: 12px
+    }
+
+    .stage-nav[disabled] {
+      opacity: .3;
+      pointer-events: none
+    }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      z-index: 40;
+      background: rgba(15, 63, 61, .95);
+      color: #fff;
+      border-radius: 99px;
+      padding: 9px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      max-width: 92%;
+      text-align: center;
+      bottom: 52px
+    }
+
+    /* thẻ nội dung bài học nổi trên khung 3D */
+    .lesson {
+      position: absolute;
+      z-index: 7;
+      right: 60px;
+      top: 12px;
+      bottom: 12px;
+      width: min(390px, 38%);
+      display: flex;
+      flex-direction: column;
+      background: rgba(255, 255, 255, .94);
+      backdrop-filter: blur(12px) saturate(1.3);
+      border-radius: var(--r);
+      box-shadow: var(--sh-3);
+      overflow: hidden
+    }
+
+    .lesson-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px 8px 16px;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      flex: 0 0 auto
+    }
+
+    .lesson-head span {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .lesson-head button {
+      width: 28px;
+      height: 28px;
+      border-radius: 99px;
+      border: none;
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+      cursor: pointer;
+      font-size: 13px
+    }
+
+    .lesson .sidebody {
+      position: relative;
+      background: transparent
+    }
+
+    .lesson.collapsed {
+      bottom: auto
+    }
+
+    .lesson.collapsed .sidebody {
+      display: none
+    }
+
+    /* thanh các bước trong khung */
+    .steps {
+      display: flex;
+      gap: 8px;
+      padding: 10px 12px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-top: 1px solid var(--line);
+      scrollbar-width: none;
+      flex: 0 0 auto
+    }
+
+    .steps::-webkit-scrollbar {
+      display: none
+    }
+
+    .step {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 13px 7px 8px;
+      border-radius: 99px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      white-space: nowrap;
+      transition: background .15s, border-color .15s, color .15s
+    }
+
+    .step b {
+      width: 20px;
+      height: 20px;
+      border-radius: 99px;
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto
+    }
+
+    .step:hover {
+      border-color: var(--brand-light)
+    }
+
+    .step[aria-pressed="true"] {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff
+    }
+
+    .step[aria-pressed="true"] b {
+      background: rgba(255, 255, 255, .25);
+      color: #fff
+    }
+
+    .step.done b {
+      background: var(--brand);
+      color: #fff
+    }
+
+    @media (max-width:900px) {
+      .main {
+        padding: 10px
+      }
+
+      .stage-nav {
+        width: 34px;
+        height: 34px;
+        font-size: 14px;
+        top: 30%
+      }
+
+      .lesson {
+        left: 8px;
+        right: 8px;
+        top: auto;
+        bottom: 8px;
+        width: auto;
+        height: 46%
+      }
+
+      .lesson.collapsed {
+        height: auto
+      }
+
+      .stage-hint {
+        display: none
+      }
+
+      .toast {
+        bottom: calc(46% + 50px)
+      }
+
+      .tag {
+        font-size: 12px;
+        padding: 5px 10px
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      * {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important
+      }
+    }
+
+    /* ghép nhãn: giao diện mới */
+
+    .matchbtns {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px
+    }
+
+    .matchbtns .qbtn {
+      flex: 1;
+      margin: 10px 0 0
+    }
+
+    .qbtn:disabled {
+      opacity: .45;
+      cursor: default
+    }
+  
+    /* ===== bổ sung cho KHTN 7 – Phần 1 ===== */
+    .tag.info {
+      cursor: default;
+      background: #fff;
+      border-color: #cfe1dd;
+      color: var(--brand-dark);
+      font-size: 12.5px;
+      padding: 5px 11px;
+      pointer-events: none
+    }
+
+    .tag.water {
+      background: #e3f1ff;
+      border-color: #9cc8f2;
+      color: #1f5a92
+    }
+
+    .tag.nudge {
+      animation: tagBlink 1s ease-in-out infinite
+    }
+
+    @keyframes tagBlink {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(253, 235, 213, .9), var(--sh-3);
+        transform: translate(-50%, -50%) scale(1)
+      }
+
+      50% {
+        box-shadow: 0 0 0 10px rgba(253, 235, 213, 0), var(--sh-3);
+        transform: translate(-50%, -50%) scale(1.08)
+      }
+    }
+
+    .fade {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: #195658;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .28s
+    }
+
+    .fade.on {
+      opacity: 1
+    }
+
+    .counter {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      background: #fff6dd;
+      border: 1px solid #efd99c;
+      border-radius: 99px;
+      padding: 3px 11px;
+      margin-left: 6px
+    }
+
+    .hide {
+      display: none !important
+    }
+
+    /* sắp xếp thứ tự */
+
+    /* sơ đồ ghép thẻ */
+
+    /* nhiệm vụ tìm kiếm */
+
+    .opt .src {
+      display: block;
+      font-size: 12px;
+      color: #1d6b3a;
+      font-weight: 500
+    }
+
+    /* ===== Phần 2 – bổ sung ===== */
+    .seg button:disabled {
+      opacity: .45;
+      cursor: not-allowed
+    }
+
+    .tag.red {
+      background: #fde6e8;
+      border-color: #f2a3ab;
+      color: #a3182c
+    }
+
+    .kcard.ph .dot {
+      background: #ff9a3c
+    }
+
+    .kcard.ph .kh {
+      color: #a8530f
+    }
+
+    /* Bảng 30.1 */
+
+    /* Bước 2: thẻ bài học rộng hơn để Bảng 30.1 chia 2 cột */
+    .lesson.wide {
+      width: min(720px, 58%)
+    }
+
+    .lesson.mid {
+      width: min(560px, 50%)
+    }
+
+    @media (max-width:900px) {
+      .lesson.wide,
+      .lesson.mid {
+        width: auto
+      }
+    }
+
+    .sidebody {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 18px 20px 12px;
+      background: linear-gradient(#fff, var(--stage-mid) 70%, var(--stage-bottom));
+      -webkit-overflow-scrolling: touch;
+      container-type: inline-size
+    }
+
+    .ghostchip {
+      position: fixed;
+      z-index: 60;
+      pointer-events: none;
+      transform: translate(-50%, -50%) rotate(-3deg);
+      box-shadow: var(--sh-3);
+      opacity: .95;
+      margin: 0
+    }
+
+    /* thanh thời gian thí nghiệm */
+
+    .tticks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11.5px;
+      color: var(--muted)
+    }
+
+    /* sơ đồ ghi nhớ */
+
+    .seg button.nudge {
+      animation: nudgePulse 1.2s ease infinite
+    }
+
+    /* ===== Phần 4 – bổ sung ===== */
+
+    .tag.sun {
+      background: #fff5cc;
+      border-color: #f0d36b;
+      color: #7a5a00
+    }
+
+    .tag.hot {
+      background: #ffe3d6;
+      border-color: #f3a585;
+      color: #9a3b12
+    }
+
+    .tag.soil {
+      background: #f3e6d6;
+      border-color: #d4b48c;
+      color: #6b3f17
+    }
+
+    /* nối thẻ */
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: none
+      }
+
+      25% {
+        transform: translateX(-4px)
+      }
+
+      75% {
+        transform: translateX(4px)
+      }
+    }
+
+    /* phân loại Nên / Không nên */
+    .pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 12px;
+      background: var(--stage-mid);
+      border: 1px dashed #b9d6d0;
+      min-height: 54px
+    }
+
+    .pool:empty::before {
+      content: "Đã xếp hết thẻ – bấm Kiểm tra nhé!";
+      font-size: 13px;
+      color: var(--muted);
+      margin: auto
+    }
+
+    .scard {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1.5px solid var(--line);
+      background: #fff;
+      border-radius: 11px;
+      padding: 6px 11px 6px 6px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: grab;
+      color: var(--ink);
+      text-align: left;
+      touch-action: none;
+      user-select: none;
+      line-height: 1.3
+    }
+
+    .scard .em {
+      font-size: 19px;
+      width: 32px;
+      height: 32px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: #f3efe4
+    }
+
+    .scard.sel {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(47, 130, 125, .3)
+    }
+
+    .scard.good {
+      border-color: var(--ok);
+      background: #eef7e9;
+      cursor: default
+    }
+
+    .scard.bad {
+      border-color: var(--bad);
+      background: #fbeae4;
+      animation: shake .35s
+    }
+
+    .scard.ghostchip {
+      position: fixed;
+      z-index: 99;
+      pointer-events: none;
+      transform: translate(-50%, -50%) rotate(-3deg);
+      box-shadow: var(--sh-3)
+    }
+
+    .bins {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px
+    }
+
+    .bin {
+      border: 2px dashed;
+      border-radius: 12px;
+      padding: 8px;
+      min-height: 130px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      transition: box-shadow .15s
+    }
+
+    .bin h4 {
+      margin: 0 0 2px;
+      font-size: 14px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      justify-content: center
+    }
+
+    .bin.yes {
+      border-color: #9fd08c;
+      background: #f5fbf1
+    }
+
+    .bin.yes h4 {
+      color: #3f6b32
+    }
+
+    .bin.no {
+      border-color: #eab3a0;
+      background: #fdf5f2
+    }
+
+    .bin.no h4 {
+      color: #a54527
+    }
+
+    .bin.over,
+    .bin.ready {
+      box-shadow: 0 0 0 3px rgba(47, 130, 125, .3)
+    }
+
+    .bin .scard {
+      width: 100%
+    }
+
+    .memo {
+      display: grid;
+      gap: 6px;
+      margin: 6px 0 0;
+      padding: 0;
+      list-style: none
+    }
+
+    .memo li {
+      display: flex;
+      gap: 8px;
+      font-size: 14px;
+      line-height: 1.5
+    }
+
+    .memo li .ico {
+      flex: 0 0 auto;
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--brand-soft);
+      font-size: 14px
+    }
+
+    /* ===== Vận dụng thực tiễn – bổ sung ===== */
+
+    .tag.bed.on {
+      background: #fff1c7;
+      border-color: #f0b429;
+      color: #7a5200
+    }
+
+    /* thẻ tình huống */
+
+    .scen {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 10px;
+      border-radius: 12px;
+      border: 1.5px solid var(--line);
+      background: #fff;
+      text-align: left;
+      cursor: pointer;
+      font: inherit;
+      color: var(--ink);
+      transition: box-shadow .15s, border-color .15s
+    }
+
+    .scen:hover {
+      border-color: var(--brand-light)
+    }
+
+    .scen .em {
+      font-size: 21px;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: #f3efe4;
+      flex: 0 0 auto
+    }
+
+    .scen b {
+      display: block;
+      font-size: 13.5px;
+      line-height: 1.25
+    }
+
+    .scen small {
+      display: block;
+      font-size: 11.5px;
+      color: var(--muted);
+      font-weight: 600
+    }
+
+    .scen.on {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(47, 130, 125, .25)
+    }
+
+    .scen.done {
+      background: #eef7e9;
+      border-color: #9fd08c
+    }
+
+    .scen.done::after {
+      content: "✓";
+      position: absolute;
+      top: 5px;
+      right: 6px;
+      width: 19px;
+      height: 19px;
+      border-radius: 50%;
+      background: var(--ok);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      display: grid;
+      place-items: center
+    }
+
+    .scen.nudge {
+      animation: nudgePulse 1.2s ease infinite
+    }
+
+    .gbar {
+      height: 8px;
+      border-radius: 5px;
+      background: var(--line);
+      overflow: hidden;
+      margin-top: 10px
+    }
+
+    .gbar span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #9fd08c, #2f827d);
+      transition: width .5s
+    }
+
+    .sbody .opt span {
+      line-height: 1.35
+    }
+
+    .scprompt {
+      margin: 4px 0 0;
+      font-size: 14.5px;
+      line-height: 1.5
+    }
+
+    .badgecard {
+      margin-top: 12px;
+      padding: 14px 12px;
+      border-radius: 16px;
+      text-align: center;
+      background: linear-gradient(135deg, #fff7dc, #ffe7a8);
+      border: 2px solid #f0c75a;
+      animation: badgePop .7s cubic-bezier(.2, 1.6, .4, 1)
+    }
+
+    .badgecard .medal {
+      font-size: 46px;
+      line-height: 1
+    }
+
+    .badgecard b {
+      display: block;
+      font-size: 17px;
+      color: #8a5a00;
+      margin-top: 4px
+    }
+
+    .badgecard p {
+      margin: 4px 0 0;
+      font-size: 13.5px;
+      color: #7a5a20
+    }
+
+    @keyframes badgePop {
+      0% {
+        transform: scale(.4);
+        opacity: 0
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1
+      }
+    }
+
+    /* chọn luống */
+    .bedpick {
+      display: grid;
+      gap: 6px;
+      margin-top: 8px
+    }
+
+    .bp {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 10px;
+      border-radius: 11px;
+      border: 1.5px solid var(--line);
+      background: #fff;
+      font: inherit;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--ink);
+      cursor: pointer;
+      text-align: left
+    }
+
+    .bp .box {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid #b9d6d0;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      color: #fff;
+      flex: 0 0 auto
+    }
+
+    .bp .em {
+      font-size: 19px
+    }
+
+    .bp.on {
+      border-color: #f0b429;
+      background: #fff8e6
+    }
+
+    .bp.on .box {
+      background: #f0b429;
+      border-color: #f0b429
+    }
+
+    .bp.on .box::after {
+      content: "✓"
+    }
+
+    .bp.good {
+      border-color: var(--ok);
+      background: #eef7e9
+    }
+
+    .bp.good .box {
+      background: var(--ok);
+      border-color: var(--ok)
+    }
+
+    .bp.bad {
+      border-color: var(--bad);
+      background: #fbeae4;
+      animation: shake .35s
+    }
+
+    .bp:disabled {
+      cursor: default
+    }
+
+    /* lượng phân bón */
+    .lvlbox {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--stage-mid);
+      border: 1px solid var(--line)
+    }
+
+    .lvlbox .trow2 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 13.5px
+    }
+
+    .lvlbox .trow2 b {
+      color: var(--brand);
+      font-size: 15px
+    }
+
+    .lvlbox input[type=range] {
+      width: 100%;
+      accent-color: #2f827d;
+      margin: 8px 0 2px
+    }
+
+    .lvlbox .seg {
+      margin-top: 10px
+    }
+
+    /* 4 căn cứ */
+    .cgrid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 10px
+    }
+
+    @container (max-width: 430px) {
+      .cgrid {
+        grid-template-columns: 1fr 1fr
+      }
+    }
+
+    .ctile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 10px 6px;
+      border-radius: 12px;
+      border: 1.5px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+      font: inherit;
+      color: var(--ink);
+      font-size: 12.5px;
+      font-weight: 700;
+      line-height: 1.25;
+      text-align: center
+    }
+
+    .ctile .em {
+      font-size: 25px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #eef6f3
+    }
+
+    .ctile.seen {
+      border-color: #9fd08c;
+      background: #f5fbf1
+    }
+
+    .ctile.on {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(47, 130, 125, .25)
+    }
+
+    .ctile.nudge {
+      animation: nudgePulse 1.2s ease infinite
+    }
+
+    .cdetail {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f2f8ff;
+      border: 1px solid #cfe2f7;
+      font-size: 14px;
+      line-height: 1.5;
+      display: none
+    }
+
+    .cdetail.show {
+      display: block
+    }
+
+    /* bí kíp của bác Ba (bước 2) */
+    .cprog {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+      margin-top: 8px
+    }
+
+    .cprog i {
+      height: 7px;
+      border-radius: 4px;
+      background: var(--line);
+      transition: background .3s
+    }
+
+    .cprog i.on {
+      background: linear-gradient(90deg, #f0b93a, #e08a12)
+    }
+
+    #cgrid {
+      grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+
+    #cgrid .ctile {
+      position: relative;
+      padding: 12px 8px 10px;
+      font-size: 13px;
+      transition: transform .15s, box-shadow .15s
+    }
+
+    #cgrid .ctile:hover {
+      transform: translateY(-2px)
+    }
+
+    #cgrid .ctile .em {
+      width: 50px;
+      height: 50px;
+      font-size: 26px;
+      background: #f1ece0;
+      filter: grayscale(.85);
+      opacity: .75;
+      transition: .3s
+    }
+
+    #cgrid .ctile .cs {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+      color: #a8814a;
+      background: #fff6dd;
+      border-radius: 99px;
+      padding: 2px 9px
+    }
+
+    #cgrid .ctile.seen .em {
+      filter: none;
+      opacity: 1;
+      background: #e3f3da
+    }
+
+    #cgrid .ctile.seen .cs {
+      color: #3f6b32;
+      background: #e3f3da
+    }
+
+    #cgrid .ctile.pop .em {
+      animation: unlockPop .6s cubic-bezier(.2, 1.6, .4, 1)
+    }
+
+    @keyframes unlockPop {
+      0% {
+        transform: scale(.6)
+      }
+
+      100% {
+        transform: scale(1)
+      }
+    }
+
+    .cquiz {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #fff8e6, #fff);
+      border: 1.5px dashed #e8c77a;
+      animation: fade .3s ease
+    }
+
+    .cquiz.hide {
+      display: none
+    }
+
+    .cq-tag {
+      display: inline-block;
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: #8a5a00;
+      background: #ffe9b0;
+      border-radius: 99px;
+      padding: 2px 10px
+    }
+
+    .cq-q {
+      margin: 8px 0 0;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.45;
+      color: var(--brand-dark)
+    }
+
+    .cq-opts {
+      display: grid;
+      gap: 7px;
+      margin-top: 10px
+    }
+
+    .cq-opt {
+      border: 2px solid var(--line);
+      background: #fff;
+      border-radius: 12px;
+      padding: 9px 10px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-align: left;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+      line-height: 1.35;
+      transition: border-color .15s, transform .15s
+    }
+
+    .cq-opt:hover {
+      border-color: var(--brand-light);
+      transform: translateY(-2px)
+    }
+
+    .cq-opt i {
+      flex: 0 0 auto;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-style: normal;
+      font-size: 12px;
+      font-weight: 800;
+      background: #fff1cc;
+      color: #8a5a00
+    }
+
+    .cq-opt.ok {
+      border-color: var(--ok);
+      background: #eef7e9;
+      color: #3f6b32
+    }
+
+    .cq-opt.no {
+      border-color: var(--bad);
+      background: #fbeae4;
+      color: #a54527;
+      animation: shake .35s
+    }
+
+    .cq-hint {
+      margin-top: 8px;
+      font-size: 13.5px;
+      color: #a54527;
+      min-height: 0
+    }
+
+    #cDetail {
+      background: linear-gradient(135deg, #eef8f1, #fff);
+      border: 1.5px solid #9fd08c;
+      animation: fade .3s ease
+    }
+
+    #cDetail .ck-h {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: #3f6b32;
+      margin-bottom: 3px
+    }
+
+    /* danh sách tình huống dạng đóng/mở (bước 1) */
+    .scbar {
+      position: absolute;
+      z-index: 9;
+      top: 58px;
+      left: 14px;
+      width: min(380px, 40%);
+      min-width: 300px;
+      max-height: calc(100% - 120px);
+      display: flex;
+      flex-direction: column;
+      background: rgba(255, 255, 255, .97);
+      border-radius: var(--r);
+      box-shadow: var(--sh-3);
+      padding: 10px 10px 8px
+    }
+
+    .scbar.away,
+    .scbadge.away,
+    .scbadge.hide,
+    .lesson.off {
+      display: none
+    }
+
+    .scbar-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 2px
+    }
+
+    .scbar-hint {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      line-height: 1.35
+    }
+
+    .scbar-hint.go {
+      animation: hintBlink 1.4s ease infinite
+    }
+
+    @keyframes hintBlink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .55
+      }
+    }
+
+    .scbar .counter {
+      margin-left: auto;
+      white-space: nowrap;
+      flex: 0 0 auto
+    }
+
+    .scbar .gbar {
+      margin: 8px 2px 8px;
+      height: 6px;
+      flex: 0 0 auto
+    }
+
+    .acc {
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      padding: 2px
+    }
+
+    .acc-item {
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      flex: 0 0 auto
+    }
+
+    .acc-item:has(.scen.on) {
+      border-color: var(--brand)
+    }
+
+    .acc .scen {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      padding: 8px 10px;
+      border-radius: 11px;
+      box-shadow: none
+    }
+
+    .acc .scen .em {
+      width: 30px;
+      height: 30px;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--brand);
+      background: var(--brand-soft)
+    }
+
+    .acc .scen .acc-t {
+      font-size: 14.5px;
+      font-weight: 700
+    }
+
+    .acc .scen .chev {
+      margin-left: auto;
+      color: var(--muted);
+      transition: transform .2s
+    }
+
+    .acc .scen.on {
+      background: var(--brand-soft);
+      border-radius: 11px 11px 0 0
+    }
+
+    .acc .scen.on .em {
+      background: var(--brand);
+      color: #fff
+    }
+
+    .acc .scen.on .chev {
+      transform: rotate(180deg)
+    }
+
+    .acc .scen.done::after {
+      top: 50%;
+      right: 34px;
+      transform: translateY(-50%)
+    }
+
+    .acc .scen.done .em {
+      background: #dff0d6;
+      color: #3f6b32
+    }
+
+    .scpop {
+      padding: 4px 12px 12px;
+      animation: accOpen .25s ease
+    }
+
+    .scpop.hide,
+    .scpop.away {
+      display: none
+    }
+
+    @keyframes accOpen {
+      from {
+        opacity: 0;
+        transform: translateY(-6px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .scpop h3 {
+      margin: 8px 0 2px;
+      font-size: 17px;
+      line-height: 1.3;
+      color: var(--brand-dark)
+    }
+
+    .scpop .scprompt {
+      background: var(--stage-mid);
+      border-left: 4px solid var(--brand-light);
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-top: 6px
+    }
+
+    .scbadge {
+      position: absolute;
+      z-index: 10;
+      right: 24px;
+      bottom: 22px;
+      width: min(320px, calc(100% - 28px));
+      margin: 0;
+      box-shadow: var(--sh-3)
+    }
+
+    @media (max-width:900px) {
+      .scbar {
+        top: 52px;
+        left: 8px;
+        right: 8px;
+        width: auto;
+        min-width: 0;
+        max-height: 50%;
+        padding: 8px 8px 6px
+      }
+
+      .scbar-hint {
+        font-size: 12px
+      }
+
+      .scbar .counter {
+        font-size: 11px
+      }
+
+      .acc {
+        gap: 5px
+      }
+
+      .acc .scen {
+        padding: 4px 8px
+      }
+
+      .acc .scen .em {
+        width: 24px;
+        height: 24px;
+        font-size: 12px
+      }
+
+      .acc .scen .acc-t {
+        font-size: 13.5px
+      }
+
+      .scpop h3 {
+        font-size: 15.5px
+      }
+
+      .lesson.collapsed {
+        top: auto;
+        bottom: 8px
+      }
+
+      #cgrid {
+        gap: 6px
+      }
+
+      #cgrid .ctile {
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr);
+        min-width: 0;
+        column-gap: 8px;
+        row-gap: 3px;
+        align-items: center;
+        justify-items: start;
+        text-align: left;
+        padding: 7px 8px;
+        font-size: 12px
+      }
+
+      #cgrid .ctile .em {
+        grid-row: span 2;
+        width: 34px;
+        height: 34px;
+        font-size: 18px
+      }
+
+      #cgrid .ctile .cs {
+        font-size: 9.5px;
+        padding: 1px 7px;
+        white-space: nowrap
+      }
+
+      .cq-q {
+        font-size: 14px
+      }
+
+      .cq-opt {
+        font-size: 13px;
+        padding: 7px 8px
+      }
+
+      .scbadge {
+        right: auto;
+        left: 50%;
+        bottom: 12px;
+        transform: translateX(-50%);
+        width: min(280px, calc(100% - 24px));
+        padding: 10px
+      }
+
+      .scbadge .medal {
+        font-size: 34px
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="introLoader" class="intro-loader" aria-live="polite">
+    <div class="intro-loader__inner">
+      <section class="intro-card">
+        <div class="intro-kicker">Khoa học tự nhiên 7</div>
+        <h1>Vận dụng vào thực tiễn</h1>
+        <p class="intro-sub">Làm người làm vườn giúp bác Ba, tìm hiểu cách tưới nước, bón phân hợp lí.</p>
+        <button id="btnExplore" class="intro-explore" type="button">Bắt đầu</button>
+        <div class="intro-progress" aria-hidden="true"><span id="introBar"></span></div>
+        <div class="intro-meta">
+          <div class="intro-status"><span class="intro-ready-dot"></span><span id="introStatus">Đang dựng khu vườn
+              3D…</span></div>
+        </div>
+      </section>
+      <div class="intro-credit">Được phát triển bởi <strong>YooBook</strong></div>
+    </div>
+  </div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="logoclip"><img class="logo" alt="YooBook" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaMAAABPCAYAAABGZKq5AAAPSUlEQVR42u1dabBUxRX+Zp6IW4FgFDUgxH1L3MUlaMTSZ6qC0Vg+lEWgJHGNgTzigiIKYkhExKiooIgbGrRwrRKjJrhbIkZNiaIxaiIRiQF3XxSZ/Jg7Or6amXtP733n+6qm3ry53adPd5/ur7tv9+nCFm3HgSAIgiB8osgiIAiCIGIio1MBlDJ82nNYThMy5n0wTYogCMI8GY2v6mivyihzWlWcSyIum7lV+ZiUMc7tVXG4/kkQBKFJRrOSDnWKpvxxiZz5EZXJ4kTnEZpybkvknEMzIwiCaIxCjQ0MJZvpBVwW3QF80KR5JwiCCGZmdKllIkLAs6RllomokvdTaXIEQRCNZ0Yl12kHUgbNmm+CIIggZ0b75pwESEQEQRARkNFiAD9qIkIiEREEQQRIRgDwaJMQEomIIAgiYDKqENIROSYH10TUjWZGEAQhJyMAeBDAqBwSkg8i+phmRhAEoUZGQNkDwc9zREiuiag7iYggCEKfjADgOgAn5oCQXBPRJgA+onkRBEGYISMAmAPgpIgJyTUR9QGwiqZFEARhloyAsq8610t2HRES0SAA79CsCIIg7JARUF6yczlD6qpJSK6J6EgA99OkCIIg7JJRZYbkmpA+iYCIjgZwH82JIAjCDRn5IKQNAXwWMBEdA+BumhJBEIRbMqoQkksP1Osj26YA10Q0HMACmhFBEIQfMgKAqwH80qGuPQA8HBARjQVwC02IIIjA8Si+uYE67bNHjGQEAFcCmOpQ30MBLAyAiMYBmEEbJwgiAnwqCPtFrGQElK/VnuZQ51YAD3is2N+gfBFhGkoKn7ct666iE+EWJc+fYayC3EHSzxdiUDKtg57uUO8j8O0lsvUdEtE0i5W6leVOTorr2Y6bDjdXEdPmLI5cQNIXtcRORgDQ7piQhqK8kw0on0d6KSAick0aaRipGG8023FT413OjpuOjKKYvmUlpBkO9b+z6vtuARKRqhF0Naz/DQpxdmQbJqoGSBNZDE2BYp4SHgvgMccNpYJNLcg/S3NGdKNCnA6D+j+hGG8Z2yVRhQsArGYxELGx4MEAnnOYj8nJ3/cNyx0P4PeaMkYqxjN1n9SBeZ3WE86xMYA3WAzRoSUGJW1OyfYB8IKjfJxX9b23QSL6rSFZWyvEmWN41pgV7GyINFtuZTGQuGIiI6B8gOpFR3mpEMdyA7IuMkhEAPCmYrxHPNjEtmyPRAoWsgiI2MgIAHaH/Z1uAHB21fdnNORcA2CCBf1Ulr4GOp4VncgmQWTErSwCckIoCUsORu4Gt/f87K8Y7zoAp1jU63VHpHKkon5z2BaJjBjCIiDB+FZyYY0OMgsp9YH93Tg61zhcB/sXCG7vqF7vcTRzI/yjoPE5mMVHxDgzaksIpzVlFN/IeWhPAB9YzM9PAiaiClTcrUhmR/PZnoiMeEyTlPZjEUaBXO2mKwH4Y8awQ5PwO9V53sMyIVWwXNAgXV6prrrWflDGcMdyVkQokNIuCvGOZdERrshIx1nm0gZxXRDSvAxhXoOfpQqVzv9RwzMoFzOprhETXQvMe8IIGUsV4vjwXVeMvF5C1z24Zbq/wpxPqhKAFXUI6WPLo71G+DuAHSIz5NkWZA42IGMaanuA7gCwtsbva6G3U9Ak9kwGRp11XJPoXytfc3NKSNLZ0WcWdekHYGWNsv+qQb3MC6gsr23QJmr9/jmAQwIY/AZzzujypGB2N5xOr0TulZ1+7wbZXRsSNDq8+SaA7Twbq8qMYbThWdE+GvoPqWpI7Qp5fwR+r6mopL0EQHdh3BFV8c9v4tnRPRZ0WJ2U65uQu/c6vqpepnkov1Oq0v+FMO56AP6MeK9uuQua19N0JqMzLCt8Wo3fNnJcaP+AmkcEG7haIc4nNX47QDF9FZdNeyeGZPKcicsGaDqtCxN5Z6D5cL+FetnYkLz2RN4kB+XQmqQ1M9I2oTtIHgXgKN10ijUC2Frjb/T+wEaafWr89imAbQJqzKcqxNmwxm9POjK6EoDFlolitiXZR1tu3Jcj/usWjvCQ5gDL5TbBsvwS7HqkKAG4OGCb2Q/y84k1+55ig8CmfLxdlMjrfJ3t3E5GYpqQOjsIXeNhFqZKmlkMtAKV0dhyzTRtYrSFtFYCWOBw5rVlpGQkuUH5UgPpvQh3Hv5LAHa2INMFztFMq8VSWAB42tQguJjSYRU0jO7zJH4t1zqTUV53B4B7q35/3mAFHl/1fS2ALoF2AKqeKdZJ/qp4jOgdaKOzkWYJdq4WSSP7gYgL0pf/4wzUyw8c5/FlfNupsirWjbxN+NKn4YSjmNHoCkmHLkl0gzrPLuxkEIOqvu9lsKAqGxQ+RfiHvlRmhV8qGmd7RA2gFHHjfQTqbqlcY2mnwZsNew2lXiZD/wbj/0XWJgoB6JGqg2RPeUsGgf1TwkxA7d1H1RmboVFAtRyybhRJh7DEUTrTI+k0dHV4OgDdnwrY3vZEecdaowPqNjq22wPI+2yNfMTcJrJgHR9EJCWjasH7dvrtjuT3ZxvEG43GO1v6Jn/HahRkRa9uFkcEtrC3gzRaImt0FUhvy/0OwnFVU3IgX+WzBOWzPK5H2IMDqZe1AdalBFM9lUvJls2onrZdnCQyPvnblhJ+FNJ3Sb1V9V3VoWpl+vwR4jz53xZIAwzNzcsJwvD/CUz/DxE37jbUnmJ+59EemO5nWRqEFg3WX18YSjgLslxANxLyrX89FXR5BvHjDouyJZ2Jjougm1HbQ3R36N0im7Uh6J5/2quO/jqdUbeIbbKA8rZ4XehuHBhYp15c3cGlc4h2Vh3de2oOnFySe0mhHf3TJRmlYQSAGwThH9BIa3/kAzZmdHcLwqo6jZ2Z6F5vFvMRyrfIFlDeam0LQzTKvYD6OzqnJ893zMmswLXekzXr5S91ns9Jnm9qMX+XaeS5AOCkOs9XA9gsCROyfawRhh8HhZ3RNsloGOQ+vFQP3b0KohEkI9tZih3GaYLwvfDN1n4JVqQ8b1WQ+YVwALAMzeflXNcbwPcdDMzet1gvYxR1l7iKKkLthulnDffznY/ALIJsmW8mFI8D2SKjnVBertHBJcL08gSTjeqQQHW9CfKlr14pz1VOwnd1mO/RkdtlCcAVCvFecmhXKvHOC6RNXISyJw8J9rFY3xdDdqvBEuGg1DoZfQ9q7ug7I+sW5M1yOhq93JCcRYKwvxbKnu+ojkMlfWn82Tmwy9Nhf0nJdb00WkKU+o/U9U83xkJ5Svr5ylGYESh7fsiKNdDcEWyajPqh7IhUB8OTvysyhH0K4e2c8rk0oNsopdPrwR50vNBQ+f4KhO4syQZmBZbPk4XhT/PQJk4wmN/Ku7m5wnjaHm5MklFflA/R6WKAIOyBOW/wW2nEXWlZt6WeyqTeksqRQjl/MKRPNzQv7swQRupV5aRAZlcqeCiwNqFSFith8SyRCzLqjW+fE9LBNgEbm2v8SyNuL8u6mfS9NtOAzQ7xVEcfe7aRgqGPynvXYzKEaUPz4HCDsu4ThN0ug40EP0s2QUYtmp1mLKMen52NFC4O6L1nUJaJ92P9I5jVAcAmgdrZq4mtSZfZSwbrpcNj/vcIrD6mIy5M8U1GRcj3oKch7aBUs22rbQZDfs2ADMmSpk+/dX0CrwvT931Jzv88xHr5Gssia8PjfZJREeX76E1jEYmIUIDE15jPEfhXEZSltJ1dZnHA26woNZvORY14thpVxZ1LPxJR08DEpWeSzTM/9JjXf+ew/sY0eLZKIGeAxzy8E1iZ7mpQlssrdJQvS1QlI5uju8qy3ygSUdAw+e7jbAMyXhCE3c1juf03kvpdYUjOE4KwG3vM7/OBlf/ZkfYLygMKKRmt43D6eD6JKGg8bFDWcEHYektst+VgBBsSTB0mv8OT/j08pHmzQVmHCsIuDcx2lDhC6rPoS8uZ6OwMkUQULnb3lG69e1zuEsoZZUifv+W0fk2963lOGH6KoXRXeSizYZ7q6neW63IPAJsL43xmy+DWRdmhpG0MJBF5hdRHl4lbO6WjKFMeGOYYkNEjp3bg8yDv+MDK4iph+Cs9tImbLOb/YpSXwN+DbOl2fQAHmCajFvi9851wB+modDDUHY2aarjOlxM0Rt/DIrGDDyOvF2n8Mxs8O10oS9cd0L0BzXLvBXBu1f9bCOM/aVJJG+eI6mEvEDGiQ5GQJio03LQdT4c57PhU4t0aeF12VczX+ynPdwm8Xi4xXI6qul8DYJAwzrOWbOE1AD+t8XvBVlmkkZHLMxHPgwgBJyvE6QDwoNBAL1BIJ+1gouqmCknnMRTxXpRXj4DOTfKkev4qbRCw1EG9HGqxXi5Q1H2OMLyKX74sHi5UXnnsYLA8xuiSkcsGx/dD4eBaxXiHJzbzSh1Drjy3bVeq6+cV3Wo1nBaUd4WVANwSmI2XND8dKN+jo4MXMoQ5TzN/4+sQ6bzk+cMW60X1PeWoqjaxbY3nRztqEwXD4aXlkemm3MIWbcf5JqIFyOZwsZnh2ovuINhZu3bVoEKbuaxC9nNZsc26rkf2SwNDzFtWuxoD9evHfeu+DMD2GcO2AviTj36pGIDBkIjCw32B6XOjMHyvwPTfJMe2Irm9tiUw3SUDnBmB6W7L/+R3BWGlnlNul5BRKWBjIJq3bkYKw6+E2UO5tHEzeVubzKRCQM/I61LimV8yCJBwwCuQuVEanJWMSEREiHWkqsNhAeh+VI5t48caMynfd0ANB7C6idqEzY1oUm/npawzIxIREVJdFSLW/WcA7smpTRwAYKFG/G4APvek+0Sob0LRmVX5bBMtgen0RhoZFSDzEaaCM0lEJCTHaRZg7yxGPewKuXuimGzBxH1QG8D9/UUHAZhkQM7qyNpEwUEaknLdGkDftJnRLRYLuQDzh8uI/BHSbRbS6p90RK7K6eUc1v8CC/VyOLLv8jJRL49H2iamRzCInygM/1YaGVUXcgFm3AAVOBvKFSH1syx/iCXZjyfy37Uk/5yc2vm8JF+2dr2+nsh/xWInWbBss7talt+uKaOLIGyLpq4SlLKQUQXrJQnsD9ka7wCSUG7xdlKv+xlucK5sZUuYXbqrkNDUHNXxFVV1MtRRmjsn6S0yJG9yIm+SA91fTtJqDbRNSDxof2GgHiVo+zrDdQ69EoQEIwHMEozA3kD5/eTTAejeHcB8lJeMsmJqQkKEPXRJ6uUoQZwZAMYGov9oALMF4ZclqwJN6xaNZEQQBEF4R5FFQBAEQfjG/wEsZ2FcXFc57gAAAABJRU5ErkJggg=="></div>
+      <div class="titles">
+        <div class="badge">Khoa học tự nhiên 7</div>
+        <h1 class="lg" id="titleLg">Vận dụng vào thực tiễn</h1>
+      </div>
+      <div class="tb-right">
+        <button class="tb-btn" id="btnFull" aria-label="Toàn màn hình" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="stagecol">
+        <div class="frame">
+          <div class="stage" id="viewer">
+            <canvas id="gl" tabindex="0" aria-label="Mô hình 3D khu vườn của bác Ba"
+              style="position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none"></canvas>
+            <div class="vignette" aria-hidden="true"></div>
+            <div class="fade" id="fade"></div>
+            <svg id="lines"></svg>
+            <div id="tags"></div>
+            <div class="stage-tools">
+              <button class="ghost" id="btnReset" type="button">⤢ <span>Toàn cảnh</span></button>
+              <button class="ghost" id="btnSpin" type="button">↻ <span>Tự xoay</span></button>
+              <button class="ghost" id="btnNarration" type="button" aria-pressed="true">🔊 <span>Thuyết minh</span></button>
+            </div>
+            <button class="stage-nav prev" id="btnPrev" type="button" aria-label="Bước trước">◀</button>
+            <button class="stage-nav next" id="btnNext" type="button" aria-label="Bước sau">▶</button>
+            <div class="finger" id="finger" aria-hidden="true">👆</div>
+            <div class="stage-hint" id="hint">↻ Chạm và kéo để xoay khu vườn • cuộn / chụm để phóng to</div>
+            <div class="toast" id="toast"></div>
+
+            <!-- danh sách tình huống đóng/mở (bước 1) -->
+            <div class="scbar" id="scBar">
+              <div class="scbar-head">
+                <span class="scbar-hint" id="scHint">👉 Chạm vào một tình huống để giúp bác Ba</span>
+                <span class="counter" id="cntG">Đã giúp bác Ba 0/4</span>
+              </div>
+              <div class="gbar" aria-hidden="true"><span id="gBar"></span></div>
+              <div class="acc" id="gmap">
+                <div class="acc-item"><button class="scen" data-s="0" type="button" aria-expanded="false"><span class="em">1</span><span class="acc-t">Tình huống 1</span><span class="chev">▾</span></button></div>
+                <div class="acc-item"><button class="scen" data-s="1" type="button" aria-expanded="false"><span class="em">2</span><span class="acc-t">Tình huống 2</span><span class="chev">▾</span></button></div>
+                <div class="acc-item"><button class="scen" data-s="2" type="button" aria-expanded="false"><span class="em">3</span><span class="acc-t">Tình huống 3</span><span class="chev">▾</span></button></div>
+                <div class="acc-item"><button class="scen" data-s="3" type="button" aria-expanded="false"><span class="em">4</span><span class="acc-t">Tình huống 4</span><span class="chev">▾</span></button></div>
+              </div>
+            </div>
+            <div class="badgecard scbadge hide" id="badge">
+              <div class="medal">🏅</div>
+              <b>Người làm vườn giỏi</b>
+              <p>Em đã giúp bác Ba xử lý đủ 4 tình huống!</p>
+            </div>
+
+            <!-- nội dung tình huống: được chuyển vào mục đang mở trong danh sách -->
+            <div class="scpop hide" id="scCard" aria-labelledby="scTitle">
+              <h3 id="scTitle">Chuyển cây bưởi con</h3>
+
+                <div class="sbody" data-s="0">
+                  <p class="scprompt">Bác muốn chuyển <b>cây bưởi con</b> sang góc vườn khác. Em sẽ làm gì?</p>
+                  <div class="opts" id="o1">
+                    <button class="opt" data-c="1"><i>A</i><span>Cắt bớt cành, lá rồi mới chuyển cây</span></button>
+                    <button class="opt" data-c="0"><i>B</i><span>Giữ nguyên cành, lá</span></button>
+                    <button class="opt" data-c="0"><i>C</i><span>Tưới thật nhiều nước rồi để cây giữa
+                        nắng</span></button>
+                  </div>
+                </div>
+
+                <div class="sbody" data-s="1">
+                  <p class="scprompt">Mấy hôm nay trời <b>khô hanh, nắng nóng</b>. Cây bưởi bắt đầu rũ lá. Em sẽ tưới
+                    cây thế nào?</p>
+                  <div class="opts" id="o2">
+                    <button class="opt" data-c="1"><i>A</i><span>Tưới nhiều nước hơn, vào sáng sớm hoặc chiều
+                        mát</span></button>
+                    <button class="opt" data-c="0"><i>B</i><span>Tưới ít đi</span></button>
+                    <button class="opt" data-c="0"><i>C</i><span>Không tưới</span></button>
+                  </div>
+                </div>
+
+                <div class="sbody" data-s="2">
+                  <p class="scprompt">Bác có ba luống cây. <b>Luống nào cần tưới nhiều nước?</b> Em có thể chọn nhiều
+                    luống (chạm vào thẻ hoặc chạm luống trên mô hình 3D).</p>
+                  <div class="bedpick" id="bedPick">
+                    <button class="bp" data-b="0" type="button"><span class="box"></span>Luống
+                      A – Chuẩn bị ra hoa</button>
+                    <button class="bp" data-b="1" type="button"><span class="box"></span>Luống
+                      B – Đang thu hoạch quả</button>
+                    <button class="bp" data-b="2" type="button"><span class="box"></span>Luống
+                      C – Đâm chồi, đẻ nhánh</button>
+                  </div>
+                  <button class="qbtn" id="btnBedWater" type="button" style="width:100%;margin-top:10px"
+                    disabled>Tưới cho luống đã chọn</button>
+                </div>
+
+                <div class="sbody" data-s="3">
+                  <p class="scprompt">Bác hỏi: <b>bón phân bao nhiêu là đủ?</b> Em kéo thanh để chọn lượng phân, chọn
+                    có tưới nước hay không, rồi bấm <b>Bón phân</b>.</p>
+                  <div class="lvlbox">
+                    <div class="trow2"><span>Lượng phân</span><b id="lvlVal">Ít</b></div>
+                    <input type="range" id="lvl" min="0" max="2" step="1" value="0" aria-label="Lượng phân bón: ít, vừa, quá nhiều">
+                    <div class="tticks"><span>Ít</span><span>Vừa đủ</span><span>Quá nhiều</span></div>
+                    <div class="seg" id="waterSeg">
+                      <button data-w="0" class="on" type="button">Không tưới</button>
+                      <button data-w="1" type="button">Tưới nước sau khi bón</button>
+                    </div>
+                  </div>
+                  <button class="qbtn" id="btnFert" type="button" style="width:100%;margin-top:10px">Bón
+                    phân</button>
+                </div>
+
+                <div class="fb" id="fbSc"></div>
+            </div>
+
+            <aside class="lesson" id="lesson">
+              <div class="lesson-head"><span id="lessonTitle">Bài học</span><button id="lessonToggle" type="button"
+                  aria-label="Thu gọn / mở rộng nội dung">▾</button></div>
+              <div class="sidebody" id="sidebody">
+
+                <!-- Bước 1 · Hoạt động 5a -->
+                <section class="sec on" data-step="0">
+                  <div class="eyebrow">Trò chơi</div>
+                  <h2>Em là người làm vườn</h2>
+                  <p class="lead">Chào mừng em đến với <b>khu vườn của bác Ba</b>! Chọn một tình huống ở phía trên
+                    khu vườn để giúp bác nhé.</p>
+                </section>
+
+                <!-- Bước 2 · Hoạt động 5b -->
+                <section class="sec" data-step="1">
+                  <h2>Tưới nước, bón phân hợp lí</h2>
+                  <p class="lead">Bác Ba có <b>4 bí kíp</b> để tưới nước, bón phân hợp lí. Mỗi bí kíp được khoá bằng một
+                    <b>câu đố nhỏ</b>: em trả lời đúng là mở khoá được, khu vườn 3D sẽ minh hoạ cho em xem.</p>
+                  <div class="card">
+                    <span class="chip">Bí kíp của bác Ba</span><span class="counter" id="cntC">Đã mở khoá 0/4</span>
+                    <div class="cprog" id="cProg" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+                    <div class="cgrid" id="cgrid"></div>
+                    <div class="cquiz hide" id="cQuiz">
+                      <div class="cq-tag" id="cqTag">Câu đố 1</div>
+                      <p class="cq-q" id="cqQ"></p>
+                      <div class="cq-opts" id="cqOpts"></div>
+                      <div class="cq-hint" id="cqHint"></div>
+                    </div>
+                    <div class="cdetail" id="cDetail"></div>
+                  </div>
+                  <div class="card hide" id="sortCard">
+                    <span class="chip">Nên / Không nên</span><span class="counter" id="cntS">Đã xếp 0/6</span>
+                    <p style="margin:8px 0 0;font-size:14px">Kéo mỗi thẻ vào cột <b>Nên</b> hoặc <b>Không nên</b> (hoặc
+                      chạm thẻ rồi chạm cột), sau đó bấm <b>Kiểm tra</b>.</p>
+                    <div class="pool" id="sPool"></div>
+                    <div class="bins">
+                      <div class="bin yes" data-b="yes" role="button" tabindex="0" aria-label="Cột Nên">
+                        <h4>✅ Nên</h4>
+                      </div>
+                      <div class="bin no" data-b="no" role="button" tabindex="0" aria-label="Cột Không nên">
+                        <h4>⛔ Không nên</h4>
+                      </div>
+                    </div>
+                    <div class="fb" id="fbS"></div>
+                    <div class="matchbtns"><button class="qbtn" id="sCheck" type="button" disabled>Kiểm tra</button><button
+                        class="qbtn alt" id="sReset" type="button">Làm lại</button></div>
+                  </div>
+                  <div class="kcard hide" id="kcS">
+                    <div class="kh"><span class="dot"></span>Hậu quả khi tưới, bón không hợp lí</div>
+                    <ul class="memo">
+                      <li><span class="ico">📉</span><span>Cây <b>phát triển kém</b>, năng suất thấp.</span></li>
+                      <li><span class="ico">🥀</span><span>Cây có thể bị <b>úng, thối rễ, ngộ độc</b> rồi chết.</span></li>
+                      <li><span class="ico">💸</span><span>Gây <b>thiệt hại</b> cho người nông dân; phân bón dư thừa làm
+                          <b>ô nhiễm môi trường</b>.</span></li>
+                    </ul>
+                  </div>
+                </section>
+              </div>
+            </aside>
+          </div>
+          <div class="steps" id="steps" role="tablist" aria-label="Các bước học"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+    import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+    const $ = id => document.getElementById(id);
+    const STEP_NAMES = ['Người làm vườn', 'Tưới, bón hợp lí'];
+    let seed = 500517;
+    const rand = () => {seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296;};
+    const R = (a, b) => a + (b - a) * rand();
+    const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+    const clamp = THREE.MathUtils.clamp;
+    const qE = (x, y, z) => new THREE.Quaternion().setFromEuler(new THREE.Euler(x, y, z));
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+
+    /* ---------- câu phản hồi hiện trên màn hình (lời đọc đầy đủ: loi-thuyet-minh-phan-N.md) ---------- */
+    const V = {
+      sc1ok: 'Chính xác! Khi đào cây, bộ rễ bị tổn thương, chưa hút đủ nước để bù vào lượng nước thoát qua lá. Cắt bớt cành, lá giúp giảm thoát hơi nước, cây không bị héo.',
+      sc1no: 'Ôi, cây bị héo rồi! Lá vẫn thoát hơi nước nhiều mà rễ chưa hút đủ nước. Em thử lại nhé.',
+      sc2ok: 'Đúng rồi! Ngày khô hanh, độ ẩm không khí thấp, cây thoát hơi nước nhiều nên cần tưới nhiều nước hơn.',
+      sc2no: 'Cây héo rũ rồi! Trời khô hanh, cây thoát hơi nước rất mạnh mà không được tưới đủ nước. Em thử lại nhé.',
+      sc3ok: 'Chính xác! Cây chuẩn bị ra hoa và cây đâm chồi, đẻ nhánh cần nhiều nước để cung cấp cho các hoạt động sống và dẫn các chất đến những bộ phận đang phát triển.',
+      sc3no: 'Chưa đúng rồi. Giai đoạn cây sắp ra hoa hoặc đang đâm chồi, đẻ nhánh mới cần nhiều nước nhất. Em chọn lại nhé.',
+      sc4low: 'Bón quá ít: cây chậm lớn, năng suất thấp.',
+      sc4high: 'Bón quá nhiều: cây không hấp thụ hết, có thể bị ngộ độc phân bón, héo úa và chết.',
+      sc4dry: 'Lượng phân vừa đủ rồi! Nhưng em nhớ tưới nước sau khi bón để phân tan ra, rễ mới hút được nhé.',
+      sc4ok: 'Tuyệt vời! Bón vừa đủ, kết hợp tưới nước, cây phát triển khoẻ mạnh.',
+      sOk: 'Giỏi lắm! Không tưới quá nhiều làm cây ngập úng, cũng không tưới quá ít làm cây thiếu nước; không tưới khi trời nắng gắt; không bón phân quá liều vì cây không hấp thụ hết, gây ô nhiễm môi trường; khi bón phân cần kết hợp tưới nước. Nếu tưới, bón không hợp lí, cây phát triển kém, năng suất thấp, thậm chí bị úng, thối rễ, ngộ độc rồi chết, gây thiệt hại cho người nông dân.',
+      sNo: 'Chưa đúng rồi, em nhớ lại khu vườn của bác Ba nhé.',
+    };
+    // Khi đã thu âm: điền đường dẫn mp3 theo cùng khoá (ví dụ AUDIO.sc1ok = 'https://…/5a-1.mp3').
+    // Khoá nào chưa có file thì đọc bằng giọng tiếng Việt của trình duyệt (nếu máy có).
+    /* ---------- file voice thuyết minh: dán đường dẫn mp3 vào đúng khoá; để trống = không phát ---------- */
+    const AUDIO = {
+      step0: 'https://assets.yoolife.com.vn/yootek/1793863420761-1607.mp3',
+      step1: 'https://assets.yoolife.com.vn/yootek/1793863681641-6990.mp3',
+      sc1: 'https://assets.yoolife.com.vn/yootek/1793865008597-5792.mp3',
+      sc1ok: 'https://assets.yoolife.com.vn/yootek/1793863430052-2371.mp3',
+      sc1no: 'https://assets.yoolife.com.vn/yootek/1793863434418-1950.mp3',
+      sc2: 'https://assets.yoolife.com.vn/yootek/1793863438985-2841.mp3',
+      sc2ok: 'https://assets.yoolife.com.vn/yootek/1793863443029-3997.mp3',
+      sc2no: 'https://assets.yoolife.com.vn/yootek/1793863447499-8179.mp3',
+      sc3: 'https://assets.yoolife.com.vn/yootek/1793863451678-1618.mp3',
+      sc3ok: 'https://assets.yoolife.com.vn/yootek/1793863455746-8819.mp3',
+      sc3no: 'https://assets.yoolife.com.vn/yootek/1793863460012-7666.mp3',
+      sc4: 'https://assets.yoolife.com.vn/yootek/1793863464771-1537.mp3',
+      sc4low: 'https://assets.yoolife.com.vn/yootek/1793863468770-7312.mp3',
+      sc4high: 'https://assets.yoolife.com.vn/yootek/1793863656602-2831.mp3',
+      sc4dry: 'https://assets.yoolife.com.vn/yootek/1793863661302-6896.mp3',
+      sc4ok: 'https://assets.yoolife.com.vn/yootek/1793863666525-4158.mp3',
+      badge: 'https://assets.yoolife.com.vn/yootek/1793863673968-8919.mp3',
+      g0: 'https://assets.yoolife.com.vn/yootek/1793863728925-1608.mp3',
+      g1: 'https://assets.yoolife.com.vn/yootek/1793863733003-8159.mp3',
+      g2: 'https://assets.yoolife.com.vn/yootek/1793863736973-3408.mp3',
+      g3: 'https://assets.yoolife.com.vn/yootek/1793863740892-6405.mp3',
+      sortIntro: '',
+      sOk: '',
+      sNo: '',
+      cq0: 'https://assets.yoolife.com.vn/yootek/1793863691225-9721.mp3',
+      cq1: 'https://assets.yoolife.com.vn/yootek/1793863696174-8372.mp3',
+      cq2: 'https://assets.yoolife.com.vn/yootek/1793863702799-9738.mp3',
+      cq3: 'https://assets.yoolife.com.vn/yootek/1793863706979-1055.mp3',
+      cqh0: '',
+      cqh1: '',
+      cqh2: '',
+      cqh3: '',
+    };
+
+    /* ---------- renderer / scene ---------- */
+    const canvas = $('gl'), viewer = $('viewer');
+    const renderer = new THREE.WebGLRenderer({canvas, antialias: true, alpha: true, powerPreference: 'high-performance'});
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    const scene = new THREE.Scene();
+    scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x9fc9a4, 0.85); scene.add(hemi);
+    const keyL = new THREE.DirectionalLight(0xffffff, 1.5); keyL.position.set(-4, 7, 3); scene.add(keyL);
+    const rimL = new THREE.DirectionalLight(0xbfe8ff, 0.5); rimL.position.set(5, 3, -5); scene.add(rimL);
+    scene.fog = new THREE.Fog(0xe3f4f6, 24, 52);
+
+    const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 200);
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true; controls.dampingFactor = 0.08;
+    controls.enablePan = true; controls.screenSpacePanning = true;
+    controls.minDistance = .8; controls.maxDistance = 24; controls.maxPolarAngle = Math.PI * .47;
+    controls.autoRotateSpeed = .8;
+
+    /* ---------- vật liệu ---------- */
+    const std = (color, o = {}) => new THREE.MeshStandardMaterial({color, roughness: .65, ...o});
+    const M = {
+      bark: std(0x7a5a3a, {roughness: .9}),
+      leaf: std(0x2f7d32, {roughness: .42, side: THREE.DoubleSide}),
+      fruit: new THREE.MeshPhysicalMaterial({color: 0xc6d65a, roughness: .5, clearcoat: .4}),
+      ground: std(0x86bb55, {roughness: 1}),
+      bed: std(0x8a6038, {roughness: .9}),
+      bedSoil: std(0x5a3a20, {roughness: 1}),
+      wood: std(0xc79a62, {roughness: .85}),
+      stem: std(0x5e9c3a),
+      plLeaf: std(0x4f9a3a, {side: THREE.DoubleSide}),
+      oldLeaf: std(0x93a84a, {side: THREE.DoubleSide}),
+      rice: std(0x62b444, {side: THREE.DoubleSide}),
+      sprout: std(0x9ee06c, {side: THREE.DoubleSide}),
+      bud: std(0xf5e7a0),
+      petal: std(0xfff6dc, {side: THREE.DoubleSide}),
+      pistil: std(0xf2b51e),
+      tomato: new THREE.MeshPhysicalMaterial({color: 0xe2442c, roughness: .35, clearcoat: .6}),
+      soilDark: std(0x3d2614, {roughness: 1}),
+      stone: std(0xc9c3b4, {roughness: .9}),
+      metal: std(0xc8d0d8, {roughness: .25, metalness: .85}),
+      red: std(0xd64236, {roughness: .5}),
+      can: std(0x2f9e6a, {roughness: .35, metalness: .35}),
+      bush: std(0x3f8f3a, {roughness: .9}),
+    };
+    const ball = new THREE.SphereGeometry(1, 14, 10);
+
+    /* ống thon dần */
+    function taperTube(pts, r0, r1, mat, opt = {}) {
+      const curve = new THREE.CatmullRomCurve3(pts.map(p => p.isVector3 ? p : V3(...p)));
+      const tub = opt.seg || 24, rad = opt.rad || 8;
+      const geo = new THREE.TubeGeometry(curve, tub, 1, rad, false);
+      const pos = geo.attributes.position, v = new THREE.Vector3(), c = new THREE.Vector3();
+      for (let i = 0; i <= tub; i++) {
+        const t = i / tub; curve.getPointAt(t, c); const r = THREE.MathUtils.lerp(r0, r1, t);
+        for (let j = 0; j <= rad; j++) {const k = i * (rad + 1) + j; v.fromBufferAttribute(pos, k).sub(c).normalize().multiplyScalar(r).add(c); pos.setXYZ(k, v.x, v.y, v.z);}
+      }
+      geo.computeVertexNormals();
+      const mesh = new THREE.Mesh(geo, mat); mesh.userData.curve = curve;
+      if (opt.cap !== false) {const tip = new THREE.Mesh(ball, mat); tip.scale.setScalar(Math.max(r1, .002)); tip.position.copy(curve.getPointAt(1)); mesh.add(tip);}
+      return mesh;
+    }
+    function instanced(geo, mat, list) {
+      const im = new THREE.InstancedMesh(geo, mat, list.length), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3();
+      list.forEach((o, i) => {s.copy(typeof o.s === 'number' ? V3(o.s, o.s, o.s) : o.s); m4.compose(o.p, o.q || q.identity(), s); im.setMatrixAt(i, m4);});
+      im.instanceMatrix.needsUpdate = true; return im;
+    }
+    function leafGeo(len, w) {
+      const s = new THREE.Shape(); s.moveTo(0, 0); s.bezierCurveTo(w, len * .25, w * .9, len * .75, 0, len); s.bezierCurveTo(-w * .9, len * .75, -w, len * .25, 0, 0);
+      const g = new THREE.ShapeGeometry(s, 10), p = g.attributes.position;
+      for (let i = 0; i < p.count; i++) {const x = p.getX(i), y = p.getY(i); p.setZ(i, .3 * len * (y / len) ** 2 - 1.2 * x * x);}
+      g.computeVertexNormals(); return g;
+    }
+    // phiến lá bưởi: hình trứng, gấp nhẹ theo gân giữa
+    function bladeGeometry() {
+      const pos = [], idx = [], sections = 10;
+      for (let i = 0; i <= sections; i++) {
+        const t = i / sections, w = Math.pow(Math.sin(Math.PI * Math.min(1, t * 1.08)), .8) * .36;
+        for (let j = 0; j < 3; j++) pos.push((j - 1) * w, t, .12 * Math.sin(Math.PI * t) + (j === 1 ? .04 : 0));
+        if (i < sections) {const k = i * 3; idx.push(k, k + 3, k + 1, k + 1, k + 3, k + 4, k + 1, k + 4, k + 2, k + 2, k + 4, k + 5);}
+      }
+      const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals(); return geo;
+    }
+    const canvasTex = (w, h, draw) => {const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;};
+
+    /* =====================================================================
+       BẦU TRỜI + MẶT TRỜI
+       ===================================================================== */
+    const SKY = {
+      normal: {top: 0x5fb2ea, bot: 0xe3f4f6, key: 1.5, kc: 0xffffff, hemi: .85, sun: 1},
+      hot: {top: 0xeeb257, bot: 0xfff1cc, key: 2.6, kc: 0xfff0c4, hemi: 1.05, sun: 1.9},
+      eve: {top: 0x6f7fcf, bot: 0xffcfa6, key: .95, kc: 0xffb27a, hemi: .7, sun: .85},
+    };
+    const skyU = {top: {value: new THREE.Color(SKY.normal.top)}, bot: {value: new THREE.Color(SKY.normal.bot)}};
+    const skyMesh = new THREE.Mesh(new THREE.SphereGeometry(70, 32, 16), new THREE.ShaderMaterial({
+      uniforms: skyU, side: THREE.BackSide, depthWrite: false, fog: false,
+      vertexShader: 'varying vec3 vP;\nvoid main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: 'uniform vec3 top;\nuniform vec3 bot;\nvarying vec3 vP;\nvoid main(){ float h = clamp(vP.y * 1.8 + .06, 0., 1.); gl_FragColor = vec4(mix(bot, top, pow(h, .75)), 1.0);\n#include <colorspace_fragment>\n}',
+    }));
+    skyMesh.renderOrder = -1; scene.add(skyMesh);
+    const gSun = new THREE.Group(); gSun.position.set(-7, 3.8, -16); scene.add(gSun);
+    gSun.add(new THREE.Mesh(new THREE.SphereGeometry(.85, 24, 16), new THREE.MeshBasicMaterial({color: 0xfff4c0, fog: false})));
+    const sunGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: canvasTex(128, 128, (g, w) => {const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, 'rgba(255,240,180,1)'); gr.addColorStop(.25, 'rgba(255,220,120,.55)'); gr.addColorStop(1, 'rgba(255,210,120,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, w);}),
+      transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
+    }));
+    sunGlow.scale.setScalar(6); gSun.add(sunGlow);
+    const skyNow = {...SKY.normal}; let skyTo = SKY.normal, skyName = 'normal';
+    const cTmpA = new THREE.Color(), cTmpB = new THREE.Color();
+    function setSky(n) {skyName = n; skyTo = SKY[n];}
+    function stepSky(dt) {
+      const k = 1 - Math.exp(-dt * 2.2);
+      skyU.top.value.lerp(cTmpA.set(skyTo.top), k); skyU.bot.value.lerp(cTmpB.set(skyTo.bot), k);
+      scene.fog.color.copy(skyU.bot.value);
+      keyL.intensity += (skyTo.key - keyL.intensity) * k; keyL.color.lerp(cTmpA.set(skyTo.kc), k);
+      hemi.intensity += (skyTo.hemi - hemi.intensity) * k;
+      skyNow.sun += (skyTo.sun - skyNow.sun) * k; gSun.scale.setScalar(skyNow.sun);
+    }
+
+    /* =====================================================================
+       KHU VƯỜN: mặt đất, cỏ, hàng rào, lối đi
+       ===================================================================== */
+    const garden = new THREE.Group(); scene.add(garden);
+    {
+      const g = new THREE.Mesh(new THREE.CircleGeometry(48, 72), M.ground); g.rotation.x = -Math.PI / 2; garden.add(g);
+    }
+    const TREE_HOME = V3(-1.7, 0, .45), TREE_NEW = V3(-4.2, 0, -2.25);
+    const BED_X = 2.15, BED_Z = [-1.95, -.15, 1.65];
+    const BAG_HOME = V3(-3.5, 0, 1.75), CAN_HOME = V3(-.35, 0, 2.0), CRATE_P = V3(-.15, 0, -1.55);
+    const inBeds = (x, z) => x > BED_X - 1.75 && x < BED_X + 1.75 && z > -2.8 && z < 2.45;
+    // cỏ
+    {
+      const geo = new THREE.ConeGeometry(.02, .15, 4); geo.translate(0, .075, 0);
+      const list = []; for (let i = 0; i < 900; i++) {
+        const a = rand() * Math.PI * 2, r = Math.sqrt(rand()) * 8.5, x = Math.cos(a) * r, z = Math.sin(a) * r * .8;
+        if (inBeds(x, z) || Math.hypot(x - TREE_HOME.x, z - TREE_HOME.z) < .55 || Math.hypot(x - TREE_NEW.x, z - TREE_NEW.z) < .6 || Math.abs(x - .25) < .3 && Math.abs(z) < 2.9) continue;
+        list.push({p: V3(x, 0, z), s: V3(1, R(.6, 1.6), 1), q: qE(R(-.35, .35), R(0, 3), R(-.35, .35))});
+      }
+      const im = instanced(geo, std(0xffffff, {roughness: .8}), list);
+      const ca = [new THREE.Color(0x4f8f30), new THREE.Color(0x5fa23a), new THREE.Color(0x6db446), new THREE.Color(0x78b84e)];
+      list.forEach((_, i) => im.setColorAt(i, ca[i % 4])); garden.add(im);
+    }
+    // lối đi bằng đá
+    {
+      const list = []; for (let i = 0; i < 9; i++) {const z = 2.8 - i * .66; list.push({p: V3(.25 + Math.sin(i * 1.3) * .08, .01, z), s: V3(.24, .025, .2), q: qE(0, i * .7, 0)});}
+      garden.add(instanced(new THREE.CylinderGeometry(1, 1, 1, 9), M.stone, list));
+    }
+    // hàng rào gỗ
+    {
+      const posts = [], rails = [];
+      for (let x = -6.4; x <= 5.4; x += .6) posts.push({p: V3(x, .33, -3.95), s: V3(.07, .66, .07)});
+      for (let z = -3.95; z <= 3.2; z += .6) posts.push({p: V3(-6.4, .33, z), s: V3(.07, .66, .07)});
+      [.22, .48].forEach(y => {rails.push({p: V3(-.5, y, -3.95), s: V3(11.8, .05, .035)}); rails.push({p: V3(-6.4, y, -.37), s: V3(.035, .05, 7.15)});});
+      const box = new THREE.BoxGeometry(1, 1, 1);
+      garden.add(instanced(box, M.wood, posts), instanced(box, M.wood, rails));
+      const bushes = []; [[-5.6, -3.4, .55], [-4.6, -3.45, .42], [3.9, -3.4, .5], [4.8, -3.35, .4], [-5.8, 1.9, .5], [-5.75, 2.7, .38], [-2.6, -3.5, .36]].forEach(([x, z, s]) => {
+        for (let k = 0; k < 4; k++) bushes.push({p: V3(x + R(-.25, .25), s * .7 + R(-.05, .1), z + R(-.15, .15)), s: s * R(.55, .85)});
+      });
+      garden.add(instanced(ball, M.bush, bushes));
+    }
+
+    /* =====================================================================
+       CÂY BƯỞI CON (có thể cắt tỉa, héo, vàng lá, ra quả)
+       ===================================================================== */
+    const gTreeG = new THREE.Group(); gTreeG.position.copy(TREE_HOME); garden.add(gTreeG);
+    const TREE_K = .78; // thu nhỏ cây bưởi con
+    const gTree = new THREE.Group(); gTree.scale.setScalar(TREE_K); gTreeG.add(gTree);
+    gTree.add(taperTube([[0, -.05, 0], [.03, .45, .01], [-.02, .95, 0], [0, 1.28, .02]], .085, .03, M.bark));
+    const rootBall = new THREE.Mesh(ball, M.soilDark); rootBall.scale.set(.26, .17, .26); rootBall.position.y = -.08; gTreeG.add(rootBall);
+    const BR = [[.62, .2, .6], [.68, 1.4, .62], [.78, 2.6, .58], [.86, 3.8, .55], [.94, 5.0, .52], [1.02, .9, .45], [1.08, 3.2, .42], [1.14, 4.5, .4]];
+    const PRUNE_BR = new Set([1, 4, 6]);
+    const branches = [], LEAVES = [], CANOPY = V3(0, 1.2, 0);
+    BR.forEach(([y0, a, len], bi) => {
+      const start = V3(0, y0, 0), dir = V3(Math.cos(a) * .85, .58, Math.sin(a) * .85).normalize(), end = start.clone().addScaledVector(dir, len);
+      const mid = start.clone().lerp(end, .5).add(V3(0, .04, 0));
+      const mesh = taperTube([start, mid, end], .032, .01, M.bark, {seg: 10, rad: 6}); gTree.add(mesh);
+      const curve = mesh.userData.curve; branches.push({mesh, prunable: PRUNE_BR.has(bi), end, dir});
+      for (let j = 0; j < 30; j++) {
+        const p = curve.getPoint(.3 + .7 * rand()).add(V3(R(-.13, .13), R(-.08, .14), R(-.13, .13)));
+        const d = dir.clone().add(V3(R(-.9, .9), R(-.1, .8), R(-.9, .9))).normalize();
+        LEAVES.push({p, d, len: R(.15, .22), spin: R(-.8, .8), prune: PRUNE_BR.has(bi) || (rand() < .55 && p.distanceTo(CANOPY) > .36), ph: rand() * 6.28});
+      }
+    });
+    for (let j = 0; j < 36; j++) {
+      const p = V3(R(-.18, .18), R(1.15, 1.42), R(-.18, .18)), d = V3(R(-1, 1), R(.3, 1.2), R(-1, 1)).normalize();
+      LEAVES.push({p, d, len: R(.14, .2), spin: R(-.8, .8), prune: rand() < .3, ph: rand() * 6.28});
+    }
+    LEAVES.forEach(L => {L.droop = V3(L.d.x * .55, -.9, L.d.z * .55).normalize();});
+    const leafIM = new THREE.InstancedMesh(bladeGeometry(), M.leaf, LEAVES.length);
+    leafIM.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    LEAVES.forEach((L, i) => {const t = R(.78, 1.18); leafIM.setColorAt(i, new THREE.Color(t, t, t));});
+    gTree.add(leafIM);
+    // quả bưởi non (hiện khi cây khoẻ mạnh sau khi bón phân đúng)
+    const fruits = branches.filter(b => !b.prunable).slice(0, 5).map(b => {
+      const f = new THREE.Mesh(ball, M.fruit); f.position.copy(b.end).add(V3(0, -.13, 0)).addScaledVector(b.dir, -.08); f.scale.setScalar(.0001); gTree.add(f); return f;
+    });
+    // vết đất ướt, đống phân bón quanh gốc
+    const wetMat = new THREE.MeshStandardMaterial({color: 0x3a2814, transparent: true, opacity: 0, depthWrite: false, roughness: .4});
+    const wet = new THREE.Mesh(new THREE.CircleGeometry(.75, 32), wetMat); wet.rotation.x = -Math.PI / 2; wet.position.y = .006; gTreeG.add(wet);
+    const pile = new THREE.Group(); gTreeG.add(pile);
+    {
+      const list = []; for (let i = 0; i < 70; i++) {const a = rand() * 6.28, r = Math.sqrt(rand()) * .5; list.push({p: V3(Math.cos(a) * r + .1, .012, Math.sin(a) * r + .15), s: R(.012, .02)});}
+      pile.add(instanced(ball, std(0xf3f3ee, {roughness: .6}), list)); pile.visible = false;
+    }
+    // lá, cành bị cắt rơi dưới gốc
+    const clips = new THREE.Group(); clips.position.copy(TREE_HOME); garden.add(clips); clips.visible = false;
+    {
+      const lg = bladeGeometry();
+      for (let i = 0; i < 20; i++) {const m = new THREE.Mesh(lg, M.leaf); m.scale.setScalar(R(.15, .2)); m.position.set(R(.3, .8), .015, R(.2, .75)); m.rotation.set(-Math.PI / 2 + R(-.2, .2), 0, R(0, 6)); clips.add(m);}
+      [[.35, .5], [.55, .3], [.25, .7]].forEach(([x, z]) => {const t = taperTube([[x, .02, z], [x + .25, .02, z + .1], [x + .45, .03, z + .05]], .014, .006, M.bark, {seg: 6, rad: 5}); clips.add(t);});
+    }
+    // hố trồng ở góc vườn mới
+    const gHole = new THREE.Group(); gHole.position.copy(TREE_NEW); garden.add(gHole);
+    {
+      const h = new THREE.Mesh(new THREE.CircleGeometry(.42, 28), M.soilDark); h.rotation.x = -Math.PI / 2; h.position.y = .008; gHole.add(h);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(.5, .07, 8, 28), std(0x6b4424, {roughness: 1})); ring.rotation.x = -Math.PI / 2; ring.scale.z = .6; ring.position.y = .02; gHole.add(ring);
+      const sh = new THREE.Mesh(new THREE.BoxGeometry(.05, .9, .05), M.wood); sh.position.set(.62, .42, -.1); sh.rotation.z = -.25; gHole.add(sh);
+      const bl = new THREE.Mesh(new RoundedBoxGeometry(.2, .26, .03, 2, .02), M.metal); bl.position.set(.73, .02, -.1); bl.rotation.z = -.25; gHole.add(bl);
+    }
+
+    // trạng thái cây: hiện tại (TS) → đích (TT)
+    const TREE0 = {wilt: 0, yellow: 0, size: 1, prune: 0, lush: 0, wet: 0, fert: 0};
+    const TS = {...TREE0}, TT = {...TREE0};
+    const cG = new THREE.Color(0x2f7d32), cDull = new THREE.Color(0x7d8f3c), cYel = new THREE.Color(0xd2b548);
+    const dmy = new THREE.Object3D(), Y = V3(0, 1, 0), vTmp = new THREE.Vector3(), qSpin = new THREE.Quaternion();
+    let windT = 0;
+    function stepTree(dt) {
+      const k = 1 - Math.exp(-dt * 2.4);
+      Object.keys(TT).forEach(key => {TS[key] += (TT[key] - TS[key]) * k;});
+      windT += dt;
+      M.leaf.color.copy(cG).lerp(cDull, TS.wilt * .55).lerp(cYel, TS.yellow);
+      gTree.scale.setScalar(TREE_K * TS.size); gTree.rotation.z = TS.wilt * .07;
+      const gust = .6 + .4 * Math.sin(windT * .8);
+      LEAVES.forEach((L, i) => {
+        vTmp.copy(L.d).lerp(L.droop, TS.wilt * .82).normalize();
+        dmy.position.copy(L.p); dmy.quaternion.setFromUnitVectors(Y, vTmp);
+        dmy.quaternion.multiply(qSpin.setFromAxisAngle(Y, L.spin));
+        dmy.rotateX(Math.sin(windT * 3 + L.ph) * .16 * gust * (1 - TS.wilt * .6));
+        const s = L.len * (L.prune ? Math.max(.0001, 1 - TS.prune) : 1); dmy.scale.setScalar(s);
+        dmy.updateMatrix(); leafIM.setMatrixAt(i, dmy.matrix);
+      });
+      leafIM.instanceMatrix.needsUpdate = true;
+      branches.forEach(b => {if (b.prunable) b.mesh.visible = TS.prune < .5;});
+      clips.visible = TT.prune > .5;
+      fruits.forEach(f => f.scale.setScalar(Math.max(.0001, TS.lush * .075)));
+      wetMat.opacity = TS.wet * .55;
+      pile.visible = TS.fert > .02; pile.scale.setScalar(.4 + TS.fert * .9);
+    }
+
+    /* =====================================================================
+       BA LUỐNG CÂY: A – chuẩn bị ra hoa · B – thu hoạch quả · C – đâm chồi, đẻ nhánh
+       ===================================================================== */
+    const BEDS = [
+      {name: 'Luống A · chuẩn bị ra hoa', kind: 'flower', ok: true},
+      {name: 'Luống B · đang thu hoạch quả', kind: 'fruit', ok: false},
+      {name: 'Luống C · đâm chồi, đẻ nhánh', kind: 'tiller', ok: true},
+    ];
+    const plLeafG = leafGeo(.15, .055);
+    function plantFlower(g) {
+      g.add(taperTube([[0, 0, 0], [.01, .18, 0], [0, .36, .01]], .013, .008, M.stem, {seg: 6, rad: 5}));
+      for (let i = 0; i < 4; i++) {const l = new THREE.Mesh(plLeafG, M.plLeaf); l.position.y = .07 + i * .065; l.rotation.set(-.9, i * 1.7, 0, 'YXZ'); g.add(l);}
+      for (let i = 0; i < 3; i++) {const b = new THREE.Mesh(ball, M.bud); b.scale.set(.022, .03, .022); b.position.set(Math.cos(i * 2.1) * .04, .37 + i * .01, Math.sin(i * 2.1) * .04); g.add(b);}
+      if (rand() < .5) {
+        const f = new THREE.Group(); f.position.set(.02, .4, 0); g.add(f);
+        for (let i = 0; i < 5; i++) {const p = new THREE.Mesh(ball, M.petal); p.scale.set(.03, .006, .018); p.position.set(Math.cos(i * 1.26) * .03, 0, Math.sin(i * 1.26) * .03); p.rotation.y = -i * 1.26; f.add(p);}
+        const c = new THREE.Mesh(ball, M.pistil); c.scale.setScalar(.014); f.add(c);
+      }
+    }
+    function plantFruit(g) {
+      const stake = new THREE.Mesh(new THREE.BoxGeometry(.015, .5, .015), M.wood); stake.position.set(.05, .25, 0); g.add(stake);
+      g.add(taperTube([[0, 0, 0], [.02, .2, 0], [-.01, .4, .02]], .014, .008, M.stem, {seg: 6, rad: 5}));
+      for (let i = 0; i < 5; i++) {const l = new THREE.Mesh(plLeafG, M.oldLeaf); l.position.y = .08 + i * .065; l.rotation.set(-1.05, i * 2.3, 0, 'YXZ'); g.add(l);}
+      for (let i = 0; i < 3; i++) {const t = new THREE.Mesh(ball, M.tomato); t.scale.setScalar(.04); t.position.set(Math.cos(i * 2) * .07, .18 + i * .07, Math.sin(i * 2) * .07); g.add(t);}
+    }
+    const bladeG = new THREE.ConeGeometry(.011, .42, 3); bladeG.translate(0, .21, 0);
+    const shootG = new THREE.ConeGeometry(.009, .2, 3); shootG.translate(0, .1, 0);
+    function plantTiller(g) {
+      for (let i = 0; i < 12; i++) {const b = new THREE.Mesh(bladeG, M.rice); const a = i / 12 * 6.28; b.rotation.set(Math.sin(a) * R(.1, .45), 0, Math.cos(a) * R(.1, .45)); b.scale.y = R(.75, 1.1); g.add(b);}
+      for (let i = 0; i < 4; i++) {const s = new THREE.Mesh(shootG, M.sprout); const a = R(0, 6.28); s.position.set(Math.cos(a) * .07, 0, Math.sin(a) * .07); s.rotation.set(Math.sin(a) * .3, 0, Math.cos(a) * .3); g.add(s);}
+    }
+    const bedPick = [];
+    BEDS.forEach((bd, bi) => {
+      const g = new THREE.Group(); g.position.set(BED_X, 0, BED_Z[bi]); garden.add(g); bd.g = g;
+      const box = new THREE.Mesh(new RoundedBoxGeometry(2.9, .24, 1.2, 2, .05), M.bed); box.position.y = .12; g.add(box); bedPick.push(box); box.userData.bed = bi;
+      const soil = new THREE.Mesh(new THREE.BoxGeometry(2.76, .02, 1.06), M.bedSoil); soil.position.y = .24; g.add(soil);
+      const plants = new THREE.Group(); plants.position.y = .25; g.add(plants); bd.plants = plants;
+      for (let r = 0; r < 2; r++) for (let c = 0; c < 5; c++) {
+        const p = new THREE.Group(); p.position.set(-1.1 + c * .55 + R(-.04, .04), 0, r ? .26 : -.26); p.rotation.y = R(0, 6.28);
+        ({flower: plantFlower, fruit: plantFruit, tiller: plantTiller})[bd.kind](p); plants.add(p);
+      }
+      // khung chọn luống (viền vàng)
+      const frame = new THREE.Group(), fm = new THREE.MeshBasicMaterial({color: 0xffc23a});
+      [[0, .64, 3.1, .05], [0, -.64, 3.1, .05], [1.55, 0, .05, 1.33], [-1.55, 0, .05, 1.33]].forEach(([x, z, w, d]) => {const m = new THREE.Mesh(new THREE.BoxGeometry(w, .04, d), fm); m.position.set(x, .27, z); frame.add(m);});
+      frame.visible = false; g.add(frame); bd.frame = frame;
+      bd.perk = 0; bd.perkTo = 0;
+      // biển tên luống
+      const sign = new THREE.Group(); sign.position.set(-1.62, 0, .45); g.add(sign);
+      const st = new THREE.Mesh(new THREE.BoxGeometry(.035, .42, .035), M.wood); st.position.y = .21; sign.add(st);
+      const pl = new THREE.Mesh(new THREE.BoxGeometry(.26, .18, .02), [M.wood, M.wood, M.wood, M.wood, new THREE.MeshStandardMaterial({map: canvasTex(128, 96, (c, w, h) => {c.fillStyle = '#f4e3c3'; c.fillRect(0, 0, w, h); c.fillStyle = '#5a3a20'; c.font = '800 70px Roboto, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('ABC'[bi], w / 2, h / 2 + 4);}), roughness: .8}), M.wood]);
+      pl.position.y = .4; sign.add(pl);
+    });
+    function stepBeds(dt) {
+      BEDS.forEach(bd => {
+        bd.perk += (bd.perkTo - bd.perk) * (1 - Math.exp(-dt * 2));
+        bd.plants.scale.set(1, .9 + bd.perk * .16, 1);
+        bd.frame.children.forEach(m => m.material.color.setHSL(.12, 1, .55 + .1 * Math.sin(performance.now() / 200)));
+      });
+    }
+
+    /* =====================================================================
+       DỤNG CỤ: bình tưới, bao phân, kéo tỉa trên thùng gỗ
+       ===================================================================== */
+    const gCan = new THREE.Group(); garden.add(gCan);
+    const SPOUT = V3(.5, .42, 0);
+    {
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(.16, .18, .32, 24), M.can); body.position.y = .16; gCan.add(body);
+      const top = new THREE.Mesh(new THREE.CylinderGeometry(.12, .16, .05, 24), M.can); top.position.y = .345; gCan.add(top);
+      const sp = taperTube([[.12, .1, 0], [.3, .25, 0], [.47, .4, 0]], .03, .022, M.can, {seg: 8, rad: 8, cap: false}); gCan.add(sp);
+      const rose = new THREE.Mesh(new THREE.CylinderGeometry(.05, .025, .06, 16), M.metal); rose.position.copy(SPOUT).add(V3(-.015, -.015, 0)); rose.rotation.z = -.85; gCan.add(rose);
+      const hd = new THREE.Mesh(new THREE.TorusGeometry(.13, .02, 8, 20, Math.PI), M.can); hd.position.set(-.04, .34, 0); gCan.add(hd);
+    }
+    const gBag = new THREE.Group(); garden.add(gBag);
+    {
+      const body = new THREE.Mesh(new RoundedBoxGeometry(.44, .58, .2, 3, .05), std(0xf2ecdc, {roughness: .85})); body.position.y = .29; gBag.add(body);
+      const lab = new THREE.Mesh(new THREE.PlaneGeometry(.36, .3), new THREE.MeshStandardMaterial({roughness: .8, map: canvasTex(256, 214, (c, w, h) => {
+        c.fillStyle = '#ffffff'; c.fillRect(0, 0, w, h); c.fillStyle = '#2f8a4a'; c.fillRect(0, 0, w, 64); c.fillRect(0, h - 26, w, 26);
+        c.fillStyle = '#fff'; c.font = '800 44px Roboto, sans-serif'; c.textAlign = 'center'; c.fillText('PHÂN BÓN', w / 2, 48);
+        c.fillStyle = '#1f5a33'; c.font = '800 70px Roboto, sans-serif'; c.fillText('NPK', w / 2, 140); c.font = '600 26px Roboto, sans-serif'; c.fillText('16 – 16 – 8', w / 2, 176);
+      })}));
+      lab.position.set(0, .3, .102); gBag.add(lab);
+      const tie = new THREE.Mesh(new THREE.CylinderGeometry(.08, .2, .1, 12), std(0xf2ecdc, {roughness: .85})); tie.position.y = .62; gBag.add(tie);
+    }
+    const BAG_MOUTH = V3(0, .66, 0);
+    const crate = new THREE.Mesh(new RoundedBoxGeometry(.6, .36, .42, 2, .03), M.wood); crate.position.copy(CRATE_P).add(V3(0, .18, 0)); garden.add(crate);
+    const gShear = new THREE.Group(); garden.add(gShear);
+    const shA = new THREE.Group(), shB = new THREE.Group(); gShear.add(shA, shB);
+    [shA, shB].forEach((h, i) => {
+      const s = i ? -1 : 1;
+      const bl = new THREE.Mesh(new THREE.BoxGeometry(.2, .012, .03), M.metal); bl.position.set(.1, 0, s * .006); h.add(bl);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(.04, .011, 8, 16), M.red); ring.position.set(-.08, 0, s * .04); ring.rotation.x = Math.PI / 2; h.add(ring);
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(.07, .014, .016), M.red); arm.position.set(-.03, 0, s * .022); h.add(arm);
+    });
+    const snipOpen = k => {shA.rotation.y = k * .35; shB.rotation.y = -k * .35;};
+    const HOME = {
+      can: {p: CAN_HOME.clone(), q: qE(0, -2.2, 0)},
+      bag: {p: BAG_HOME.clone(), q: qE(0, .5, 0)},
+      shear: {p: CRATE_P.clone().add(V3(0, .37, 0)), q: qE(0, .6, 0)},
+    };
+    const TOOL = {can: gCan, bag: gBag, shear: gShear};
+    function placeHome() {Object.entries(HOME).forEach(([k, h]) => {TOOL[k].position.copy(h.p); TOOL[k].quaternion.copy(h.q);});}
+    placeHome();
+
+    /* ---------- hạt nước, hạt phân bón ---------- */
+    function makePool(geo, mat, n, grav) {
+      const im = new THREE.InstancedMesh(geo, mat, n); im.frustumCulled = false; garden.add(im);
+      const ps = Array.from({length: n}, () => ({on: false, p: V3(0, 0, 0), v: V3(0, 0, 0), floor: 0}));
+      const m4 = new THREE.Matrix4(), zero = new THREE.Matrix4().makeScale(0, 0, 0), q = new THREE.Quaternion(), s = V3(1, 1, 1);
+      let ptr = 0;
+      return {
+        spawn(p, v, floor = .01) {const o = ps[ptr = (ptr + 1) % n]; o.on = true; o.p.copy(p); o.v.copy(v); o.floor = floor;},
+        update(dt) {
+          ps.forEach((o, i) => {
+            if (o.on) {o.v.y -= grav * dt; o.p.addScaledVector(o.v, dt); if (o.p.y < o.floor) o.on = false;}
+            if (o.on) {q.setFromUnitVectors(Y, vTmp.copy(o.v).normalize()); m4.compose(o.p, q, s); im.setMatrixAt(i, m4);} else im.setMatrixAt(i, zero);
+          });
+          im.instanceMatrix.needsUpdate = true;
+        },
+      };
+    }
+    const dropG = new THREE.SphereGeometry(.016, 6, 4); dropG.scale(1, 2, 1);
+    const drops = makePool(dropG, new THREE.MeshStandardMaterial({color: 0x5ab8ff, transparent: true, opacity: .85, roughness: .1}), 260, 6);
+    const grains = makePool(new THREE.SphereGeometry(.014, 5, 4), std(0xf6f6f0), 220, 5);
+    const emitters = new Set();
+    function emit(dur, fn) {return new Promise(res => emitters.add({t0: performance.now(), dur, fn, res, acc: 0}));}
+    function stepEmit(now, dt) {
+      emitters.forEach(e => {if (now - e.t0 >= e.dur) {emitters.delete(e); e.res(); return;} e.acc += dt; while (e.acc > .012) {e.acc -= .012; e.fn();}});
+      drops.update(dt); grains.update(dt);
+    }
+
+    /* ---------- camera ---------- */
+    const avail = {w: 1, h: 1, top: 0, bottom: 1};
+    function fitView(target, radius, dir) {
+      const w = viewer.clientWidth || 1, h = viewer.clientHeight || 1, tv = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+      // điện thoại dọc: khung 3D hẹp → kéo camera lại gần để hình không bị bé
+      if (w < 700) radius *= w < 480 ? .66 : .78;
+      const d = radius / Math.min(tv * avail.h / h, tv * (w / h) * avail.w / w);
+      return {target, pos: target.clone().add(dir.clone().normalize().multiplyScalar(d))};
+    }
+    const TP = () => gTreeG.position.clone();
+    const VIEWS = {
+      garden: () => fitView(V3(-.2, .5, 0), 4.3, V3(.12, .52, 1)),
+      tree: () => fitView(TP().add(V3(0, .7, 0)), 1.45, V3(.25, .28, 1)),
+      move: () => fitView(TREE_HOME.clone().lerp(TREE_NEW, .5).add(V3(0, .7, 0)), 2.7, V3(.35, .5, 1)),
+      sky: () => fitView(TP().add(V3(-.9, 1.5, -.6)), 3.0, V3(.4, .02, 1)),
+      beds: () => fitView(V3(BED_X, .3, -.15), 2.45, V3(-.1, 1.1, 1)),
+      bag: () => fitView(TP().lerp(BAG_HOME, .4).add(V3(0, .7, 0)), 1.9, V3(.25, .32, 1)),
+      soil: () => fitView(V3(BED_X, .3, BED_Z[2]), 1.0, V3(0, .9, 1)),
+    };
+    let tween = null, currentView = 'garden';
+    function goView(name, instant) {
+      currentView = name; const v = VIEWS[name]();
+      if (instant) {tween = null; camera.position.copy(v.pos); controls.target.copy(v.target); controls.update(); return;}
+      tween = {t0: performance.now(), dur: 1100, p0: camera.position.clone(), q0: controls.target.clone(), p1: v.pos, q1: v.target};
+    }
+    function stepTween(now) {
+      if (!tween) return;
+      let k = Math.min(1, (now - tween.t0) / tween.dur); k = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+      camera.position.lerpVectors(tween.p0, tween.p1, k); controls.target.lerpVectors(tween.q0, tween.q1, k);
+      if (k >= 1) tween = null;
+    }
+    canvas.addEventListener('pointerdown', () => {tween = null; $('hint').style.opacity = 0;});
+    canvas.addEventListener('wheel', () => {tween = null;}, {passive: true});
+
+    /* ---------- hoạt ảnh nhỏ (promise) ---------- */
+    const anims = new Set();
+    const ease = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+    function play(dur, fn) {return new Promise(res => anims.add({t0: performance.now(), dur, fn, res}));}
+    function moveTo(obj, pos, quat, dur = 700) {const p0 = obj.position.clone(), q0 = obj.quaternion.clone(); return play(dur, k => {k = ease(k); obj.position.lerpVectors(p0, pos, k); obj.quaternion.slerpQuaternions(q0, quat, k);});}
+    function runAnims(now) {anims.forEach(a => {const k = Math.min(1, (now - a.t0) / a.dur); a.fn(k); if (k >= 1) {anims.delete(a); a.res();}});}
+
+    /* ---------- nhãn gắn với vị trí 3D ---------- */
+    const lines = $('lines'), NS = 'http://www.w3.org/2000/svg';
+    const LBL = {
+      newSpot: {text: 'Góc vườn mới', anchor: () => TREE_NEW.clone().add(V3(0, .05, 0)), off: [-1, .6], info: 1},
+      bed0: {text: 'Luống A · chuẩn bị ra hoa', anchor: () => V3(BED_X + (cur === 0 ? 1 : -1), .55, BED_Z[0]), get off() {return [cur === 0 ? 1 : -1, -.4];}, cls: 'bed', click: () => toggleBed(0)},
+      bed1: {text: 'Luống B · đang thu hoạch quả', anchor: () => V3(BED_X + (cur === 0 ? 1 : -1), .55, BED_Z[1]), get off() {return [cur === 0 ? 1 : -1, -.1];}, cls: 'bed', click: () => toggleBed(1)},
+      bed2: {text: 'Luống C · đâm chồi, đẻ nhánh', anchor: () => V3(BED_X + (cur === 0 ? 1 : -1), .5, BED_Z[2]), get off() {return [cur === 0 ? 1 : -1, .3];}, cls: 'bed', click: () => toggleBed(2)},
+      sun: {text: '☀️ Nắng gắt, khô hanh', anchor: () => gSun.position.clone(), off: [-1, .8], info: 1, cls: 'red'},
+    };
+    Object.entries(LBL).forEach(([k, o]) => {
+      o.tag = document.createElement('button'); o.tag.type = 'button'; o.tag.className = 'tag' + (o.info ? ' info' : '') + (o.cls ? ' ' + o.cls : ''); o.tag.textContent = o.text;
+      if (o.click) o.tag.onclick = o.click; $('tags').append(o.tag);
+      o.ln = document.createElementNS(NS, 'line'); o.dot = document.createElementNS(NS, 'circle'); o.dot.setAttribute('r', 4.5); lines.append(o.ln, o.dot);
+    });
+    let shownLabels = new Set();
+    const setLabels = arr => {shownLabels = new Set(arr);};
+    const tmp = new THREE.Vector3();
+    function updateLabels() {
+      const w = viewer.clientWidth, h = viewer.clientHeight, narrow = w < 600, side = narrow ? 50 : 8, placed = [];
+      Object.entries(LBL).forEach(([k, o]) => {
+        let show = shownLabels.has(k);
+        if (show) {tmp.copy(o.anchor()).project(camera); if (tmp.z > 1 || Math.abs(tmp.x) > 1.2 || Math.abs(tmp.y) > 1.2) show = false;}
+        o.tag.classList.toggle('show', show); o.ln.style.display = o.dot.style.display = show ? '' : 'none';
+        if (!show) return;
+        const x = (tmp.x * .5 + .5) * w, y = (-tmp.y * .5 + .5) * h;
+        const tw = o.tag.offsetWidth, th = o.tag.offsetHeight, gap = Math.min(80, w * .12);
+        let tx = x + o.off[0] * (gap + tw / 2); tx = Math.max(tw / 2 + side, Math.min(w - tw / 2 - side, tx));
+        let ty = Math.max(th / 2 + avail.top + 52, Math.min(avail.bottom - 12 - th / 2, y + o.off[1] * (narrow ? 30 : 40)));
+        // đẩy nhãn xuống nếu chồng lên nhãn đã đặt (màn hình hẹp)
+        for (let moved = true, n = 0; moved && n < 6; n++) {
+          moved = false;
+          for (const r of placed) if (Math.abs(tx - r.x) < (tw + r.w) / 2 + 4 && Math.abs(ty - r.y) < (th + r.h) / 2 + 4) {ty = r.y + (r.h + th) / 2 + 6; moved = true;}
+        }
+        placed.push({x: tx, y: ty, w: tw, h: th});
+        o.tag.style.left = tx + 'px'; o.tag.style.top = ty + 'px';
+        const ex = tx + (tx < x ? tw / 2 : -tw / 2);
+        o.ln.setAttribute('x1', ex); o.ln.setAttribute('y1', ty); o.ln.setAttribute('x2', x); o.ln.setAttribute('y2', y);
+        o.dot.setAttribute('cx', x); o.dot.setAttribute('cy', y);
+      });
+    }
+
+    /* ---------- toast / phản hồi ---------- */
+    let toastT;
+    function toast(msg) {const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2800);}
+    function fb(id, kind, html) {const f = $(id); f.className = 'fb show ' + kind; f.innerHTML = html;}
+
+    /* ---------- thuyết minh ---------- */
+    let voice = null, muted = false, started = false, chainId = 0;
+    function stopVoice() {chainId++; if (voice) {voice.onended = null; voice.pause(); voice = null;}}
+    // phát lần lượt nhiều file audio theo khoá: [khoá, …]
+    function sayChain(list) {
+      stopVoice(); if (muted || !started) return;
+      const tok = chainId; let i = 0;
+      const next = () => {
+        if (tok !== chainId || i >= list.length) return;
+        const k = list[i++];
+        if (!AUDIO[k]) return next();
+        voice = new Audio(AUDIO[k]); voice.onended = next; voice.play().catch(() => next());
+      };
+      next();
+    }
+    const say = key => sayChain([key]);
+    $('btnNarration').onclick = () => {
+      muted = !muted; stopVoice();
+      $('btnNarration').setAttribute('aria-pressed', !muted);
+      $('btnNarration').firstChild.textContent = muted ? '🔇 ' : '🔊 ';
+    };
+
+    /* ---------- hiệu ứng âm thanh (WebAudio) ---------- */
+    let ac = null;
+    function tone(f0, t0, dur, type = 'sine', vol = .12, f1 = null) {
+      const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + t0;
+      o.type = type; o.frequency.setValueAtTime(f0, t); if (f1) o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + dur + .02);
+    }
+    const SFX = {
+      click: () => tone(720, 0, .05, 'sine', .07),
+      pop: () => tone(420, 0, .09, 'sine', .1, 760),
+      place: () => {tone(300, 0, .08, 'triangle', .12, 200); tone(600, .05, .06, 'sine', .06);},
+      ding: () => {tone(988, 0, .18, 'triangle', .1); tone(1318, .1, .26, 'triangle', .08);},
+      water: () => {for (let i = 0; i < 10; i++) tone(950 - i * 35, i * .08, .07, 'sine', .035, 620);},
+      cut: () => tone(1400, 0, .16, 'sawtooth', .04, 600),
+      whoosh: () => tone(220, 0, .5, 'sine', .06, 520),
+      correct: () => {tone(659, 0, .14, 'triangle', .13); tone(880, .12, .3, 'triangle', .13);},
+      wrong: () => {tone(240, 0, .22, 'sawtooth', .07, 150); tone(180, .1, .26, 'sawtooth', .06, 110);},
+      success: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, i * .1, .28, 'triangle', .12)),
+      fanfare: () => [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => tone(f, i * .11, .3, 'triangle', .12)),
+    };
+    function sfx(name) {if (muted) return; try {ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); SFX[name]();} catch (e) {} }
+    document.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.matches('.opt, #btnExplore, #btnNarration, #sCheck, .scard, .bp, #btnBedWater, #btnFert')) return;
+      sfx('click');
+    }, true);
+
+    /* ---------- các bước ---------- */
+    const stepsEl = $('steps');
+    STEP_NAMES.forEach((n, i) => {
+      const b = document.createElement('button'); b.className = 'step'; b.innerHTML = `<b>${i + 1}</b><span>${n}</span>`; b.setAttribute('aria-pressed', 'false');
+      b.onclick = () => goStep(i); stepsEl.append(b);
+    });
+    const visited = new Set(); let cur = -1;
+    function hideFinger() {$('finger').classList.remove('show'); $('btnReset').classList.remove('nudge');}
+
+    function goStep(i) {
+      i = Math.max(0, Math.min(STEP_NAMES.length - 1, i));
+      if (cur >= 0) visited.add(cur);
+      cur = i; hideFinger();
+      document.querySelectorAll('.sec').forEach(el => el.classList.toggle('on', +el.dataset.step === i));
+      [...stepsEl.children].forEach((b, k) => {b.setAttribute('aria-pressed', k === i); b.classList.toggle('done', visited.has(k) && k !== i);});
+      const act = stepsEl.children[i].getBoundingClientRect(), bar = stepsEl.getBoundingClientRect();
+      stepsEl.scrollTo({left: stepsEl.scrollLeft + act.left - bar.left - (bar.width - act.width) / 2, behavior: 'smooth'});
+      $('btnPrev').disabled = i === 0; $('btnNext').disabled = i === STEP_NAMES.length - 1;
+      $('lessonTitle').textContent = 'Bước ' + (i + 1) + ' · ' + STEP_NAMES[i];
+      $('sidebody').scrollTop = 0;
+      controls.autoRotate = i === 1; $('btnSpin').classList.toggle('on', controls.autoRotate);
+      $('lesson').classList.toggle('wide', false); $('lesson').classList.toggle('mid', i === 1); $('lesson').classList.toggle('off', i === 0);
+      $('scCard').classList.toggle('away', i !== 0); $('scBar').classList.toggle('away', i !== 0); $('badge').classList.toggle('away', i !== 0); resize();
+      if (i === 0) {
+        if (curSc >= 0) {applyScenScene(curSc); goView(SC[curSc].view);} else {setSky('normal'); goView('garden');}
+        scenLabels();
+      }
+      if (i === 1) {setSky(cSel === 3 ? 'hot' : 'normal'); restTree(); setLabels([]); goView('garden');}
+      if (!started) return;
+      say('step' + i);
+    }
+    $('btnPrev').onclick = () => goStep(cur - 1);
+    $('btnNext').onclick = () => goStep(cur + 1);
+
+    /* =====================================================================
+       BƯỚC 1 · TRÒ CHƠI "EM LÀ NGƯỜI LÀM VƯỜN"
+       ===================================================================== */
+    const SC = [
+      {key: 'sc1', title: 'Chuyển cây bưởi con', view: 'tree'},
+      {key: 'sc2', title: 'Ngày khô hanh', view: 'sky'},
+      {key: 'sc3', title: 'Ba luống cây', view: 'beds'},
+      {key: 'sc4', title: 'Bón phân', view: 'bag'},
+    ];
+    const solved = [false, false, false, false];
+    let curSc = -1, busy = false;
+    // trạng thái "nghỉ" của cây sau các tình huống đã giải
+    function restState() {return {...TREE0, prune: solved[0] ? 1 : 0, lush: solved[3] ? 1 : 0, size: solved[3] ? 1.06 : 1};}
+    function restTree() {if (busy) return; Object.assign(TT, restState()); gTreeG.position.copy(solved[0] ? TREE_NEW : TREE_HOME); gTreeG.rotation.set(0, 0, 0);}
+    function scenLabels() {
+      const l = [];
+      if (curSc === 0 && !solved[0]) l.push('newSpot');
+      if (curSc === 1) l.push('sun');
+      if (curSc === 2) l.push('bed0', 'bed1', 'bed2');
+      setLabels(l);
+    }
+    function applyScenScene(i) {
+      restTree();
+      setSky(i === 1 ? (solved[1] ? 'eve' : 'hot') : 'normal');
+      if (i === 1 && !solved[1]) TT.wilt = .45;
+      BEDS.forEach((bd, b) => bd.frame.visible = i === 2 && bedSel[b]);
+    }
+    function openScen(i) {
+      if (busy) return toast('Em chờ một chút, bác Ba đang làm việc nhé');
+      if (cur !== 0) goStep(0);
+      curSc = i;
+      document.querySelectorAll('.scen').forEach(b => {b.classList.toggle('on', +b.dataset.s === i); b.classList.remove('nudge');});
+      $('scHint').classList.remove('go'); $('scHint').textContent = 'Tình huống ' + (i + 1) + ': chọn câu trả lời bên dưới';
+      document.querySelectorAll('.sbody').forEach(b => b.classList.toggle('hide', +b.dataset.s !== i));
+      const head = document.querySelector(`.scen[data-s="${i}"]`); head.parentElement.append($('scCard'));
+      document.querySelectorAll('.scen').forEach(b => b.setAttribute('aria-expanded', b === head));
+      $('scCard').classList.remove('hide', 'away'); $('scTitle').textContent = SC[i].title;
+      // điện thoại: thu gọn khung bài học để còn chỗ nhìn khu vườn bên dưới popup
+      $('scCard').style.animation = 'none'; void $('scCard').offsetWidth; $('scCard').style.animation = '';
+      // cuộn danh sách để mục vừa mở nằm sát mép trên, thấy trọn câu hỏi và lựa chọn
+      setTimeout(() => {const acc = $('gmap'); acc.scrollTo({top: head.parentElement.offsetTop - acc.offsetTop - 2, behavior: 'smooth'});}, 60);
+      $('fbSc').className = 'fb';
+      if (solved[i]) fb('fbSc', 'ok', '✅ Em đã giải xong tình huống này. Em có thể chọn tình huống khác trên bản đồ.');
+      applyScenScene(i); scenLabels(); goView(SC[i].view); sfx('whoosh');
+      say(SC[i].key);
+      resize();
+    }
+    function closeScen() {$('scCard').classList.add('hide'); document.querySelectorAll('.scen').forEach(b => {b.classList.remove('on'); b.setAttribute('aria-expanded', 'false');}); guideNext(); resize();}
+    document.querySelectorAll('.scen').forEach(b => b.onclick = () => {const i = +b.dataset.s; if (i === curSc && !$('scCard').classList.contains('hide')) return closeScen(); openScen(i);});
+
+    function guideNext() {
+      document.querySelectorAll('.scen').forEach(b => b.classList.remove('nudge'));
+      const nx = solved.findIndex(v => !v), h = $('scHint');
+      if (nx < 0) {h.textContent = '🎉 Em đã giúp bác Ba xử lý đủ 4 tình huống!'; h.classList.remove('go'); return;}
+      document.querySelector(`.scen[data-s="${nx}"]`).classList.add('nudge');
+      h.textContent = solved.some(Boolean) ? `👉 Tiếp theo: chạm vào Tình huống ${nx + 1}` : '👉 Chạm vào một tình huống để giúp bác Ba'; h.classList.add('go');
+    }
+    function solve(i) {
+      if (solved[i]) return; solved[i] = true;
+      document.querySelector(`.scen[data-s="${i}"]`).classList.add('done');
+      const n = solved.filter(Boolean).length; $('cntG').textContent = `Đã giúp bác Ba ${n}/4`; $('gBar').style.width = n * 25 + '%';
+      if (n === 4) {
+        setTimeout(() => {
+          $('badge').classList.remove('hide'); guideNext(); sfx('fanfare');
+          sayChain([SC[i].key + 'ok', 'badge']);
+        }, 600);
+      } else {
+        setTimeout(guideNext, 2500);
+      }
+    }
+    function result(i, ok, text, key) {
+      sfx(ok ? 'correct' : 'wrong'); fb('fbSc', ok ? 'ok' : 'no', (ok ? '👏 ' : '') + text);
+      if (ok && solved.filter(Boolean).length === 3 && !solved[i]) {solve(i); return;}
+      say(key); if (ok) solve(i);
+    }
+
+    // --- công cụ hoạt ảnh ---
+    async function snip() {
+      await moveTo(gShear, TP().add(V3(.4, .9, .45)), qE(0, -2.3, 1.2), 800);
+      for (let n = 0; n < 5; n++) {sfx('cut'); await play(240, k => snipOpen(Math.sin(k * Math.PI))); TT.prune = Math.min(1, (n + 1) / 5); await wait(130);}
+      await moveTo(gShear, HOME.shear.p, HOME.shear.q, 700);
+    }
+    async function transplant() {
+      goView('move'); sfx('whoosh');
+      const p0 = gTreeG.position.clone();
+      await play(600, k => {gTreeG.position.y = ease(k) * .38;});
+      await play(1100, k => {k = ease(k); gTreeG.position.x = THREE.MathUtils.lerp(p0.x, TREE_NEW.x, k); gTreeG.position.z = THREE.MathUtils.lerp(p0.z, TREE_NEW.z, k); gTreeG.rotation.z = Math.sin(k * Math.PI) * .08;});
+      await play(500, k => {gTreeG.position.y = .38 * (1 - ease(k));});
+      sfx('place');
+    }
+    async function water(dur, target) {
+      const tgt = target ? target.clone() : TP();
+      await moveTo(gCan, tgt.clone().add(V3(-.75, .55, .25)), qE(0, -.3, 0), 700);
+      await play(400, k => {gCan.rotation.z = -ease(k) * .55;});
+      sfx('water'); if (!target) TT.wet = 1;
+      const sp = V3(0, 0, 0);
+      await emit(dur * 1000, () => {gCan.localToWorld(sp.copy(SPOUT)); drops.spawn(sp, V3(R(.5, 1), R(-.2, .3), R(-.25, .25)).applyQuaternion(gCan.quaternion), target ? .26 : .01);});
+      await play(350, k => {gCan.rotation.z = -.55 * (1 - ease(k));});
+      await moveTo(gCan, HOME.can.p, HOME.can.q, 700);
+    }
+    // tưới luống: bình đứng ở mép trước luống, cao hơn ngọn cây, vòi hướng vào giữa luống và đi dọc theo luống
+    async function waterBed(i) {
+      const z = BED_Z[i] + .72, y = .88, x0 = BED_X - 1.15, x1 = BED_X + 1.15, q = qE(0, Math.PI / 2, 0);
+      await moveTo(gCan, V3(x0, y, z), q, 800);
+      await play(400, k => {gCan.rotation.z = -ease(k) * .55;});
+      sfx('water');
+      const sp = V3(0, 0, 0), dur = 2200;
+      await Promise.all([
+        emit(dur, () => {gCan.localToWorld(sp.copy(SPOUT)); drops.spawn(sp, V3(R(.35, .8), R(-.15, .2), R(-.18, .18)).applyQuaternion(gCan.quaternion), .26);}),
+        play(dur, k => {gCan.position.x = THREE.MathUtils.lerp(x0, x1, k);}),
+      ]);
+      await play(350, k => {gCan.rotation.z = -.55 * (1 - ease(k));});
+      await moveTo(gCan, HOME.can.p, HOME.can.q, 800);
+    }
+    async function fertilize(level) {
+      const dur = [500, 1100, 2600][level];
+      await moveTo(gBag, TP().add(V3(.65, .55, .45)), qE(0, -.6, 0), 700);
+      await play(400, k => {gBag.rotation.z = ease(k) * 1.6;});
+      const mp = V3(0, 0, 0);
+      await emit(dur, () => {gBag.localToWorld(mp.copy(BAG_MOUTH)); grains.spawn(mp, V3(R(-.4, -.1), R(-.2, .2), R(-.3, .3)));});
+      TT.fert = [.25, .5, 1.3][level];
+      await play(350, k => {gBag.rotation.z = 1.6 * (1 - ease(k));});
+      await moveTo(gBag, HOME.bag.p, HOME.bag.q, 700);
+    }
+    async function resetForTry() {
+      // đưa cây về trạng thái trước khi thử lại (tức thì nếu đã bị chuyển)
+      if (gTreeG.position.distanceTo(solved[0] ? TREE_NEW : TREE_HOME) > .01) {gTreeG.position.copy(solved[0] ? TREE_NEW : TREE_HOME); goView(SC[curSc].view, true);}
+      Object.assign(TT, restState()); await wait(450);
+    }
+    function lockOpts(root, on) {root.querySelectorAll('.opt').forEach(b => {if (!b.classList.contains('no') && !b.classList.contains('ok')) b.disabled = on;});}
+
+    // --- Tình huống 1 & 2: chọn một đáp án ---
+    function optScen(rootId, run) {
+      const root = $(rootId);
+      root.querySelectorAll('.opt').forEach((b, idx) => b.onclick = async () => {
+        if (busy) return; busy = true; sfx('click'); lockOpts(root, true); $('fbSc').className = 'fb'; stopVoice();
+        let ok = false;
+        try {ok = await run(idx);} finally {busy = false;}
+        if (ok) {b.classList.add('ok'); root.querySelectorAll('.opt').forEach(x => x.disabled = true);} else {b.classList.add('no'); b.disabled = true; lockOpts(root, false);}
+      });
+    }
+    optScen('o1', async idx => {
+      setSky('normal');
+      if (TT.prune > 0 || gTreeG.position.distanceTo(TREE_HOME) > .01) {gTreeG.position.copy(TREE_HOME); Object.assign(TT, restState()); TT.prune = 0; goView('tree', true); await wait(500);}
+      if (idx === 0) {
+        await snip(); await wait(300); await transplant(); TT.wilt = 0; await wait(500);
+        result(0, true, V.sc1ok, 'sc1ok'); setLabels(['s0', 's1', 's2', 's3']); return true;
+      }
+      await transplant();
+      if (idx === 2) {await water(1.4); setSky('hot'); toast('Cây được để giữa trời nắng gắt…');}
+      await wait(400); TT.wilt = 1; TT.yellow = .12; await wait(1000);
+      result(0, false, V.sc1no, 'sc1no'); return false;
+    });
+    optScen('o2', async idx => {
+      await resetForTry(); setSky('hot'); TT.wilt = .45;
+      if (idx === 0) {
+        setSky('eve'); toast('Chiều mát – thời điểm tưới cây phù hợp'); await wait(900);
+        await water(2.4); TT.wilt = 0; await wait(700);
+        result(1, true, V.sc2ok, 'sc2ok'); return true;
+      }
+      if (idx === 1) {await water(.5); TT.wet = .3;} else await wait(500);
+      TT.wilt = idx === 1 ? .85 : 1; TT.yellow = idx === 1 ? .1 : .22; await wait(1100);
+      result(1, false, V.sc2no, 'sc2no'); return false;
+    });
+
+    // --- Tình huống 3: chọn nhiều luống ---
+    const bedSel = [false, false, false];
+    function drawBeds() {
+      document.querySelectorAll('.bp').forEach(b => b.classList.toggle('on', bedSel[+b.dataset.b]));
+      BEDS.forEach((bd, i) => {bd.frame.visible = curSc === 2 && bedSel[i]; LBL['bed' + i].tag.classList.toggle('on', bedSel[i]);});
+      $('btnBedWater').disabled = solved[2] || busy || !bedSel.some(Boolean);
+    }
+    function toggleBed(i) {
+      if (cur !== 0 || solved[2] || busy) return; if (curSc !== 2) return openScen(2);
+      bedSel[i] = !bedSel[i]; sfx('pop'); $('fbSc').className = 'fb';
+      document.querySelectorAll('.bp').forEach(b => b.classList.remove('bad'));
+      drawBeds();
+    }
+    document.querySelectorAll('.bp').forEach(b => b.onclick = () => toggleBed(+b.dataset.b));
+    $('btnBedWater').onclick = async () => {
+      if (busy || solved[2]) return;
+      const ok = BEDS.every((bd, i) => bd.ok === bedSel[i]);
+      busy = true; drawBeds(); stopVoice();
+      try {
+        if (ok) {
+          for (let i = 0; i < 3; i++) if (bedSel[i]) {await waterBed(i); BEDS[i].perkTo = 1;}
+          document.querySelectorAll('.bp').forEach(b => {b.classList.toggle('good', bedSel[+b.dataset.b]); b.disabled = true;});
+          await wait(400); result(2, true, V.sc3ok, 'sc3ok');
+        } else {
+          document.querySelectorAll('.bp').forEach(b => {const i = +b.dataset.b; if (BEDS[i].ok !== bedSel[i]) b.classList.add('bad');});
+          const extra = bedSel[1] ? ' Luống đang thu hoạch quả đã qua giai đoạn cần nhiều nước nhất.' : ' Còn thiếu luống cần nhiều nước.';
+          result(2, false, V.sc3no + extra, 'sc3no');
+        }
+      } finally {busy = false; drawBeds();}
+    };
+
+    // --- Tình huống 4: lượng phân + tưới nước ---
+    const LVL = ['Ít', 'Vừa đủ', 'Quá nhiều'];
+    let waterAfter = false;
+    $('lvl').oninput = () => {$('lvlVal').textContent = LVL[+$('lvl').value]; sfx('click');};
+    document.querySelectorAll('#waterSeg button').forEach(b => b.onclick = () => {waterAfter = b.dataset.w === '1'; document.querySelectorAll('#waterSeg button').forEach(x => x.classList.toggle('on', x === b));});
+    $('btnFert').onclick = async () => {
+      if (busy) return; if (curSc !== 3) return openScen(3);
+      busy = true; $('btnFert').disabled = true; $('fbSc').className = 'fb'; stopVoice(); sfx('click');
+      const lv = +$('lvl').value;
+      try {
+        Object.assign(TT, restState()); TT.lush = 0; TT.size = 1; TT.fert = 0; TS.fert = 0; await wait(300);
+        await fertilize(lv);
+        if (waterAfter) {await water(1.3); TT.fert *= .4;}
+        await wait(300);
+        if (lv === 0) {TT.size = .9; TT.yellow = .32; await wait(1100); result(3, false, V.sc4low + ' Em thử lại nhé.', 'sc4low');}
+        else if (lv === 2) {TT.yellow = .85; TT.wilt = .9; await wait(1200); result(3, false, V.sc4high + ' Em thử lại nhé.', 'sc4high');}
+        else if (!waterAfter) {fb('fbSc', 'info', '💡 ' + V.sc4dry); sfx('ding'); say('sc4dry');}
+        else {TT.lush = 1; TT.size = 1.06; await wait(1200); result(3, true, V.sc4ok, 'sc4ok');}
+      } finally {busy = false; $('btnFert').disabled = false;}
+    };
+
+    /* =====================================================================
+       BƯỚC 2 · 4 CĂN CỨ + NÊN / KHÔNG NÊN
+       ===================================================================== */
+    const BASIS = [
+      {em: '🌳', t: 'Nhu cầu của từng loài cây', d: 'Mỗi loài cây cần <b>lượng nước</b> và <b>loại phân bón</b> khác nhau. Ví dụ: lúa nước cần rất nhiều nước, xương rồng cần rất ít.', view: 'tree'},
+      {em: '🌱', t: 'Giai đoạn sinh trưởng, phát triển', d: 'Cây <b>chuẩn bị ra hoa</b>, <b>đâm chồi, đẻ nhánh</b> cần nhiều nước hơn các giai đoạn khác.', view: 'beds'},
+      {em: '🟫', t: 'Đặc điểm của đất trồng', d: '<b>Đất cát</b> giữ nước kém nên phải tưới nhiều lần hơn; <b>đất thịt</b> giữ nước tốt hơn.', view: 'soil'},
+      {em: '⛅', t: 'Thời tiết', d: 'Trời <b>nắng nóng, khô hanh</b> cần tưới nhiều nước hơn; trời <b>mưa</b> thì giảm hoặc ngừng tưới.', view: 'sky'},
+    ];
+    // mỗi bí kíp có một câu đố so sánh: trả lời đúng mới mở khoá
+    const CQ = [
+      {q: 'Bác Ba trồng rau muống, cây bưởi và cây xương rồng trong cùng một khu vườn. Bác nên tưới thế nào?',
+        o: ['Tưới cả ba cây cùng một lượng nước cho công bằng', 'Tưới nhiều nhất cho cây xương rồng vì nó trồng ở chỗ nắng', 'Tưới nhiều nhất cho rau muống, ít nhất cho cây xương rồng'], c: 2,
+        h: 'Gợi ý: rau muống sống được cả dưới nước, còn xương rồng sống ở sa mạc.'},
+      {q: 'Ruộng lúa của bác Ba cần được giữ nhiều nước nhất vào giai đoạn nào?',
+        o: ['Lúa đẻ nhánh và chuẩn bị trổ bông', 'Lúa đã chín vàng, chuẩn bị gặt', 'Ruộng vừa gặt xong, đang để nghỉ'], c: 0,
+        h: 'Gợi ý: cây cần nhiều nước khi đang đâm chồi, đẻ nhánh hoặc chuẩn bị ra hoa.'},
+      {q: 'Hai luống rau giống nhau: một luống đất cát, một luống đất thịt. Sau một ngày nắng, bác Ba nên làm gì?',
+        o: ['Tưới hai luống y như nhau', 'Tưới luống đất cát nhiều lần hơn vì đất cát giữ nước kém', 'Tưới luống đất thịt nhiều lần hơn vì đất thịt nặng, khó thấm nước'], c: 1,
+        h: 'Gợi ý: nước thấm qua đất cát rất nhanh rồi trôi mất.'},
+      {q: 'Dự báo chiều nay có mưa to, sáng nay đất trong vườn vẫn còn ẩm. Bác Ba nên làm gì?',
+        o: ['Tưới thật đẫm từ sáng để cây dự trữ thêm nước', 'Bón thật nhiều phân để mưa hoà tan cho nhanh', 'Giảm hoặc tạm ngừng tưới hôm nay'], c: 2,
+        h: 'Gợi ý: đất đã ẩm lại sắp có mưa, tưới thêm dễ làm cây bị ngập úng.'},
+    ];
+    const cSeen = new Set(); let cSel = -1;
+    $('cgrid').innerHTML = BASIS.map((b, i) => `<button class="ctile" data-i="${i}" type="button"><span class="em">${b.em}</span><span>${b.t}</span><span class="cs">Chưa mở khoá</span></button>`).join('');
+    // cuộn khung bài học sao cho phần tử hiện trọn (khung bài học trên điện thoại khá thấp)
+    function scrollPanelTo(el) {
+      setTimeout(() => {
+        const sb = $('sidebody'), r = el.getBoundingClientRect(), rb = sb.getBoundingClientRect();
+        if (r.top < rb.top || r.bottom > rb.bottom) sb.scrollTo({top: sb.scrollTop + r.top - rb.top - 8, behavior: 'smooth'});
+      }, 120);
+    }
+    function showBasis(i, fresh) {
+      const o = BASIS[i]; $('cQuiz').classList.add('hide');
+      $('cDetail').innerHTML = `<span class="ck-h">${fresh ? 'Đúng rồi! ' : ''}Bí kíp ${i + 1} · ${o.t}</span>${o.d}`;
+      $('cDetail').classList.remove('show'); void $('cDetail').offsetWidth; $('cDetail').classList.add('show'); scrollPanelTo($('cDetail'));
+    }
+    function unlock(i) {
+      cSeen.add(i); sfx('correct');
+      const tile = document.querySelector(`.ctile[data-i="${i}"]`); tile.classList.add('seen', 'pop'); tile.querySelector('.cs').textContent = 'Đã mở khoá';
+      [...$('cProg').children].forEach((d, k) => d.classList.toggle('on', k < cSeen.size));
+      $('cntC').textContent = `Đã mở khoá ${cSeen.size}/4`;
+      showBasis(i, true);
+      if (cSeen.size === 4 && $('sortCard').classList.contains('hide')) {
+        setTimeout(() => sfx('success'), 400);
+        $('sortCard').classList.remove('hide'); sayChain(['g' + i, 'sortIntro']);
+        setTimeout(() => scrollPanelTo($('sortCard')), 600);
+      } else {
+        say('g' + i);
+        const nx = BASIS.findIndex((_, k) => !cSeen.has(k)); if (nx >= 0) document.querySelector(`.ctile[data-i="${nx}"]`).classList.add('nudge');
+      }
+    }
+    document.querySelectorAll('.ctile').forEach(b => b.onclick = () => {
+      const i = +b.dataset.i, o = BASIS[i], z = CQ[i]; cSel = i;
+      document.querySelectorAll('.ctile').forEach(x => {x.classList.toggle('on', x === b); x.classList.remove('nudge', 'pop');});
+      controls.autoRotate = false; $('btnSpin').classList.remove('on');
+      setSky(i === 3 ? 'hot' : 'normal'); setLabels(i === 1 ? ['bed0', 'bed1', 'bed2'] : i === 3 ? ['sun'] : []); goView(o.view);
+      if (cSeen.has(i)) {sfx('pop'); showBasis(i, false); say('g' + i); return;}
+      sfx('pop'); $('cDetail').classList.remove('show');
+      $('cqTag').textContent = `Câu đố ${i + 1} · ${o.t}`; $('cqQ').textContent = z.q; $('cqHint').textContent = '';
+      $('cqOpts').innerHTML = z.o.map((t, k) => `<button class="cq-opt" data-k="${k}" type="button"><i>${'ABC'[k]}</i><span>${t}</span></button>`).join('');
+      let tries = 0;
+      $('cQuiz').classList.remove('hide');
+      $('cqOpts').querySelectorAll('.cq-opt').forEach(x => x.onclick = () => {
+        if (+x.dataset.k === z.c) {x.classList.add('ok'); $('cqOpts').querySelectorAll('.cq-opt').forEach(y => y.disabled = true); setTimeout(() => unlock(i), 450);}
+        else {tries++; x.classList.add('no'); x.disabled = true; sfx('wrong'); $('cqHint').textContent = tries >= 1 ? 'Chưa đúng rồi. ' + z.h : ''; say('cqh' + i);}
+      });
+      scrollPanelTo($('cQuiz'));
+      say('cq' + i);
+    });
+
+    const ACTS = [
+      {t: 'Tưới vừa đủ theo nhu cầu của cây', e: '🚿', a: 'yes'},
+      {t: 'Tưới khi trời nắng gắt', e: '🔥', a: 'no'},
+      {t: 'Bón phân quá liều cho cây nhanh lớn', e: '🧪', a: 'no'},
+      {t: 'Bón phân kết hợp tưới nước', e: '💧', a: 'yes'},
+      {t: 'Để cây ngập úng nhiều ngày', e: '🌊', a: 'no'},
+      {t: 'Bón phân theo giai đoạn phát triển của cây', e: '🌱', a: 'yes'},
+    ].map((o, i) => ({...o, id: i}));
+    const sst = {place: ACTS.map(() => null), sel: null, good: new Set(), won: false};
+    const order = [...ACTS].sort(() => rand() - .5);
+    const bins = {yes: document.querySelector('.bin.yes'), no: document.querySelector('.bin.no')};
+    function cardHTML(o) {return `<button type="button" class="scard ${sst.sel === o.id ? 'sel' : ''} ${sst.good.has(o.id) ? 'good' : ''}" data-id="${o.id}"><span class="em">${o.e}</span><span>${o.t}</span></button>`;}
+    function drawSort() {
+      $('sPool').innerHTML = order.filter(o => !sst.place[o.id]).map(cardHTML).join('');
+      Object.entries(bins).forEach(([b, el]) => {el.querySelectorAll('.scard').forEach(x => x.remove()); el.insertAdjacentHTML('beforeend', order.filter(o => sst.place[o.id] === b).map(cardHTML).join('')); el.classList.toggle('ready', sst.sel != null);});
+      const n = sst.place.filter(Boolean).length; $('cntS').textContent = `Đã xếp ${n}/6`; $('sCheck').disabled = n < 6 || sst.won;
+      document.querySelectorAll('.scard').forEach(c => {
+        const id = +c.dataset.id;
+        c.onclick = e => {e.stopPropagation(); if (sst.won || sst.good.has(id) || sdrag?.moved || sSuppress) return; sst.sel = sst.sel === id ? null : id; sfx('pop'); drawSort();};
+        c.onpointerdown = e => {if (sst.won || sst.good.has(id) || e.button > 0) return; sdrag = {id, x0: e.clientX, y0: e.clientY, moved: false, ghost: null};};
+      });
+    }
+    function placeCard(id, b) {if (sst.good.has(id)) return; sst.place[id] = b; sst.sel = null; sfx('place'); $('fbS').className = 'fb'; drawSort();}
+    Object.entries(bins).forEach(([b, el]) => {
+      el.onclick = () => {if (sst.won) return; if (sst.sel == null) return toast('Em chọn một thẻ việc làm trước nhé'); placeCard(sst.sel, b);};
+      el.onkeydown = e => {if (e.key === 'Enter' || e.key === ' ') {e.preventDefault(); el.onclick();}};
+    });
+    $('sPool').onclick = e => {if (e.target.closest('.scard') || sst.sel == null || sst.good.has(sst.sel)) return; sst.place[sst.sel] = null; sst.sel = null; drawSort();};
+    let sdrag = null, sSuppress = false;
+    addEventListener('pointermove', e => {
+      if (!sdrag) return;
+      if (!sdrag.ghost) {
+        if (Math.hypot(e.clientX - sdrag.x0, e.clientY - sdrag.y0) < 8) return;
+        sdrag.moved = true; const o = ACTS[sdrag.id];
+        sdrag.ghost = document.createElement('div'); sdrag.ghost.className = 'scard ghostchip'; sdrag.ghost.innerHTML = `<span class="em">${o.e}</span><span>${o.t}</span>`; document.body.append(sdrag.ghost);
+      }
+      sdrag.ghost.style.left = e.clientX + 'px'; sdrag.ghost.style.top = e.clientY + 'px';
+      const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('.bin');
+      Object.values(bins).forEach(b => b.classList.toggle('over', b === over));
+    });
+    addEventListener('pointerup', e => {
+      if (!sdrag) return; const d = sdrag; sdrag = null; if (!d.ghost) return;
+      d.ghost.remove(); Object.values(bins).forEach(b => b.classList.remove('over'));
+      sSuppress = true; setTimeout(() => sSuppress = false, 60);
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const bin = el?.closest('.bin'); if (bin) placeCard(d.id, bin.dataset.b); else if (el?.closest('#sPool')) {sst.place[d.id] = null; drawSort();}
+    });
+    addEventListener('pointercancel', () => {if (sdrag?.ghost) sdrag.ghost.remove(); sdrag = null;});
+    $('sCheck').onclick = () => {
+      if (sst.won) return;
+      const wrong = ACTS.filter(o => sst.place[o.id] !== o.a);
+      ACTS.forEach(o => {if (sst.place[o.id] === o.a) sst.good.add(o.id);});
+      if (!wrong.length) {
+        sst.won = true; sst.sel = null; drawSort(); sfx('success'); fb('fbS', 'ok', '🎉 ' + V.sOk); say('sOk');
+        $('kcS').classList.remove('hide');
+        setTimeout(() => $('kcS').scrollIntoView({block: 'nearest', behavior: 'smooth'}), 400);
+        return;
+      }
+      sfx('wrong'); sst.sel = null; drawSort();
+      wrong.forEach(o => document.querySelector(`.scard[data-id="${o.id}"]`)?.classList.add('bad'));
+      fb('fbS', 'no', `Đúng ${6 - wrong.length}/6. ${V.sNo} Thẻ viền đỏ đang ở sai cột.`); say('sNo');
+    };
+    $('sReset').onclick = () => {sst.place = ACTS.map(() => null); sst.sel = null; sst.good.clear(); sst.won = false; $('fbS').className = 'fb'; $('kcS').classList.add('hide'); drawSort();};
+    drawSort();
+
+    /* ---------- chạm vào vật trên mô hình 3D ---------- */
+    const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+    const PICK = [[gTree, () => openScen(0)], [gShear, () => openScen(0)], [crate, () => openScen(0)], [gCan, () => openScen(1)], [gSun, () => openScen(1)], [gBag, () => openScen(3)]];
+    bedPick.forEach((b, i) => PICK.push([BEDS[i].g, () => toggleBed(i)]));
+    let downAt = null;
+    canvas.addEventListener('pointerdown', e => {downAt = {x: e.clientX, y: e.clientY};});
+    canvas.addEventListener('pointerup', e => {
+      if (!downAt) return; const moved = Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y); downAt = null; if (moved > 6 || cur !== 0) return;
+      const r = canvas.getBoundingClientRect(); ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); ray.setFromCamera(ndc, camera);
+      const hits = ray.intersectObjects(PICK.map(p => p[0]), true).filter(h => h.object.isMesh || h.object.isInstancedMesh);
+      if (!hits.length) return; const o = hits[0].object;
+      const f = PICK.find(([g]) => {let x = o; while (x) {if (x === g) return true; x = x.parent;} return false;});
+      if (f) f[1]();
+    });
+
+    /* ---------- công cụ chung ---------- */
+    $('btnSpin').onclick = () => {controls.autoRotate = !controls.autoRotate; $('btnSpin').classList.toggle('on', controls.autoRotate); tween = null;};
+    $('btnReset').onclick = () => {
+      hideFinger(); controls.autoRotate = cur === 1; $('btnSpin').classList.toggle('on', controls.autoRotate);
+      goView('garden');
+    };
+    $('btnFull').onclick = () => {document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();};
+    addEventListener('keydown', e => {if (e.target.matches('input,textarea')) return; if (e.key === 'ArrowRight') goStep(cur + 1); if (e.key === 'ArrowLeft') goStep(cur - 1);});
+
+    /* ---------- vòng lặp ---------- */
+    function resize() {
+      const w = viewer.clientWidth, h = viewer.clientHeight; if (!w || !h) return;
+      renderer.setSize(w, h, false); camera.aspect = w / h;
+      const les = $('lesson'), wide = w > 900;
+      const lw = les.offsetWidth > 0, cw = wide && lw ? les.offsetWidth + 72 : 0, ch = !wide && lw ? (les.offsetHeight + 20) : 0;
+      // danh sách tình huống: bên trái (máy tính) hoặc phía trên (điện thoại)
+      const bar = $('scBar'), bv = bar.offsetWidth > 0;
+      const pw = wide && bv ? bar.offsetLeft + bar.offsetWidth + 10 : 0, ph = !wide && bv ? bar.offsetTop + bar.offsetHeight + 10 : 0;
+      avail.w = Math.max(1, w - cw - pw); avail.h = Math.max(1, h - ch - ph);
+      avail.top = wide ? 0 : ph; avail.bottom = wide ? h - 44 : h - ch;
+      camera.setViewOffset(w, h, (cw - pw) / 2, (ch - ph) / 2, w, h); camera.updateProjectionMatrix();
+    }
+    new ResizeObserver(() => resize()).observe($('lesson'));
+    new ResizeObserver(() => resize()).observe($('scCard'));
+    new ResizeObserver(() => resize()).observe($('scBar'));
+    new ResizeObserver(() => resize()).observe(viewer);
+    $('lessonToggle').onclick = () => {const c = $('lesson').classList.toggle('collapsed'); $('lessonToggle').textContent = c ? '▴' : '▾'; resize();};
+    const clock = new THREE.Clock();
+    function loop(now) {
+      requestAnimationFrame(loop);
+      const dt = Math.min(clock.getDelta(), .05);
+      stepTween(now); runAnims(now); controls.update();
+      stepSky(dt); stepTree(dt); stepBeds(dt); stepEmit(now, dt);
+      TT.wet = Math.max(0, TT.wet - dt * .03);
+      sunGlow.material.rotation += dt * .05;
+      updateLabels();
+      renderer.render(scene, camera);
+    }
+
+    /* ---------- khởi động ---------- */
+    const bar = $('introBar'), status = $('introStatus');
+    resize(); goStep(0); goView('garden', true);
+    let pct = 0; const prog = setInterval(() => {
+      pct = Math.min(100, pct + 9); bar.style.width = pct + '%'; status.textContent = `Đang dựng khu vườn 3D… ${pct}%`;
+      if (pct >= 100) {clearInterval(prog); status.textContent = 'Sẵn sàng!'; $('introLoader').classList.add('ready');}
+    }, 60);
+    $('btnExplore').onclick = () => {
+      const l = $('introLoader'); l.classList.add('gone'); setTimeout(() => l.remove(), 600);
+      resize(); goView(currentView, true); started = true; sfx('click'); say('step0');
+      setTimeout(() => {$('hint').style.opacity = 0;}, 9000);
+      setTimeout(() => {if (curSc < 0) guideNext();}, 1500);
+    };
+    requestAnimationFrame(loop);
+    window.__app = {goStep, openScen, solved, TT, TS, setSky, BEDS, toggleBed, camera, controls, scene, THREE};
+  </script>
+</body>
+
+</html>

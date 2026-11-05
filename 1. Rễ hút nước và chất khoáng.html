@@ -1,0 +1,2670 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <link rel="icon" href="data:,">
+  <title>Sự hấp thụ nước và chất khoáng ở rễ | Khoa học tự nhiên 7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <script type="importmap">{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}</script>
+  <style>
+    :root {
+      --brand: #195856;
+      --brand-dark: #0f3f3d;
+      --brand-light: #2f827d;
+      --brand-soft: #e6f0ee;
+      --ink: #10302d;
+      --muted: #5f8b89;
+      --line: #dbe8e5;
+      --bg: #195658;
+      --gold: #a8814a;
+      --stage-mid: #f1f9f7;
+      --stage-bottom: #dcebe7;
+      --art: #d8514a;
+      --vein: #3f7fc4;
+      --ok: #6fa85b;
+      --bad: #c96a4f;
+      --r: 16px;
+      --r-sm: 11px;
+      --sh-1: 0 1px 2px rgba(13, 42, 40, .05);
+      --sh-2: 0 2px 6px rgba(13, 42, 40, .06), 0 18px 34px -22px rgba(13, 42, 40, .45);
+      --sh-3: 0 10px 30px -12px rgba(13, 42, 40, .32);
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0
+    }
+
+    body {
+      font-family: 'Roboto', system-ui, -apple-system, Segoe UI, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--ink);
+      background: #195658;
+      overflow: hidden;
+      overscroll-behavior: none;
+      -webkit-tap-highlight-color: transparent
+    }
+
+    button {
+      font-family: inherit
+    }
+
+    .app {
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #195658
+    }
+
+    /* topbar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      box-shadow: var(--sh-1);
+      z-index: 20;
+      flex: 0 0 auto;
+    }
+
+    .logoclip {
+      height: 27px;
+      display: flex;
+      align-items: center;
+      flex: 0 0 auto
+    }
+
+    .logoclip .logo {
+      height: 27px;
+      display: block
+    }
+
+    .titles {
+      flex: 1;
+      min-width: 0
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .02em;
+      color: var(--brand);
+      background: var(--brand-soft);
+      border-radius: 99px;
+      padding: 2px 9px;
+      margin-bottom: 2px;
+    }
+
+    .titles h1 {
+      margin: 0;
+      font-weight: 700;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .titles h1.lg {
+      font-size: 18px
+    }
+
+    .tb-right {
+      display: flex;
+      gap: 8px;
+      flex: 0 0 auto
+    }
+
+    .tb-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      border: 1px solid var(--line);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--brand-dark);
+      transition: background .15s, border-color .15s;
+    }
+
+    .tb-btn:hover {
+      background: var(--brand-soft);
+      border-color: var(--brand-light)
+    }
+
+    .tb-btn svg {
+      width: 18px;
+      height: 18px
+    }
+
+    /* layout */
+
+    #gl {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+      outline: none
+    }
+
+    #lines {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 3
+    }
+
+    #lines line {
+      stroke: #fff;
+      stroke-width: 1.6;
+      opacity: .9
+    }
+
+    #lines circle {
+      fill: #fff;
+      stroke: var(--brand);
+      stroke-width: 2
+    }
+
+    .tag {
+      position: absolute;
+      z-index: 4;
+      transform: translate(-50%, -50%);
+      padding: 7px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #e9c9a4;
+      background: #fdebd5;
+      color: #6b3f17;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: var(--sh-3);
+      white-space: nowrap;
+      display: none
+    }
+
+    .tag.show {
+      display: block
+    }
+
+    .tag:hover {
+      background: #fff4e4
+    }
+
+    .lyr {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 13px;
+      border-radius: 99px;
+      border: 1.5px solid rgba(255, 255, 255, .55);
+      background: rgba(15, 63, 61, .72);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(6px)
+    }
+
+    .lyr i {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #fff;
+      display: inline-block
+    }
+
+    .lyr[data-l="heart"] i {
+      background: #ff8a7a
+    }
+
+    .lyr[data-l="art"] i {
+      background: var(--art)
+    }
+
+    .lyr[data-l="vein"] i {
+      background: #6fa7e6
+    }
+
+    .lyr[data-l="body"] i {
+      background: #cfd8d6
+    }
+
+    .lyr.off {
+      background: rgba(255, 255, 255, .88);
+      color: var(--muted);
+      border-color: transparent;
+      text-decoration: line-through
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0)
+    }
+
+    /* kính lúp mạch máu */
+
+    #lines polygon {
+      fill: rgba(246, 200, 90, .42);
+      stroke: none
+    }
+
+    /* side */
+    .sidebody {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 18px 20px 12px;
+      background: linear-gradient(#fff, var(--stage-mid) 70%, var(--stage-bottom));
+      -webkit-overflow-scrolling: touch
+    }
+
+    .sec {
+      display: none
+    }
+
+    .sec.on {
+      display: block;
+      animation: fade .3s ease
+    }
+
+    @keyframes fade {
+      from {
+        opacity: 0;
+        transform: translateY(6px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .eyebrow {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--brand-light);
+      margin: 0 0 4px
+    }
+
+    .sec h2 {
+      margin: 0 0 8px;
+      font-size: 21px;
+      line-height: 1.3;
+      color: var(--brand-dark)
+    }
+
+    .lead {
+      font-size: 15px;
+      line-height: 1.65;
+      margin: 8px 0
+    }
+
+    .muted {
+      color: var(--muted)
+    }
+
+    .chip {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand);
+      background: var(--brand-soft);
+      border-radius: 99px;
+      padding: 3px 11px;
+      margin-bottom: 6px
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--sh-1);
+      padding: 14px 16px;
+      margin: 12px 0
+    }
+
+    .card h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      color: var(--brand-dark)
+    }
+
+    .kcard {
+      border-radius: var(--r-sm);
+      padding: 12px 14px;
+      margin-top: 10px;
+      border: 1.5px solid var(--line);
+      background: #fff;
+      box-shadow: var(--sh-1);
+      cursor: default;
+      transition: .15s
+    }
+
+    .kcard .kh {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--brand-light);
+      margin-bottom: 5px
+    }
+
+    .kcard .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--brand-light);
+      flex: 0 0 auto
+    }
+
+    .kcard p {
+      margin: 0;
+      font-size: 14.5px;
+      line-height: 1.6
+    }
+
+    .kcard.cap .dot {
+      background: #b86fc2
+    }
+
+    .kcard.cap .kh {
+      color: #8a4795
+    }
+
+    .kcard.sel {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(47, 130, 125, .22)
+    }
+
+    .kcard.click {
+      cursor: pointer
+    }
+
+    .kcard.click:hover {
+      border-color: var(--brand-light)
+    }
+
+    .checks {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 13px;
+      border-radius: var(--r-sm);
+      border: 1.5px dashed #cdbd9f;
+      background: #fffaef;
+      font-weight: 600;
+      font-size: 14.5px
+    }
+
+    .check b {
+      flex: 0 0 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid #cdbd9f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 13px
+    }
+
+    .check.done {
+      border-style: solid;
+      border-color: var(--ok);
+      background: #eef7e9;
+      color: #3f6b32
+    }
+
+    .check.done b {
+      background: var(--ok);
+      border-color: var(--ok)
+    }
+
+    .opts {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 10px 0 0
+    }
+
+    .opt {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      width: 100%;
+      text-align: left;
+      padding: 11px 13px;
+      border-radius: var(--r-sm);
+      border: 1.5px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      font-size: 14.5px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s
+    }
+
+    .opt i {
+      font-style: normal;
+      flex: 0 0 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-weight: 700;
+      font-size: 12.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .opt:hover:not(:disabled) {
+      border-color: var(--brand-light);
+      background: var(--stage-mid)
+    }
+
+    .opt:disabled {
+      cursor: default
+    }
+
+    .opt.ok {
+      border-color: var(--brand);
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+      font-weight: 600
+    }
+
+    .opt.ok i {
+      background: var(--brand);
+      color: #fff
+    }
+
+    .opt.no {
+      border-color: var(--bad);
+      background: #fbeae4;
+      color: #a54527
+    }
+
+    .opt.no i {
+      background: var(--bad);
+      color: #fff
+    }
+
+    .fb {
+      display: none;
+      margin: 9px 0 0;
+      padding: 10px 13px;
+      border-radius: var(--r-sm);
+      font-size: 14px;
+      line-height: 1.6
+    }
+
+    .fb.show {
+      display: block
+    }
+
+    .fb.ok {
+      background: var(--brand-soft);
+      color: var(--brand-dark)
+    }
+
+    .fb.no {
+      background: #fbeae4;
+      color: #a54527
+    }
+
+    .fb.info {
+      background: #fff6dd;
+      color: #6b4d13
+    }
+
+    .qbtn {
+      border: 0;
+      border-radius: 11px;
+      padding: 10px 18px;
+      font-size: 14.5px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--brand);
+      color: #fff;
+      margin: 10px 8px 0 0
+    }
+
+    .qbtn:hover {
+      background: var(--brand-dark)
+    }
+
+    .qbtn.alt {
+      background: #fff;
+      color: var(--brand);
+      border: 1.5px solid var(--brand)
+    }
+
+    .qbtn.alt:hover {
+      background: var(--brand-soft)
+    }
+
+    .seg {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px
+    }
+
+    .seg button {
+      border: 1.5px solid var(--line);
+      background: #fff;
+      border-radius: 99px;
+      padding: 7px 14px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer
+    }
+
+    .seg button.on {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff
+    }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin: 8px 0 0
+    }
+
+    .flow span {
+      padding: 6px 11px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--brand-soft);
+      color: var(--brand-dark)
+    }
+
+    .flow span.r {
+      background: #fbe3e0;
+      color: #a5372f
+    }
+
+    .flow span.b {
+      background: #e0ecf8;
+      color: #2a5b92
+    }
+
+    .flow span.p {
+      background: #ece0f1;
+      color: #7d3f89
+    }
+
+    .flow em {
+      font-style: normal;
+      color: var(--muted);
+      font-weight: 700
+    }
+
+    .pulse {
+      display: inline-block;
+      animation: hb 0.85s ease-in-out infinite
+    }
+
+    @keyframes hb {
+
+      0%,
+      100% {
+        transform: scale(1)
+      }
+
+      25% {
+        transform: scale(1.25)
+      }
+
+      45% {
+        transform: scale(1)
+      }
+    }
+
+    /* loader */
+    .intro-loader {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      overflow: hidden;
+      transition: opacity .5s;
+      background: radial-gradient(80% 70% at 50% 40%, #2f827d 0, #195856 58%, #0b2a29 100%)
+    }
+
+    .intro-loader::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(6, 20, 23, .08), rgba(6, 20, 23, .52));
+      pointer-events: none
+    }
+
+    .intro-loader.gone {
+      opacity: 0;
+      pointer-events: none
+    }
+
+    .intro-loader__inner {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 920px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      text-align: center
+    }
+
+    .intro-card {
+      width: min(92vw, 980px);
+      padding: 8px 12px 12px;
+      text-align: center;
+      color: #fff
+    }
+
+    .intro-kicker {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .20em;
+      text-transform: uppercase;
+      color: rgba(248, 252, 252, .92)
+    }
+
+    .intro-card h1 {
+      font-size: clamp(32px, 5vw, 66px);
+      margin: 10px 0 12px;
+      color: #fff;
+      line-height: 1.08;
+      font-weight: 800;
+      text-shadow: 0 4px 18px rgba(0, 0, 0, .26);
+      text-wrap: balance
+    }
+
+    .intro-sub {
+      max-width: 720px;
+      margin: 0 auto 22px;
+      font-size: clamp(13px, 1.8vw, 20px);
+      color: rgba(244, 249, 249, .96);
+      line-height: 1.72;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, .22)
+    }
+
+    .intro-explore {
+      width: min(280px, 88vw);
+      padding: 14px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      cursor: pointer;
+      background: rgba(21, 92, 88, .76);
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: .02em;
+      visibility: hidden;
+      pointer-events: none;
+      box-shadow: 0 16px 42px -20px rgba(0, 0, 0, .6)
+    }
+
+    .intro-loader.ready .intro-explore {
+      visibility: visible;
+      pointer-events: auto
+    }
+
+    .intro-explore:hover {
+      background: rgba(21, 92, 88, .9)
+    }
+
+    .intro-progress {
+      height: 4px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, .28);
+      overflow: hidden;
+      margin: 18px auto 0;
+      max-width: 430px
+    }
+
+    .intro-progress span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: #d7e779;
+      transition: width .25s linear
+    }
+
+    .intro-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      max-width: 430px;
+      margin: 12px auto 0;
+      font-size: 12px;
+      color: rgba(255, 255, 255, .96)
+    }
+
+    .intro-status {
+      display: flex;
+      align-items: center;
+      gap: 7px
+    }
+
+    .intro-ready-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: #d7e779;
+      flex: 0 0 auto;
+      box-shadow: 0 0 0 4px rgba(215, 231, 121, .18)
+    }
+
+    .intro-loader.ready .intro-ready-dot {
+      background: #9ff5d7;
+      box-shadow: 0 0 0 4px rgba(159, 245, 215, .16)
+    }
+
+    .intro-credit {
+      color: rgba(255, 255, 255, .88);
+      font-size: 12px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, .24)
+    }
+
+    @media (max-width:620px) {
+      .intro-card h1 {
+        font-size: 38px
+      }
+
+      .intro-sub {
+        font-size: 14px;
+        line-height: 1.65
+      }
+
+      .intro-meta {
+        flex-direction: column;
+        gap: 8px
+      }
+    }
+
+    /* ===== bố cục theo template: một khung 3D + thanh bước ===== */
+    .main {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 14px;
+      overflow: hidden;
+      background: #195658
+    }
+
+    .stagecol {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      min-width: 0
+    }
+
+    .frame {
+      background: #fff;
+      border-radius: var(--r);
+      box-shadow: var(--sh-2);
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden
+    }
+
+    .stage {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      background: #195658;
+      overflow: hidden
+    }
+
+    .vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      box-shadow: inset 0 0 90px rgba(15, 63, 61, .10)
+    }
+
+    .stage-tools {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      z-index: 5;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .ghost {
+      background: rgba(255, 255, 255, .88);
+      backdrop-filter: blur(8px) saturate(1.3);
+      border: 1px solid var(--line);
+      border-radius: var(--r-sm);
+      padding: 7px 11px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--brand-dark);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--sh-1)
+    }
+
+    .ghost:hover {
+      background: #fff
+    }
+
+    .ghost.on,
+    .ghost[aria-pressed="true"] {
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand)
+    }
+
+    .card.nudge {
+      animation: nudgePulse 1.2s ease infinite
+    }
+
+    .qbtn.nudge {
+      animation: nudgePulse 1.2s ease infinite
+    }
+
+    .kcard.nudge {
+      animation: nudgePulse 1.2s ease infinite
+    }
+
+    .finger {
+      position: absolute;
+      z-index: 8;
+      font-size: 38px;
+      line-height: 1;
+      pointer-events: none;
+      display: none;
+      filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .35));
+      animation: tapHint 1s ease-in-out infinite
+    }
+
+    .finger.show {
+      display: block
+    }
+
+    @keyframes tapHint {
+
+      0%,
+      100% {
+        transform: translateY(0) scale(1)
+      }
+
+      50% {
+        transform: translateY(-10px) scale(.92)
+      }
+    }
+
+    .ghost.nudge {
+      animation: nudgePulse 1.2s ease infinite
+    }
+
+    @keyframes nudgePulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(25, 88, 86, .55)
+      }
+
+      50% {
+        box-shadow: 0 0 0 9px rgba(25, 88, 86, 0)
+      }
+    }
+
+    .stage-hint {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      z-index: 5;
+      background: rgba(255, 255, 255, .88);
+      backdrop-filter: blur(8px) saturate(1.3);
+      border-radius: 99px;
+      padding: 7px 13px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--brand-dark);
+      box-shadow: var(--sh-1);
+      max-width: min(60%, 520px);
+      transition: opacity .6s;
+      pointer-events: none
+    }
+
+    .stage-nav {
+      position: absolute;
+      top: 50%;
+      z-index: 6;
+      transform: translateY(-50%);
+      width: 38px;
+      height: 38px;
+      border-radius: 99px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .88);
+      backdrop-filter: blur(8px) saturate(1.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--brand-dark);
+      box-shadow: var(--sh-1);
+      font-size: 16px
+    }
+
+    .stage-nav:hover {
+      background: var(--brand-soft)
+    }
+
+    .stage-nav.prev {
+      left: 12px
+    }
+
+    .stage-nav.next {
+      right: 12px
+    }
+
+    .stage-nav[disabled] {
+      opacity: .3;
+      pointer-events: none
+    }
+
+    .layers {
+      position: absolute;
+      z-index: 5;
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      left: 12px;
+      bottom: 52px;
+      transform: none;
+      justify-content: flex-start;
+      width: auto;
+      max-width: calc(100% - 24px)
+    }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      z-index: 40;
+      background: rgba(15, 63, 61, .95);
+      color: #fff;
+      border-radius: 99px;
+      padding: 9px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      max-width: 92%;
+      text-align: center;
+      bottom: 52px
+    }
+
+    /* thẻ nội dung bài học nổi trên khung 3D */
+    .lesson {
+      position: absolute;
+      z-index: 7;
+      right: 60px;
+      top: 12px;
+      bottom: 12px;
+      width: min(390px, 38%);
+      display: flex;
+      flex-direction: column;
+      background: rgba(255, 255, 255, .94);
+      backdrop-filter: blur(12px) saturate(1.3);
+      border-radius: var(--r);
+      box-shadow: var(--sh-3);
+      overflow: hidden
+    }
+
+    .lesson-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px 8px 16px;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      flex: 0 0 auto
+    }
+
+    .lesson-head span {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .lesson-head button {
+      width: 28px;
+      height: 28px;
+      border-radius: 99px;
+      border: none;
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+      cursor: pointer;
+      font-size: 13px
+    }
+
+    .lesson .sidebody {
+      position: relative;
+      background: transparent
+    }
+
+    .lesson.collapsed {
+      bottom: auto
+    }
+
+    .lesson.collapsed .sidebody {
+      display: none
+    }
+
+    /* thanh các bước trong khung */
+    .steps {
+      display: flex;
+      gap: 8px;
+      padding: 10px 12px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-top: 1px solid var(--line);
+      scrollbar-width: none;
+      flex: 0 0 auto
+    }
+
+    .steps::-webkit-scrollbar {
+      display: none
+    }
+
+    .step {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 13px 7px 8px;
+      border-radius: 99px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      white-space: nowrap;
+      transition: background .15s, border-color .15s, color .15s
+    }
+
+    .step b {
+      width: 20px;
+      height: 20px;
+      border-radius: 99px;
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto
+    }
+
+    .step:hover {
+      border-color: var(--brand-light)
+    }
+
+    .step[aria-pressed="true"] {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff
+    }
+
+    .step[aria-pressed="true"] b {
+      background: rgba(255, 255, 255, .25);
+      color: #fff
+    }
+
+    .step.done b {
+      background: var(--brand);
+      color: #fff
+    }
+
+    @media (max-width:900px) {
+      .main {
+        padding: 10px
+      }
+
+      .stage-nav {
+        width: 34px;
+        height: 34px;
+        font-size: 14px;
+        top: 30%
+      }
+
+      .lesson {
+        left: 8px;
+        right: 8px;
+        top: auto;
+        bottom: 8px;
+        width: auto;
+        height: 46%
+      }
+
+      .lesson.collapsed {
+        height: auto
+      }
+
+      .layers {
+        bottom: calc(46% + 14px)
+      }
+
+      .lyr {
+        padding: 5px 9px;
+        font-size: 11.5px;
+        gap: 5px
+      }
+
+      .lyr i {
+        width: 9px;
+        height: 9px
+      }
+
+      .stage-hint {
+        display: none
+      }
+
+      .toast {
+        bottom: calc(46% + 50px)
+      }
+
+      .tag {
+        font-size: 12px;
+        padding: 5px 10px
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      * {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important
+      }
+    }
+
+    /* ghép nhãn: giao diện mới */
+
+    .mslot {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 11px 12px;
+      border-radius: 11px;
+      border: 2px dashed #cdbd9f;
+      background: #fffaef;
+      color: var(--muted);
+      font: 600 14px inherit;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: center
+    }
+
+    .mslot:hover {
+      border-color: var(--brand-light)
+    }
+
+    .mslot.filled {
+      border-style: solid;
+      border-color: var(--brand-light);
+      background: var(--brand-soft);
+      color: var(--brand-dark)
+    }
+
+    .mslot.good {
+      border-style: solid;
+      border-color: var(--ok);
+      background: #eef7e9;
+      color: #3f6b32
+    }
+
+    .mslot.good::before {
+      content: "✓ "
+    }
+
+    .mslot.bad {
+      border-style: solid;
+      border-color: var(--bad);
+      background: #fbeae4;
+      color: #a54527
+    }
+
+    .mslot.bad::before {
+      content: "✕ "
+    }
+
+    .tray {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding: 12px;
+      margin: 12px 0 0;
+      border-radius: 12px;
+      background: var(--stage-mid);
+      border: 1px solid var(--line)
+    }
+
+    .tray::before {
+      content: "Thẻ nhãn:";
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--brand-light);
+      margin-right: 4px
+    }
+
+    .chipcard {
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--sh-1);
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff;
+      padding: 8px 15px
+    }
+
+    .chipcard:hover {
+      border-color: var(--brand-light);
+      background: var(--brand-dark)
+    }
+
+    .chipcard.sel {
+      border-color: var(--brand);
+      background: #fff;
+      color: var(--brand-dark);
+      border: 2px solid var(--brand);
+      box-shadow: 0 0 0 3px rgba(47, 130, 125, .25)
+    }
+
+    .chipcard.used {
+      pointer-events: none;
+      opacity: .25
+    }
+
+    .matchbtns {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px
+    }
+
+    .matchbtns .qbtn {
+      flex: 1;
+      margin: 10px 0 0
+    }
+
+    .qbtn:disabled {
+      opacity: .45;
+      cursor: default
+    }
+  
+    /* ===== bổ sung cho KHTN 7 – Phần 1 ===== */
+    .tag.info {
+      cursor: default;
+      background: #fff;
+      border-color: #cfe1dd;
+      color: var(--brand-dark);
+      font-size: 12.5px;
+      padding: 5px 11px;
+      pointer-events: none
+    }
+
+    .tag.water {
+      background: #e3f1ff;
+      border-color: #9cc8f2;
+      color: #1f5a92
+    }
+
+    .tag.nudge {
+      animation: tagBlink 1s ease-in-out infinite
+    }
+
+    @keyframes tagBlink {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(253, 235, 213, .9), var(--sh-3);
+        transform: translate(-50%, -50%) scale(1)
+      }
+
+      50% {
+        box-shadow: 0 0 0 10px rgba(253, 235, 213, 0), var(--sh-3);
+        transform: translate(-50%, -50%) scale(1.08)
+      }
+    }
+
+    .lyr[data-l="soil"] i {
+      background: #a8784a
+    }
+
+    .lyr[data-l="water"] i {
+      background: #3fa3ff
+    }
+
+    .lyr[data-l="ion"] i {
+      background: #f7c53c
+    }
+
+    .fade {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: #195658;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .28s
+    }
+
+    .fade.on {
+      opacity: 1
+    }
+
+    .counter {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      background: #fff6dd;
+      border: 1px solid #efd99c;
+      border-radius: 99px;
+      padding: 3px 11px;
+      margin-left: 6px
+    }
+
+    .hide {
+      display: none !important
+    }
+
+    .legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      margin-top: 8px;
+      color: var(--muted)
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .legend i {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      display: inline-block
+    }
+
+    .check.cur {
+      border-style: solid;
+      border-color: var(--brand-light);
+      background: var(--brand-soft);
+      color: var(--brand-dark)
+    }
+
+    .check.cur b {
+      border-color: var(--brand-light);
+      background: var(--brand-light)
+    }
+
+    .check small {
+      display: block;
+      font-weight: 500;
+      color: var(--muted);
+      font-size: 12.5px
+    }
+
+    /* sắp xếp thứ tự */
+    .ordrow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+      margin-top: 10px
+    }
+
+    .ordrow .mslot {
+      flex: 1 1 64px;
+      width: auto;
+      margin: 0;
+      padding: 10px 4px;
+      font-size: 13px;
+      min-height: 44px
+    }
+
+    .ordrow em {
+      font-style: normal;
+      color: var(--muted);
+      font-weight: 800
+    }
+
+    /* sơ đồ ghép thẻ */
+    .diag {
+      position: relative;
+      margin-top: 8px;
+      border-radius: 12px;
+      background: linear-gradient(#f4fbff, #fff 45%);
+      border: 1px solid var(--line);
+      overflow: hidden
+    }
+
+    .diag svg {
+      display: block;
+      width: 100%;
+      height: auto
+    }
+
+    .diag .mslot {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 30%;
+      margin: 0;
+      padding: 6px 4px;
+      font-size: 11.5px;
+      line-height: 1.2;
+      min-height: 30px
+    }
+
+    .diag .mslot:not(.filled):not(.good):not(.bad) {
+      background: #fffaefee
+    }
+
+    .diag .flow {
+      fill: none;
+      stroke: #1f7ae0;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 5 8;
+      opacity: 0;
+      transition: opacity .4s
+    }
+
+    .diag.run .flow {
+      opacity: 1;
+      animation: dashRun .9s linear infinite
+    }
+
+    @keyframes dashRun {
+      to {
+        stroke-dashoffset: -13
+      }
+    }
+
+    /* nhiệm vụ tìm kiếm */
+
+    .opt .src {
+      display: block;
+      font-size: 12px;
+      color: #1d6b3a;
+      font-weight: 500
+    }
+
+    .scene-cap {
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 10px 0 0;
+      padding: 10px 12px;
+      border-radius: 11px;
+      background: var(--stage-mid);
+      border: 1px solid var(--line)
+    }
+
+    #stageList .check b {
+      color: var(--muted);
+      font-size: 12px
+    }
+
+    #stageList .check.done b,
+    #stageList .check.cur b {
+      color: #fff
+    }
+  </style>
+</head>
+
+<body>
+  <div id="introLoader" class="intro-loader" aria-live="polite">
+    <div class="intro-loader__inner">
+      <section class="intro-card">
+        <div class="intro-kicker">Khoa học tự nhiên 7 · Phần 1</div>
+        <h1>Sự hấp thụ nước và chất khoáng ở rễ</h1>
+        <p class="intro-sub">Xoay khối đất để tìm lông hút, cắt ngang rễ để theo dõi đường đi của nước và muối khoáng,
+          hoàn thành sơ đồ vận chuyển rồi so sánh cây trên cạn với cây thủy sinh.</p>
+        <button id="btnExplore" class="intro-explore" type="button">Bắt đầu</button>
+        <div class="intro-progress" aria-hidden="true"><span id="introBar"></span></div>
+        <div class="intro-meta">
+          <div class="intro-status"><span class="intro-ready-dot"></span><span id="introStatus">Đang dựng mô hình
+              3D…</span></div>
+          <div>Phần 1/5</div>
+        </div>
+      </section>
+      <div class="intro-credit">Được phát triển bởi <strong>YooBook</strong></div>
+    </div>
+  </div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="logoclip"><img class="logo" alt="YooBook" src="data:image/png;base64,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"></div>
+      <div class="titles">
+        <div class="badge">Khoa học tự nhiên 7 · Phần 1</div>
+        <h1 class="lg" id="titleLg">Sự hấp thụ nước và chất khoáng ở rễ</h1>
+      </div>
+      <div class="tb-right">
+        <button class="tb-btn" id="btnFull" aria-label="Toàn màn hình" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="stagecol">
+        <div class="frame">
+          <div class="stage" id="viewer">
+            <canvas id="gl" tabindex="0" aria-label="Mô hình 3D rễ cây hút nước và chất khoáng"
+              style="position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none"></canvas>
+            <div class="vignette" aria-hidden="true"></div>
+            <div class="fade" id="fade"></div>
+            <svg id="lines"></svg>
+            <div id="tags"></div>
+            <div class="stage-tools">
+              <button class="ghost" id="btnReset" type="button">⤢ <span>Toàn cảnh</span></button>
+              <button class="ghost" id="btnSpin" type="button">↻ <span>Tự xoay</span></button>
+              <button class="ghost" id="btnNarration" type="button" aria-pressed="true">🔊 <span>Thuyết minh</span></button>
+            </div>
+            <button class="stage-nav prev" id="btnPrev" type="button" aria-label="Bước trước">◀</button>
+            <button class="stage-nav next" id="btnNext" type="button" aria-label="Bước sau">▶</button>
+            <div class="finger" id="finger" aria-hidden="true">👆</div>
+            <div class="stage-hint" id="hint">↻ Chạm và kéo để xoay mô hình • cuộn / chụm để phóng to</div>
+            <div class="layers" id="layers">
+              <button class="lyr" data-l="soil"><i></i>Đất</button>
+              <button class="lyr" data-l="water"><i></i>Nước</button>
+              <button class="lyr" data-l="ion"><i></i>Chất khoáng</button>
+            </div>
+            <div class="toast" id="toast"></div>
+
+            <aside class="lesson" id="lesson">
+              <div class="lesson-head"><span id="lessonTitle">Bài học</span><button id="lessonToggle" type="button"
+                  aria-label="Thu gọn / mở rộng nội dung">▾</button></div>
+              <div class="sidebody" id="sidebody">
+
+                <!-- Bước 1 · Hoạt động 1a -->
+                <section class="sec on" data-step="0">
+                  <div class="eyebrow">Hoạt động 1a</div>
+                  <h2>Quan sát miền lông hút</h2>
+                  <p class="lead">Muốn biết cây lấy nước từ đâu, chúng mình bắt đầu từ <b>dưới đất</b>! Em hãy xoay
+                    khối đất để nhìn thấy <b>bộ rễ</b> của cây.</p>
+                  <div class="card">
+                    <span class="chip">Nhiệm vụ</span><span class="counter" id="cnt0">Đã khám phá 0/2</span>
+                    <p style="margin:6px 0 4px">Chạm vào nhãn trên mô hình 3D theo thứ tự:</p>
+                    <div class="checks">
+                      <div class="check" id="ck-zone"><b>✓</b>Miền lông hút</div>
+                      <div class="check" id="ck-hair"><b>✓</b>Lông hút</div>
+                    </div>
+                    <div class="fb" id="fb0"></div>
+                  </div>
+                  <div class="card hide" id="q1card">
+                    <h3>Chọn đáp án đúng</h3>
+                    <p style="margin:0">Nhờ đặc điểm nào mà rễ cây có thể hút nước và muối khoáng?</p>
+                    <div class="opts" id="q1">
+                      <button class="opt" data-c="1"><i>A</i><span>Nhờ một số tế bào biểu bì kéo dài tạo thành lông
+                          hút</span></button>
+                      <button class="opt" data-c="0"><i>B</i><span>Nhờ rễ có màu nâu</span></button>
+                      <button class="opt" data-c="0"><i>C</i><span>Nhờ rễ mọc rất sâu</span></button>
+                    </div>
+                    <div class="fb" id="fbq1"></div>
+                  </div>
+                  <div class="kcard hide" id="kc0">
+                    <div class="kh"><span class="dot"></span>Ghi nhớ</div>
+                    <p>Rễ hút nước và muối khoáng nhờ <b>lông hút</b>. Mỗi lông hút là một <b>tế bào biểu bì</b> của rễ
+                      kéo dài ra.</p>
+                  </div>
+                </section>
+
+                <!-- Bước 2 · Hoạt động 1b -->
+                <section class="sec" data-step="1">
+                  <div class="eyebrow">Hoạt động 1b</div>
+                  <h2>Con đường nước và muối khoáng vào rễ</h2>
+                  <p class="lead">Chúng mình <b>cắt ngang rễ</b> để nhìn vào bên trong. Bấm <b>Bắt đầu</b> và theo
+                    dõi các hạt nước và ion khoáng.</p>
+                  <div class="legend"><span><i style="background:#3fa3ff"></i>Nước</span><span><i
+                        style="background:#f7c53c"></i>Ion khoáng</span></div>
+                  <div class="card">
+                    <span class="chip">Hoạt ảnh</span>
+                    <div class="seg" id="animSeg">
+                      <button id="aPlay" class="on">▶ Bắt đầu</button>
+                      <button id="aSlow">🐢 Chậm</button>
+                      <button id="aNorm" class="on">Bình thường</button>
+                      <button id="aReplay">↺ Xem lại</button>
+                    </div>
+                    <div class="checks" id="stageList">
+                      <div class="check"><b>1</b><div>Lông hút<small>hút nước và muối khoáng từ đất</small></div></div>
+                      <div class="check"><b>2</b><div>Biểu bì<small>nước và muối khoáng đi qua lớp biểu bì</small></div>
+                      </div>
+                      <div class="check"><b>3</b><div>Thịt vỏ<small>tiếp tục đi qua lớp thịt vỏ</small></div></div>
+                      <div class="check"><b>4</b><div>Mạch gỗ<small>vào mạch gỗ của rễ, rồi lên thân và lá</small></div>
+                      </div>
+                    </div>
+                    <p class="muted" style="font-size:13px;margin:10px 0 0">Mẹo: chạm vào từng lớp trên lát cắt để xem
+                      tên lớp.</p>
+                  </div>
+                  <div class="card hide" id="ordCard">
+                    <h3>Sắp xếp đúng thứ tự</h3>
+                    <p style="margin:0">Con đường nước đi vào rễ: chọn một thẻ rồi chạm vào ô trống.</p>
+                    <div class="ordrow" id="ordRow"></div>
+                    <div class="tray" id="ordTray"></div>
+                    <div class="fb" id="fbOrd"></div>
+                    <div class="matchbtns"><button class="qbtn" id="ordCheck" disabled>Kiểm tra</button><button
+                        class="qbtn alt" id="ordReset">Làm lại</button></div>
+                  </div>
+                </section>
+
+                <!-- Bước 3 · Hoạt động 1c -->
+                <section class="sec" data-step="2">
+                  <div class="eyebrow">Hoạt động 1c · Phiếu học tập 1 – Câu 2</div>
+                  <h2>Hoàn thành sơ đồ con đường vận chuyển</h2>
+                  <p class="lead">Sơ đồ có <b>6 ô trống</b>. Em chọn một thẻ rồi chạm vào ô trống phù hợp. Ghép xong
+                    bấm <b>Kiểm tra</b>.</p>
+                  <div class="card">
+                    <span class="chip">Sơ đồ</span><span class="counter" id="cntD">Đã ghép 0/6</span>
+                    <div class="diag" id="diag">
+                      <svg viewBox="0 0 320 400" aria-label="Sơ đồ cây và lát cắt rễ">
+                        <defs>
+                          <marker id="arw" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+                            <path d="M0,0 L7,3.5 L0,7 z" fill="#1f7ae0" />
+                          </marker>
+                          <radialGradient id="soilG" cx="50%" cy="30%" r="80%">
+                            <stop offset="0" stop-color="#f1dfba" />
+                            <stop offset="1" stop-color="#dcc196" />
+                          </radialGradient>
+                        </defs>
+                        <!-- đất -->
+                        <rect x="88" y="200" width="124" height="128" rx="12" fill="url(#soilG)" />
+                        <!-- rễ -->
+                        <g stroke="#cfb07a" stroke-linecap="round" fill="none">
+                          <path d="M150,200 C147,240 154,272 150,318" stroke-width="8" />
+                          <path d="M150,232 C132,246 118,262 108,290" stroke-width="5" />
+                          <path d="M150,252 C168,266 184,280 192,304" stroke-width="5" />
+                        </g>
+                        <g stroke="#fffaf0" stroke-width="1.3" stroke-linecap="round">
+                          <path d="M146,296 l-8,-3 M146,302 l-9,0 M146,308 l-8,3 M154,296 l8,-3 M154,302 l9,0 M154,308 l8,3" />
+                          <path d="M108,282 l-7,-2 M106,288 l-7,1 M112,286 l6,4 M190,296 l7,-2 M193,302 l7,1 M188,302 l-5,5" />
+                        </g>
+                        <!-- thân, lá -->
+                        <path d="M150,202 L150,92" stroke="#6aa84f" stroke-width="10" stroke-linecap="round" />
+                        <path d="M150,118 C128,92 96,92 84,104 C100,122 128,126 150,118 z" fill="#7cc35d" />
+                        <path d="M150,100 C160,74 188,60 210,62 C204,84 178,100 150,100 z" fill="#7cc35d" />
+                        <path d="M150,92 C140,78 142,64 150,52 C158,64 160,78 150,92 z" fill="#8ed06c" />
+                        <!-- mạch gỗ (xanh) trong rễ, thân, gân lá -->
+                        <g stroke="#3f7fc4" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".85">
+                          <path d="M150,312 L150,96" />
+                          <path d="M150,100 C166,84 186,72 206,64" />
+                          <path d="M150,118 C130,108 108,104 88,104" />
+                        </g>
+                        <!-- kính lúp lát cắt rễ -->
+                        <g stroke="#9aa9a6" stroke-width="1.2" stroke-dasharray="3 3">
+                          <line x1="153" y1="300" x2="212" y2="268" />
+                          <line x1="153" y1="306" x2="214" y2="334" />
+                        </g>
+                        <circle cx="152" cy="303" r="9" fill="none" stroke="#f0a93b" stroke-width="2" />
+                        <circle cx="250" cy="300" r="52" fill="#ead9b5" stroke="#f0a93b" stroke-width="3" />
+                        <g stroke="#fff6dc" stroke-width="4" stroke-linecap="round">
+                          <path d="M262,271 L270,253 M276,290 L298,286 M273,316 L292,329 M232,277 L222,258 M228,318 L211,330 M248,329 L246,349" />
+                        </g>
+                        <circle cx="250" cy="300" r="30" fill="#ffe39a" />
+                        <circle cx="250" cy="300" r="25" fill="#cde9b0" stroke="#a9cf86" stroke-width="1" />
+                        <g fill="none" stroke="#a9cf86" stroke-width="1">
+                          <circle cx="250" cy="300" r="19" />
+                        </g>
+                        <circle cx="250" cy="300" r="12" fill="#f6d0d6" />
+                        <g fill="#b98ee0" stroke="#7b55a6" stroke-width="1">
+                          <circle cx="250" cy="300" r="4" />
+                          <circle cx="250" cy="292" r="2.6" /><circle cx="257.6" cy="297.5" r="2.6" />
+                          <circle cx="254.7" cy="306.5" r="2.6" /><circle cx="245.3" cy="306.5" r="2.6" />
+                          <circle cx="242.4" cy="297.5" r="2.6" />
+                        </g>
+                        <!-- đường dẫn tới ô -->
+                        <g stroke="#b6a58a" stroke-width="1.2">
+                          <line x1="262" y1="238" x2="268" y2="256" />
+                          <line x1="262" y1="366" x2="268" y2="326" />
+                          <line x1="186" y1="370" x2="234" y2="316" />
+                          <line x1="96" y1="306" x2="148" y2="292" />
+                          <line x1="96" y1="160" x2="147" y2="160" />
+                          <line x1="230" y1="48" x2="196" y2="72" />
+                        </g>
+                        <!-- mũi tên chạy khi đúng hết -->
+                        <path class="flow" d="M270,250 L262,272 L256,286 L250,298" marker-end="url(#arw)" />
+                        <path class="flow" d="M150,318 L150,100" marker-end="url(#arw)" />
+                        <path class="flow" d="M150,100 C166,84 186,72 206,64" marker-end="url(#arw)" />
+                        <path class="flow" d="M150,118 C130,108 108,104 88,104" marker-end="url(#arw)" />
+                      </svg>
+                      <button class="mslot" data-ans="Lông hút" style="left:81.9%;top:56.5%">?</button>
+                      <button class="mslot" data-ans="Biểu bì" style="left:81.9%;top:93.5%">?</button>
+                      <button class="mslot" data-ans="Thịt vỏ" style="left:46%;top:93.5%">?</button>
+                      <button class="mslot" data-ans="Mạch gỗ ở rễ" style="left:16%;top:76.5%">?</button>
+                      <button class="mslot" data-ans="Mạch gỗ ở thân" style="left:16%;top:40%">?</button>
+                      <button class="mslot" data-ans="Mạch gỗ ở lá" style="left:80%;top:10%">?</button>
+                    </div>
+                    <div class="tray" id="dTray"></div>
+                    <div class="fb" id="fbD"></div>
+                    <div class="matchbtns"><button class="qbtn" id="dCheck" disabled>Kiểm tra</button><button
+                        class="qbtn alt" id="dReset">Làm lại</button></div>
+                  </div>
+                </section>
+
+                <!-- Bước 4 · Hoạt động 1d -->
+                <section class="sec" data-step="3">
+                  <div class="eyebrow">Hoạt động 1d · Phiếu học tập 1 – Câu 3</div>
+                  <h2>Cây trên cạn và cây thủy sinh</h2>
+                  <p class="lead">Cây trên cạn hút nước và muối khoáng chủ yếu qua <b>lông hút</b> của rễ. Còn những
+                    cây sống dưới nước như <b>rong, bèo</b> thì sao nhỉ?</p>
+                  <div class="card">
+                    <span class="chip">Chuyển cảnh</span><span class="counter" id="cnt3">Đã xem 0/2</span>
+                    <div class="seg" id="envSeg">
+                      <button data-env="land" class="on">🌱 Cây trên cạn</button>
+                      <button data-env="aqua">🌊 Cây thủy sinh</button>
+                    </div>
+                    <p class="scene-cap" id="envCap"></p>
+                  </div>
+                  <div class="card hide" id="q4card">
+                    <h3>Câu hỏi 1</h3>
+                    <p style="margin:0">Cây trên cạn hấp thụ nước và muối khoáng chủ yếu nhờ bộ phận nào?</p>
+                    <div class="opts" id="q4a">
+                      <button class="opt" data-c="1"><i>A</i><span>Lông hút của rễ</span></button>
+                      <button class="opt" data-c="0"><i>B</i><span>Lá cây</span></button>
+                      <button class="opt" data-c="0"><i>C</i><span>Hoa</span></button>
+                    </div>
+                    <div class="fb" id="fbq4a"></div>
+                    <h3 style="margin-top:16px">Câu hỏi 2</h3>
+                    <p style="margin:0">Thực vật thủy sinh hấp thụ nước và muối khoáng qua đâu?</p>
+                    <div class="opts" id="q4b">
+                      <button class="opt" data-c="1"><i>A</i><span>Bề mặt các tế bào biểu bì của cây</span></button>
+                      <button class="opt" data-c="0"><i>B</i><span>Chỉ qua hoa</span></button>
+                      <button class="opt" data-c="0"><i>C</i><span>Không cần hút nước</span></button>
+                    </div>
+                    <div class="fb" id="fbq4b"></div>
+                  </div>
+                  <button class="qbtn" id="btnNextPart" type="button" style="width:100%;margin-top:12px">Sang Phần 2:
+                    Vận chuyển các chất trong thân ▶</button>
+                </section>
+
+              </div>
+            </aside>
+          </div>
+          <div class="steps" id="steps" role="tablist" aria-label="Các bước học"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+    import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+    const $ = id => document.getElementById(id);
+    const STEP_NAMES = ['Lông hút', 'Đường đi của nước', 'Sơ đồ vận chuyển', 'Trên cạn – thủy sinh'];
+    const NEXT_PART = '2. Vận chuyển các chất trong thân.html';
+
+    let seed = 300701;
+    const rand = () => {seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296;};
+    const R = (a, b) => a + (b - a) * rand();
+    const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+
+    /* ---------- chữ phản hồi hiện trên màn hình ---------- */
+    const V = {
+      q1ok: 'Chính xác! Nhờ một số tế bào biểu bì ở rễ kéo dài tạo thành lông hút.',
+      q1no: 'Chưa đúng rồi, em quan sát lại phần đầu rễ đang phóng to nhé.',
+      q1hint: 'Cô gợi ý: hãy nhìn những sợi lông nhỏ li ti ở gần đầu rễ.',
+      ordHint: 'Cô gợi ý: nước đi từ ngoài vào trong, lớp ngoài cùng là lông hút.',
+      q4aOk: 'Đúng rồi! Cây trên cạn hút chủ yếu qua lông hút của rễ.',
+      q4bOk: 'Đúng rồi! Cây thủy sinh hấp thụ qua bề mặt các tế bào biểu bì của cây.',
+      q4no: 'Chưa đúng rồi, em bấm chuyển qua lại giữa hai cảnh để quan sát lại nhé.',
+    };
+    /* ---------- file voice thuyết minh: dán đường dẫn mp3 vào đúng khoá; để trống = không phát ---------- */
+    const AUDIO = {
+      step0: '',
+      step1: '',
+      step2: '',
+      step3: '',
+      zone: '',
+      hair: '',
+      q1ok: '',
+      q1no: '',
+      stage0: '',
+      stage1: '',
+      stage2: '',
+      stage3: '',
+      up: '',
+      ordOk: '',
+      ordNo: '',
+      dOk: '',
+      dNo: '',
+      land: '',
+      aqua: '',
+      q4: '',
+      q4aOk: '',
+      q4bOk: '',
+      q4no: '',
+    };
+
+    /* ---------- renderer / scene ---------- */
+    const canvas = $('gl'), viewer = $('viewer');
+    const renderer = new THREE.WebGLRenderer({canvas, antialias: true, alpha: true, powerPreference: 'high-performance'});
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    const scene = new THREE.Scene();
+    scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x9fc9c4, 0.85));
+    const keyL = new THREE.DirectionalLight(0xffffff, 1.5); keyL.position.set(3, 6, 5); scene.add(keyL);
+    const rimL = new THREE.DirectionalLight(0x9fe5de, 0.7); rimL.position.set(-4, 2, -4); scene.add(rimL);
+
+    const camera = new THREE.PerspectiveCamera(32, 1, 0.01, 200);
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true; controls.dampingFactor = 0.08;
+    controls.enablePan = true; controls.screenSpacePanning = true;
+    controls.minDistance = 0.25; controls.maxDistance = 30;
+    controls.autoRotateSpeed = 1.2;
+
+    /* ---------- vật liệu ---------- */
+    const std = (color, o = {}) => new THREE.MeshStandardMaterial({color, roughness: .65, ...o});
+    const M = {
+      root: std(0xe6cf9f, {roughness: .75}),
+      hair: std(0xfff7e2, {roughness: .55}),
+      stem: std(0x58a443, {roughness: .55}),
+      leaf: std(0x6bbf4e, {roughness: .5, side: THREE.DoubleSide}),
+      soilP: std(0x7a4f2a, {roughness: 1}),
+      water: std(0x3fa3ff, {emissive: 0x0d4f8f, emissiveIntensity: .7, roughness: .2}),
+      ion: std(0xf7c53c, {emissive: 0x8a6200, emissiveIntensity: .6, roughness: .3}),
+      flow: new THREE.MeshBasicMaterial({color: 0x52b4ff}),
+    };
+    const ball = new THREE.SphereGeometry(1, 12, 9);
+    const rock = new THREE.IcosahedronGeometry(1, 1);
+    const glowMats = new Set();
+
+    /* ống thon dần (rễ, thân, lông hút) */
+    function taperTube(pts, r0, r1, mat, opt = {}) {
+      const curve = new THREE.CatmullRomCurve3(pts.map(p => p.isVector3 ? p : V3(...p)));
+      const tub = opt.seg || 48, rad = opt.rad || 10;
+      const geo = new THREE.TubeGeometry(curve, tub, 1, rad, false);
+      const pos = geo.attributes.position, v = new THREE.Vector3(), c = new THREE.Vector3();
+      const rAt = t => {let r = THREE.MathUtils.lerp(r0, r1, t); if (opt.round && t > .9) r *= Math.sqrt(Math.max(0, (1 - t) / .1)) * .85 + .15; return r;};
+      for (let i = 0; i <= tub; i++) {
+        const t = i / tub; curve.getPointAt(t, c); const r = rAt(t);
+        for (let j = 0; j <= rad; j++) {const k = i * (rad + 1) + j; v.fromBufferAttribute(pos, k).sub(c).normalize().multiplyScalar(r).add(c); pos.setXYZ(k, v.x, v.y, v.z);}
+      }
+      geo.computeVertexNormals();
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.userData.curve = curve; mesh.userData.rAt = rAt;
+      if (opt.cap !== false) {const tip = new THREE.Mesh(ball, mat); tip.scale.setScalar(Math.max(r1 * (opt.round ? .2 : 1), .002)); tip.position.copy(curve.getPointAt(1)); mesh.add(tip);}
+      return mesh;
+    }
+    function instanced(geo, mat, list) { // list: [{p, s(number|Vector3), q?}]
+      const im = new THREE.InstancedMesh(geo, mat, list.length), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3();
+      list.forEach((o, i) => {s.copy(typeof o.s === 'number' ? V3(o.s, o.s, o.s) : o.s); m4.compose(o.p, o.q || q.identity(), s); im.setMatrixAt(i, m4);});
+      im.instanceMatrix.needsUpdate = true; return im;
+    }
+    /* đường gấp khúc có tham số độ dài */
+    function poly(points) {
+      const L = [0]; for (let i = 1; i < points.length; i++) L.push(L[i - 1] + points[i].distanceTo(points[i - 1]));
+      return {points, L, len: L[L.length - 1], at(u, out = new THREE.Vector3()) {
+        const d = THREE.MathUtils.clamp(u, 0, 1) * this.len; let i = 1; while (i < L.length - 1 && L[i] < d) i++;
+        const k = (d - L[i - 1]) / ((L[i] - L[i - 1]) || 1); return out.lerpVectors(points[i - 1], points[i], k);
+      }};
+    }
+
+    /* =====================================================================
+       CẢNH A: cây non trong khối đất cắt dọc
+       ===================================================================== */
+    const gPlant = new THREE.Group(); scene.add(gPlant);
+    const SOIL = {w: 4.4, h: 3.3, d: 2.6};
+    const gSoil = new THREE.Group(); gPlant.add(gSoil);
+    {
+      const box = new THREE.Mesh(new THREE.BoxGeometry(SOIL.w, SOIL.h, SOIL.d), new THREE.MeshStandardMaterial({color: 0x9a6a3c, transparent: true, opacity: .2, depthWrite: false, roughness: 1, side: THREE.DoubleSide}));
+      box.position.y = -SOIL.h / 2; box.renderOrder = 2; gSoil.add(box);
+      const edges = new THREE.LineSegments(new THREE.EdgesGeometry(box.geometry), new THREE.LineBasicMaterial({color: 0xe0b98a, transparent: true, opacity: .7}));
+      edges.position.copy(box.position); gSoil.add(edges);
+      const top = new THREE.Mesh(new THREE.PlaneGeometry(SOIL.w, SOIL.d), new THREE.MeshStandardMaterial({color: 0x5b3b1f, transparent: true, opacity: .55, depthWrite: false, side: THREE.DoubleSide}));
+      top.rotation.x = -Math.PI / 2; top.position.y = .002; gSoil.add(top);
+      const ps = []; for (let i = 0; i < 300; i++) ps.push({p: V3(R(-2.1, 2.1), R(-3.2, -.05), R(-1.25, 1.25)), s: R(.02, .055), q: new THREE.Quaternion().setFromEuler(new THREE.Euler(R(0, 3), R(0, 3), 0))});
+      gSoil.add(instanced(rock, M.soilP, ps));
+    }
+    // rễ cọc + rễ con
+    const mainRoot = taperTube([[0, .05, 0], [.04, -.55, .03], [-.05, -1.2, -.02], [.05, -1.85, .03], [-.02, -2.55, 0], [0, -2.9, .01]], .075, .014, M.root, {seg: 90, round: true});
+    gPlant.add(mainRoot);
+    const roots = [mainRoot];
+    [[.12, 0, 1.0], [.2, 2.2, 1.15], [.3, 4.1, 1.2], [.42, 1.1, 1.05], [.55, 3.2, .95], [.66, 5.3, .78]].forEach(([t, a, L]) => {
+      const p0 = mainRoot.userData.curve.getPointAt(t), d = V3(Math.cos(a), 0, Math.sin(a) * .9);
+      const pts = [p0, p0.clone().addScaledVector(d, L * .3).add(V3(0, -.08 * L, 0)), p0.clone().addScaledVector(d, L * .62).add(V3(0, -.3 * L, 0)), p0.clone().addScaledVector(d, L * .85).add(V3(0, -.62 * L, 0)), p0.clone().addScaledVector(d, L * .93).add(V3(0, -.85 * L, 0))];
+      const m = taperTube(pts, .036, .009, M.root, {seg: 50, rad: 8, round: true}); m.userData.attachT = t; m.userData.angle = a;
+      gPlant.add(m); roots.push(m);
+    });
+    // lông hút ở miền lông hút (gần đầu rễ, chừa chóp rễ)
+    const hairTips = [];
+    {
+      const geo = new THREE.CylinderGeometry(1, .7, 1, 5, 1, true); geo.translate(0, .5, 0);
+      const list = [], Y = V3(0, 1, 0), tmpT = new THREE.Vector3();
+      roots.forEach((m, ri) => {
+        const n = ri === 0 ? 360 : 120, c = m.userData.curve;
+        for (let i = 0; i < n; i++) {
+          const t = R(.7, .94); const p = c.getPointAt(t); c.getTangentAt(t, tmpT);
+          const N = V3(R(-1, 1), R(-1, 1), R(-1, 1)).cross(tmpT).normalize();
+          const L = ri === 0 ? R(.07, .17) : R(.04, .1), r = m.userData.rAt(t);
+          const base = p.clone().addScaledVector(N, r * .85);
+          list.push({p: base, q: new THREE.Quaternion().setFromUnitVectors(Y, N), s: V3(ri ? .0035 : .0045, L, ri ? .0035 : .0045)});
+          if (i % 3 === 0) hairTips.push(base.clone().addScaledVector(N, L));
+        }
+      });
+      gPlant.add(instanced(geo, M.hair, list));
+    }
+    const zoneAnchor = mainRoot.userData.curve.getPointAt(.8);
+    const zoneHairAnchor = mainRoot.userData.curve.getPointAt(.86).add(V3(.16, 0, .05));
+    // thân + lá
+    const stem = taperTube([[0, -.02, 0], [.02, .6, 0], [-.03, 1.3, .02], [0, 2.05, 0]], .058, .034, M.stem, {seg: 40});
+    gPlant.add(stem);
+    function leafGeo(len, w) {
+      const s = new THREE.Shape(); s.moveTo(0, 0); s.bezierCurveTo(w, len * .25, w * .9, len * .75, 0, len); s.bezierCurveTo(-w * .9, len * .75, -w, len * .25, 0, 0);
+      const g = new THREE.ShapeGeometry(s, 16); const p = g.attributes.position;
+      for (let i = 0; i < p.count; i++) {const x = p.getX(i), y = p.getY(i); p.setZ(i, .32 * len * (y / len) ** 2 - 1.2 * x * x);}
+      g.computeVertexNormals(); return g;
+    }
+    const leaves = [];
+    [[.42, 0, .8, .26, .3], [.58, 2.6, .85, .28, .28], [.74, 4.9, .75, .25, .38], [.88, 1.4, .6, .2, .5], [.99, 3.7, .38, .13, .9]].forEach(([t, az, len, w, el]) => {
+      const pivot = new THREE.Group(); pivot.position.copy(stem.userData.curve.getPointAt(t)); pivot.rotation.y = az;
+      const lf = new THREE.Mesh(leafGeo(len, w), M.leaf); lf.rotation.x = Math.PI / 2 - el; pivot.add(lf);
+      const rib = []; for (let k = 0; k <= 8; k++) {const y = len * k / 8; rib.push(V3(0, y, .32 * len * (y / len) ** 2 - .006));}
+      const ribLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(rib), new THREE.LineBasicMaterial({color: 0x9edc82})); lf.add(ribLine);
+      gPlant.add(pivot); leaves.push({lf, rib, t});
+    });
+    gPlant.updateMatrixWorld(true);
+
+    /* hạt nước, ion trôi tới lông hút rồi được hút vào */
+    function absorber(parent, {count, mat, size, spawn, targets, speed}) {
+      const im = new THREE.InstancedMesh(ball, mat, count); parent.add(im);
+      const P = [], m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3();
+      const reset = (o, first) => {o.p = spawn(); o.t = targets[(rand() * targets.length) | 0]; o.v = speed * R(.7, 1.3); o.k = 1; if (first) o.p.lerp(o.t, rand() * .6);};
+      for (let i = 0; i < count; i++) {const o = {}; reset(o, true); P.push(o);}
+      im.userData.update = dt => {
+        P.forEach((o, i) => {
+          const d = o.p.distanceTo(o.t);
+          if (d < .03) {o.k -= dt * 2.5; if (o.k <= 0) reset(o);} else o.p.addScaledVector(o.t.clone().sub(o.p).normalize(), Math.min(d, o.v * dt));
+          s.setScalar(size * Math.max(o.k, 0)); m4.compose(o.p, q, s); im.setMatrixAt(i, m4);
+        });
+        im.instanceMatrix.needsUpdate = true;
+      };
+      return im;
+    }
+    const soilSpawn = () => V3(R(-2.1, 2.1), R(-3.2, -.2), R(-1.25, 1.25));
+    const plantW = absorber(gPlant, {count: 90, mat: M.water, size: .03, spawn: soilSpawn, targets: hairTips, speed: .35});
+    const plantI = absorber(gPlant, {count: 55, mat: M.ion, size: .022, spawn: soilSpawn, targets: hairTips, speed: .3});
+
+    /* dòng nước trong mạch gỗ: rễ → thân → lá */
+    const flowPaths = [];
+    {
+      const mc = mainRoot.userData.curve, sc = stem.userData.curve;
+      const seg = (c, a, b, n = 14) => {const o = []; for (let i = 0; i <= n; i++) o.push(c.getPointAt(a + (b - a) * i / n)); return o;};
+      leaves.forEach((L, li) => {
+        const leafPts = L.rib.map(p => p.clone().applyMatrix4(L.lf.matrixWorld));
+        roots.forEach((m, ri) => {
+          if ((ri + li) % 2) return;
+          let pts = seg(m.userData.curve, .84, 0);
+          if (ri) pts = pts.concat(seg(mc, m.userData.attachT, 0, 8));
+          pts = pts.concat(seg(sc, 0, L.t, 12), leafPts);
+          flowPaths.push(poly(pts));
+        });
+      });
+    }
+    const flowIM = new THREE.InstancedMesh(ball, M.flow, 160); gPlant.add(flowIM);
+    const flowP = []; for (let i = 0; i < 160; i++) flowP.push({path: flowPaths[i % flowPaths.length], u: rand(), v: R(.07, .11)});
+    flowIM.userData.update = dt => {
+      const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = V3(.026, .026, .026), p = new THREE.Vector3();
+      flowP.forEach((o, i) => {o.u = (o.u + dt * o.v) % 1; o.path.at(o.u, p); m4.compose(p, q, s); flowIM.setMatrixAt(i, m4);});
+      flowIM.instanceMatrix.needsUpdate = true;
+    };
+    let flowOn = false;
+    function setFlow(on) {
+      flowOn = on; flowIM.visible = on;
+      [M.root, M.stem].forEach(m => {m.transparent = on; m.opacity = on ? .42 : 1; m.depthWrite = !on; m.needsUpdate = true;});
+      M.leaf.transparent = on; M.leaf.opacity = on ? .7 : 1; M.leaf.needsUpdate = true;
+    }
+
+    /* =====================================================================
+       CẢNH A2: phóng to một lông hút (tế bào biểu bì kéo dài)
+       ===================================================================== */
+    const gHair = new THREE.Group(); gHair.position.set(14, 0, 0); scene.add(gHair);
+    const epiMat = std(0xf7dc8f, {roughness: .45, transparent: true, opacity: .78});
+    const cortMat = std(0xcfe6ae, {roughness: .5});
+    const nucMat = std(0x8b5cb8, {roughness: .4});
+    const hairDet = {};
+    {
+      for (let i = -3; i <= 3; i++) {
+        const c = new THREE.Mesh(new RoundedBoxGeometry(.62, .42, .62, 3, .12), epiMat); c.position.set(i * .66, 0, 0); gHair.add(c);
+        if (i) {const n = new THREE.Mesh(ball, nucMat); n.scale.setScalar(.075); n.position.set(i * .66 + R(-.12, .12), .02, .2); gHair.add(n);}
+        for (let r = 1; r <= 2; r++) {const k = new THREE.Mesh(new RoundedBoxGeometry(.7, .55, .66, 3, .14), cortMat); k.position.set(i * .66 + (r % 2 ? .33 : 0), -.5 * r - .05, 0); gHair.add(k);}
+      }
+      const hairM = taperTube([[0, .1, 0], [.04, .6, 0], [.22, 1.4, .05], [.58, 2.3, .08], [.85, 3.1, 0]], .17, .12, epiMat, {seg: 60, rad: 18, round: true});
+      gHair.add(hairM); hairDet.curve = hairM.userData.curve;
+      const n = new THREE.Mesh(ball, nucMat); n.scale.setScalar(.085); n.position.copy(hairDet.curve.getPointAt(.42)); gHair.add(n); hairDet.nuc = n.position.clone();
+      // hạt đất có màng nước bao quanh
+      const soilList = [], filmList = [];
+      [[-.75, 1.0, .2, .32], [-.55, 2.1, -.3, .36], [1.15, .95, .1, .3], [1.3, 2.0, -.2, .34], [-.2, 3.0, .35, .28], [1.55, 3.2, .3, .3], [.1, 2.7, -.75, .3], [.9, 1.6, .8, .26], [-1.3, 1.8, .5, .3]].forEach(([x, y, z, s]) => {
+        const p = V3(x, y, z); soilList.push({p, s, q: new THREE.Quaternion().setFromEuler(new THREE.Euler(R(0, 3), R(0, 3), 0))}); filmList.push({p, s: s * 1.22});
+      });
+      gHair.add(instanced(new THREE.DodecahedronGeometry(1, 0), M.soilP, soilList));
+      gHair.add(instanced(ball, std(0x6cb8ff, {transparent: true, opacity: .28, depthWrite: false}), filmList));
+      hairDet.soil = soilList.map(o => o.p);
+      // hạt nước, ion: từ màng nước → bề mặt lông hút → theo lông hút vào tế bào
+      const mk = (count, mat, size) => {
+        const im = new THREE.InstancedMesh(ball, mat, count); gHair.add(im);
+        const P = []; const reset = o => {const s = hairDet.soil[(rand() * hairDet.soil.length) | 0]; o.p = s.clone().add(V3(R(-.3, .3), R(-.3, .3), R(-.3, .3))); o.th = R(.25, .95); o.tg = hairDet.curve.getPointAt(o.th); o.ph = 0; o.v = R(.35, .6);};
+        for (let i = 0; i < count; i++) {const o = {}; reset(o); o.p.lerp(o.tg, rand() * .7); P.push(o);}
+        const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = V3(size, size, size);
+        im.userData.update = dt => {
+          P.forEach((o, i) => {
+            if (o.ph === 0) {const d = o.p.distanceTo(o.tg); if (d < .02) o.ph = 1; else o.p.addScaledVector(o.tg.clone().sub(o.p).normalize(), Math.min(d, o.v * dt));}
+            else {o.th -= dt * .22; if (o.th <= 0) reset(o); else hairDet.curve.getPointAt(o.th, o.p);}
+            m4.compose(o.p, q, s); im.setMatrixAt(i, m4);
+          });
+          im.instanceMatrix.needsUpdate = true;
+        };
+        return im;
+      };
+      hairDet.w = mk(40, M.water, .045); hairDet.i = mk(18, M.ion, .035);
+    }
+    gHair.visible = false;
+    const H = p => p.clone().add(gHair.position);
+
+    /* =====================================================================
+       CẢNH B: lát cắt ngang rễ
+       ===================================================================== */
+    const gSec = new THREE.Group(); gSec.position.set(34, 0, 0); scene.add(gSec);
+    const SH = .3, TOP = SH / 2, PY = TOP + .05;
+    const LAYER = {
+      hair: {name: 'Lông hút', info: 'tế bào biểu bì kéo dài ra, hút nước và muối khoáng từ đất', color: 0xfff3d6, glow: 0xffd36b},
+      epi: {name: 'Biểu bì', info: 'lớp tế bào ngoài cùng của rễ', color: 0xffd25e, glow: 0xff9a00},
+      cortex: {name: 'Thịt vỏ', info: 'nhiều lớp tế bào nằm giữa biểu bì và trụ giữa', color: 0x93cf6a, glow: 0x5fd12a},
+      stele: {name: 'Trụ giữa', info: 'phần giữa rễ, chứa mạch gỗ và mạch rây', color: 0xf2aebd, glow: 0xff6f8f},
+      xylem: {name: 'Mạch gỗ', info: 'dẫn nước và muối khoáng đi lên thân, lá', color: 0x9a68d6, glow: 0x8a3cff},
+    };
+    Object.values(LAYER).forEach(L => {L.mat = std(L.color, {roughness: .5}); glowMats.add(L.mat);});
+    LAYER.hair.mat.transparent = true; LAYER.hair.mat.opacity = .95;
+    const secPick = [];
+    const HAIR_A = [];
+    {
+      const cyl = new THREE.CylinderGeometry(1, 1, SH, 18);
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, SH - .04, 64), std(0xd9c79c)); gSec.add(base);
+      const ring = (Rr, r, sq = 1) => {const n = Math.floor(2 * Math.PI * Rr / (2 * r)), o = []; for (let i = 0; i < n; i++) {const a = i / n * Math.PI * 2 + Rr; o.push({p: V3(Math.cos(a) * Rr, 0, Math.sin(a) * Rr), s: V3(r * .93, 1, r * .93 * sq)});} return o;};
+      const add = (list, L) => {const im = instanced(cyl, LAYER[L].mat, list); im.userData.layer = L; gSec.add(im); secPick.push(im); return im;};
+      add(ring(2.08, .11), 'epi');
+      add([...ring(1.85, .15), ...ring(1.55, .16), ...ring(1.24, .16)], 'cortex');
+      const XY = [[0, 0, .18]]; for (let k = 0; k < 5; k++) {const a = k / 5 * Math.PI * 2 - Math.PI / 2; XY.push([Math.cos(a) * .42, Math.sin(a) * .42, .13], [Math.cos(a) * .7, Math.sin(a) * .7, .095]);}
+      const steleL = [];
+      for (let y = -1; y <= 1; y += .15) for (let x = -1; x <= 1; x += .15) {
+        const px = x + (Math.round(y / .15) % 2 ? .075 : 0), r = Math.hypot(px, y);
+        if (r > .98 || XY.some(([a, b, c]) => Math.hypot(px - a, y - b) < c + .07)) continue;
+        steleL.push({p: V3(px, -.005, y), s: V3(.07, .97, .07)});
+      }
+      add(steleL, 'stele');
+      add(XY.map(([x, z, r]) => ({p: V3(x, .005, z), s: V3(r, 1.03, r)})), 'xylem');
+      gSec.add(instanced(new THREE.CircleGeometry(1, 20).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({color: 0x5e3f8c}), XY.map(([x, z, r]) => ({p: V3(x, TOP + .01, z), s: r * .62}))));
+      // lông hút
+      for (let i = 0; i < 9; i++) {
+        const a = i / 9 * Math.PI * 2 + R(-.12, .12); HAIR_A.push(a);
+        const pol = (r, da) => V3(Math.cos(a + da) * r, TOP - .07, Math.sin(a + da) * r);
+        const m = taperTube([pol(2.05, 0), pol(2.5, .03), pol(3.0, .09 * (i % 2 ? 1 : -1)), pol(3.55, .06 * (i % 2 ? 1 : -1))], .075, .055, LAYER.hair.mat, {seg: 30, rad: 10, round: true});
+        m.userData.layer = 'hair'; gSec.add(m); secPick.push(m);
+      }
+      // đất xung quanh
+      const sl = []; for (let i = 0; i < 80; i++) {const a = R(0, Math.PI * 2), r = R(2.45, 4.3); const p = V3(Math.cos(a) * r, R(-.12, .12), Math.sin(a) * r); if (HAIR_A.some(h => Math.abs(Math.atan2(Math.sin(a - h), Math.cos(a - h))) * r < .25)) continue; sl.push({p, s: R(.08, .17), q: new THREE.Quaternion().setFromEuler(new THREE.Euler(R(0, 3), R(0, 3), 0))});}
+      const soilSec = instanced(rock, M.soilP, sl); gSec.add(soilSec); gSec.userData.soil = soilSec;
+    }
+    // mạch gỗ đi lên thân (hiện ở cuối hoạt ảnh)
+    const upGroup = new THREE.Group(); gSec.add(upGroup);
+    const upMat = new THREE.MeshStandardMaterial({color: 0x8fb8ff, transparent: true, opacity: .16, depthWrite: false, side: THREE.DoubleSide});
+    {
+      const tube = new THREE.Mesh(new THREE.CylinderGeometry(.85, .85, 4.6, 40, 1, true), upMat); tube.position.y = TOP + 2.3; upGroup.add(tube);
+      const vm = new THREE.MeshStandardMaterial({color: 0xb98ee0, transparent: true, opacity: .45, depthWrite: false});
+      [[0, 0, .14], ...[0, 1, 2, 3, 4].map(k => {const a = k / 5 * Math.PI * 2 - Math.PI / 2; return [Math.cos(a) * .42, Math.sin(a) * .42, .1];})].forEach(([x, z, r]) => {const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 4.6, 16, 1, true), vm); c.position.set(x, TOP + 2.3, z); upGroup.add(c);});
+    }
+    upGroup.visible = false;
+    // đường đi của từng hạt (4 chặng)
+    const secParts = [];
+    {
+      const XA = [0, 1, 2, 3, 4].map(k => k / 5 * Math.PI * 2 - Math.PI / 2);
+      const P = (r, a) => V3(Math.cos(a) * r, PY, Math.sin(a) * r);
+      const mk = (n, mat, size, off) => {
+        const im = new THREE.InstancedMesh(ball, mat, n); gSec.add(im);
+        const list = [];
+        for (let j = 0; j < n; j++) {
+          const a = HAIR_A[(j + off) % 9] + R(-.03, .03), da = (j % 2 ? 1 : -1) * R(.02, .06);
+          const near = XA.reduce((b, x) => Math.abs(Math.atan2(Math.sin(x - a), Math.cos(x - a))) < Math.abs(Math.atan2(Math.sin(b - a), Math.cos(b - a))) ? x : b, XA[0]);
+          const s1 = [P(R(3.75, 4.05), a + R(-.1, .1)), P(3.4, a + da * .5), P(2.8, a + da), P(2.1, a)];
+          const s2 = [P(2.1, a), P(2.02, a + da * .3), P(1.97, a)];
+          const s3 = [P(1.97, a), P(1.7, a + da * 1.6), P(1.4, a - da * 1.2), P(1.1, a + da)];
+          const s4 = [P(1.1, a + da), P(.85, (a + near) / 2), P(.56, near), P(.3, near), P(R(0, .08), R(0, 6))];
+          list.push({segs: [poly(s1), poly(s2), poly(s3), poly(s4)], d: R(0, .3), up: V3(R(-.4, .4), 0, R(-.4, .4))});
+        }
+        return {im, list, size};
+      };
+      secParts.push(mk(30, M.water, .075, 0), mk(16, M.ion, .06, 4));
+    }
+    const anim = {t: 0, playing: false, speed: 1, stage: -1, done: false};
+    const STG = 4, T_IN = 16, T_END = 21.5;
+    function placeSecParts() {
+      const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), s = new THREE.Vector3();
+      secParts.forEach(({im, list, size}) => {
+        list.forEach((o, i) => {
+          const t = anim.t;
+          if (t < T_IN) {
+            const k = Math.min(3, Math.floor(t / STG)), u = (t - k * STG) / STG;
+            o.segs[k].at(THREE.MathUtils.clamp((u - o.d) / (1 - .3), 0, 1), p);
+          } else {
+            const u = THREE.MathUtils.clamp((t - T_IN - o.d * 3) / (T_END - T_IN - 1.2), 0, 1);
+            o.segs[3].at(1, p); p.x += o.up.x * u; p.z += o.up.z * u; p.y = PY + u * 4.4;
+          }
+          s.setScalar(size); m4.compose(p, q, s); im.setMatrixAt(i, m4);
+        });
+        im.instanceMatrix.needsUpdate = true;
+      });
+    }
+    placeSecParts();
+
+    /* =====================================================================
+       CẢNH C: bể thủy sinh (rong, bèo)
+       ===================================================================== */
+    const gAqua = new THREE.Group(); gAqua.position.set(68, 0, 0); scene.add(gAqua);
+    const aquaTargets = [], weeds = [];
+    {
+      const W = 4.4, Hh = 3, D = 2.4, WL = 2.6;
+      const glass = new THREE.Mesh(new THREE.BoxGeometry(W, Hh, D), new THREE.MeshPhysicalMaterial({color: 0xd8f3ff, transparent: true, opacity: .1, roughness: .05, depthWrite: false, side: THREE.DoubleSide}));
+      glass.position.y = Hh / 2; gAqua.add(glass);
+      const ed = new THREE.LineSegments(new THREE.EdgesGeometry(glass.geometry), new THREE.LineBasicMaterial({color: 0xffffff, transparent: true, opacity: .8})); ed.position.copy(glass.position); gAqua.add(ed);
+      const water = new THREE.Mesh(new THREE.BoxGeometry(W - .04, WL, D - .04), new THREE.MeshStandardMaterial({color: 0x3d9fd6, transparent: true, opacity: .2, depthWrite: false})); water.position.y = WL / 2; water.renderOrder = 2; gAqua.add(water);
+      const surf = new THREE.Mesh(new THREE.PlaneGeometry(W - .04, D - .04), new THREE.MeshStandardMaterial({color: 0x8fd3ff, transparent: true, opacity: .35, depthWrite: false, side: THREE.DoubleSide})); surf.rotation.x = -Math.PI / 2; surf.position.y = WL; gAqua.add(surf);
+      const sand = new THREE.Mesh(new THREE.BoxGeometry(W - .04, .26, D - .04), std(0xe2c48a, {roughness: 1})); sand.position.y = .13; gAqua.add(sand);
+      const peb = []; for (let i = 0; i < 40; i++) peb.push({p: V3(R(-2.1, 2.1), .27, R(-1.1, 1.1)), s: V3(R(.05, .12), R(.03, .06), R(.05, .12))}); gAqua.add(instanced(ball, std(0xb9a083, {roughness: 1}), peb));
+      const wStem = std(0x3f9b4a), wLeaf = std(0x5cbf5a, {side: THREE.DoubleSide});
+      [[-1.5, -.4], [-.8, .35], [-.15, -.3], [.55, .4], [1.25, -.2], [1.75, .45], [-1.9, .5]].forEach(([x, z], wi) => {
+        const g = new THREE.Group(); g.position.set(x, .25, z); gAqua.add(g);
+        const h = R(1.7, 2.2), pts = []; for (let k = 0; k <= 5; k++) pts.push(V3(Math.sin(k * 1.3 + wi) * .12, h * k / 5, Math.cos(k * 1.1 + wi) * .08));
+        const st = taperTube(pts, .035, .018, wStem, {seg: 30, rad: 6}); g.add(st);
+        for (let k = 0; k < 9; k++) {
+          const t = .12 + k * .095, p = st.userData.curve.getPointAt(t);
+          const lf = new THREE.Mesh(leafGeo(R(.35, .5), .06), wLeaf); lf.position.copy(p); lf.rotation.set(R(.3, .9), k * 2.4 + wi, R(-.4, .4)); g.add(lf);
+          gAqua.updateMatrixWorld(true); aquaTargets.push(lf.localToWorld(V3(0, .2, .02)).sub(gAqua.position));
+          aquaTargets.push(st.localToWorld(p.clone()).sub(gAqua.position));
+        }
+        weeds.push({g, ph: R(0, 6)});
+      });
+      // bèo nổi trên mặt nước, rễ ngắn thả xuống
+      const duck = std(0x7ed957, {side: THREE.DoubleSide}), dRoot = new THREE.LineBasicMaterial({color: 0xeef7d8});
+      for (let i = 0; i < 16; i++) {
+        const p = V3(R(-2, 2), WL + .01, R(-1, 1)), d = new THREE.Mesh(new THREE.CircleGeometry(R(.08, .13), 14), duck); d.rotation.x = -Math.PI / 2; d.position.copy(p); gAqua.add(d);
+        const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([p, p.clone().add(V3(0, -R(.2, .35), 0))]), dRoot); gAqua.add(l);
+        aquaTargets.push(p.clone().add(V3(0, -.02, 0)));
+      }
+    }
+    const aquaSpawn = () => V3(R(-2.1, 2.1), R(.4, 2.5), R(-1.1, 1.1));
+    const aquaW = absorber(gAqua, {count: 90, mat: M.water, size: .035, spawn: aquaSpawn, targets: aquaTargets, speed: .4});
+    const aquaI = absorber(gAqua, {count: 50, mat: M.ion, size: .026, spawn: aquaSpawn, targets: aquaTargets, speed: .35});
+
+    const GROUPS = {plant: gPlant, hair: gHair, sec: gSec, aqua: gAqua};
+    let sceneName = 'plant';
+    function showScene(n) {sceneName = n; Object.entries(GROUPS).forEach(([k, g]) => g.visible = k === n);}
+    showScene('plant');
+
+    /* ---------- lớp hiển thị (Đất / Nước / Chất khoáng) ---------- */
+    const layerOn = {soil: true, water: true, ion: true};
+    function applyLayers() {
+      gSoil.visible = layerOn.soil; gSec.userData.soil.visible = layerOn.soil;
+      [plantW, aquaW, hairDet.w, secParts[0].im].forEach(m => m.visible = layerOn.water);
+      [plantI, aquaI, hairDet.i, secParts[1].im].forEach(m => m.visible = layerOn.ion);
+      document.querySelectorAll('.lyr').forEach(b => b.classList.toggle('off', !layerOn[b.dataset.l]));
+    }
+    document.querySelectorAll('.lyr').forEach(b => b.onclick = () => {layerOn[b.dataset.l] = !layerOn[b.dataset.l]; applyLayers();});
+
+    /* ---------- camera ---------- */
+    const avail = {w: 1, h: 1, top: 0, bottom: 1};
+    function fitView(target, radius, dir) {
+      // vùng còn trống (không bị thẻ bài học che) quyết định khoảng cách camera
+      const w = viewer.clientWidth || 1, h = viewer.clientHeight || 1, tv = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+      const d = radius / Math.min(tv * avail.h / h, tv * (w / h) * avail.w / w);
+      return {target, pos: target.clone().add(dir.clone().normalize().multiplyScalar(d))};
+    }
+    const VIEWS = {
+      plant: () => fitView(V3(0, -.45, 0), 3.05, V3(.35, .42, 1)),
+      land: () => fitView(V3(0, -.9, 0), 2.6, V3(.45, .2, 1)),
+      zone: () => fitView(zoneAnchor.clone(), .42, V3(.4, .1, 1)),
+      hair: () => fitView(H(V3(.2, 1.25, 0)), 2.55, V3(.25, .18, 1)),
+      sec: () => fitView(gSec.position.clone().add(V3(0, 0, .2)), 3.9, V3(0, 1.15, 1)),
+      secUp: () => fitView(gSec.position.clone().add(V3(0, 2.1, 0)), 3.6, V3(.15, .5, 1)),
+      aqua: () => fitView(gAqua.position.clone().add(V3(0, 1.4, 0)), 2.6, V3(.2, .12, 1)),
+    };
+    let tween = null, currentView = 'plant';
+    function goView(name, instant) {
+      currentView = name; const v = VIEWS[name]();
+      if (instant) {tween = null; camera.position.copy(v.pos); controls.target.copy(v.target); controls.update(); return;}
+      tween = {t0: performance.now(), dur: 1000, p0: camera.position.clone(), q0: controls.target.clone(), p1: v.pos, q1: v.target};
+    }
+    function stepTween(now) {
+      if (!tween) return;
+      let k = Math.min(1, (now - tween.t0) / tween.dur); k = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+      camera.position.lerpVectors(tween.p0, tween.p1, k); controls.target.lerpVectors(tween.q0, tween.q1, k);
+      if (k >= 1) tween = null;
+    }
+    canvas.addEventListener('pointerdown', () => {tween = null; $('hint').style.opacity = 0;});
+    canvas.addEventListener('wheel', () => {tween = null;}, {passive: true});
+
+    /* ---------- nhãn gắn với vị trí 3D ---------- */
+    const lines = $('lines'), NS = 'http://www.w3.org/2000/svg';
+    const S = p => p.clone().add(gSec.position);
+    const secAnchor = (r, i = 0) => S(V3(Math.cos(HAIR_A[i]) * r, TOP, Math.sin(HAIR_A[i]) * r));
+    const LBL = {
+      zone: {text: 'Miền lông hút', anchor: () => zoneAnchor, off: [-1, -.6], click: () => onZone()},
+      hairL: {text: 'Lông hút', anchor: () => zoneHairAnchor, off: [1, .7], click: () => onHair()},
+      dHair: {text: 'Lông hút', anchor: () => H(hairDet.curve.getPointAt(.75)), off: [1, -.4], info: 1},
+      dNuc: {text: 'Nhân tế bào', anchor: () => H(hairDet.nuc), off: [-1, -.3], info: 1},
+      dEpi: {text: 'Tế bào biểu bì', anchor: () => H(V3(-1.98, .2, .2)), off: [-1, 1.3], info: 1},
+      dSoil: {text: 'Hạt đất', anchor: () => H(hairDet.soil[1]), off: [-1, -.8], info: 1},
+      dWater: {text: 'Nước + muối khoáng', anchor: () => H(hairDet.soil[3].clone().add(V3(.3, .2, 0))), off: [1, .5], info: 1, cls: 'water'},
+      s0: {text: '1 · Lông hút', anchor: () => secAnchor(2.9), off: [1, -1], info: 1},
+      s1: {text: '2 · Biểu bì', anchor: () => secAnchor(2.08, 3), off: [1, 2.2], info: 1},
+      s2: {text: '3 · Thịt vỏ', anchor: () => secAnchor(1.55, 3), off: [1, 1.2], info: 1},
+      s3: {text: '4 · Mạch gỗ', anchor: () => S(V3(0, TOP, 0)), off: [-1, -1.6], info: 1},
+      up: {text: 'Lên mạch gỗ của thân → lá', anchor: () => S(V3(0, TOP + 4, 0)), off: [1, 0], info: 1, cls: 'water'},
+      landHair: {text: 'Nước vào qua lông hút', anchor: () => zoneAnchor, off: [1, .2], info: 1, cls: 'water'},
+      aquaSurf: {text: 'Nước thấm qua bề mặt cây', anchor: () => gAqua.position.clone().add(aquaTargets[20]), off: [1, -.5], info: 1, cls: 'water'},
+    };
+    Object.entries(LBL).forEach(([k, o]) => {
+      o.tag = document.createElement('button'); o.tag.type = 'button'; o.tag.className = 'tag' + (o.info ? ' info' : '') + (o.cls ? ' ' + o.cls : ''); o.tag.textContent = o.text;
+      if (o.click) o.tag.onclick = o.click; $('tags').append(o.tag);
+      o.ln = document.createElementNS(NS, 'line'); o.dot = document.createElementNS(NS, 'circle'); o.dot.setAttribute('r', 4.5); lines.append(o.ln, o.dot);
+    });
+    let shownLabels = new Set();
+    const setLabels = arr => {shownLabels = new Set(arr);};
+    const tmp = new THREE.Vector3();
+    function updateLabels() {
+      const w = viewer.clientWidth, h = viewer.clientHeight, narrow = w < 600, side = narrow ? 50 : 8, placed = [];
+      Object.entries(LBL).forEach(([k, o]) => {
+        let show = shownLabels.has(k);
+        if (show) {tmp.copy(o.anchor()).project(camera); if (tmp.z > 1 || Math.abs(tmp.x) > 1.2 || Math.abs(tmp.y) > 1.2) show = false;}
+        o.tag.classList.toggle('show', show); o.ln.style.display = o.dot.style.display = show ? '' : 'none';
+        if (!show) return;
+        const x = (tmp.x * .5 + .5) * w, y = (-tmp.y * .5 + .5) * h;
+        const tw = o.tag.offsetWidth, th = o.tag.offsetHeight, gap = Math.min(90, w * .14);
+        let tx = x + o.off[0] * (gap + tw / 2); tx = Math.max(tw / 2 + side, Math.min(w - tw / 2 - side, tx));
+        let ty = Math.max(th / 2 + avail.top + 52, Math.min(avail.bottom - 12 - th / 2, y + o.off[1] * (narrow ? 30 : 40)));
+        // đẩy nhãn xuống nếu chồng lên nhãn đã đặt (màn hình hẹp)
+        for (let moved = true, n = 0; moved && n < 6; n++) {
+          moved = false;
+          for (const r of placed) if (Math.abs(tx - r.x) < (tw + r.w) / 2 + 4 && Math.abs(ty - r.y) < (th + r.h) / 2 + 4) {ty = r.y + (r.h + th) / 2 + 6; moved = true;}
+        }
+        placed.push({x: tx, y: ty, w: tw, h: th});
+        o.tag.style.left = tx + 'px'; o.tag.style.top = ty + 'px';
+        const ex = tx + (tx < x ? tw / 2 : -tw / 2);
+        o.ln.setAttribute('x1', ex); o.ln.setAttribute('y1', ty); o.ln.setAttribute('x2', x); o.ln.setAttribute('y2', y);
+        o.dot.setAttribute('cx', x); o.dot.setAttribute('cy', y);
+      });
+    }
+
+    /* ---------- toast / phản hồi ---------- */
+    let toastT;
+    function toast(msg) {const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600);}
+    function fb(id, kind, html) {const f = $(id); f.className = 'fb show ' + kind; f.innerHTML = html;}
+
+    /* ---------- thuyết minh ---------- */
+    let voice = null, muted = false, started = false;
+    function stopVoice() {if (voice) {voice.pause(); voice = null;} }
+    function say(key) {
+      stopVoice(); if (muted || !started || !AUDIO[key]) return;
+      voice = new Audio(AUDIO[key]); voice.play().catch(() => {});
+    }
+    const sayV = (key, idx) => say(idx == null ? key : key + idx);
+    $('btnNarration').onclick = () => {
+      muted = !muted; stopVoice();
+      $('btnNarration').setAttribute('aria-pressed', !muted);
+      $('btnNarration').firstChild.textContent = muted ? '🔇 ' : '🔊 ';
+    };
+
+    /* ---------- hiệu ứng âm thanh (WebAudio) ---------- */
+    let ac = null;
+    function tone(f0, t0, dur, type = 'sine', vol = .12, f1 = null) {
+      const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + t0;
+      o.type = type; o.frequency.setValueAtTime(f0, t); if (f1) o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + dur + .02);
+    }
+    const SFX = {
+      click: () => tone(720, 0, .05, 'sine', .07),
+      pop: () => tone(420, 0, .09, 'sine', .1, 760),
+      place: () => {tone(300, 0, .08, 'triangle', .12, 200); tone(600, .05, .06, 'sine', .06);},
+      ding: () => {tone(988, 0, .18, 'triangle', .1); tone(1318, .1, .26, 'triangle', .08);},
+      correct: () => {tone(659, 0, .14, 'triangle', .13); tone(880, .12, .3, 'triangle', .13);},
+      wrong: () => {tone(240, 0, .22, 'sawtooth', .07, 150); tone(180, .1, .26, 'sawtooth', .06, 110);},
+      success: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, i * .1, .28, 'triangle', .12)),
+    };
+    function sfx(name) {if (muted) return; try {ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); SFX[name]();} catch (e) {} }
+    document.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.matches('.opt, .mslot, #btnExplore, #btnNarration, #ordCheck, #dCheck')) return;
+      if (b.matches('.chipcard')) return sfx('pop');
+      sfx('click');
+    }, true);
+
+    /* ---------- các bước ---------- */
+    const stepsEl = $('steps');
+    STEP_NAMES.forEach((n, i) => {
+      const b = document.createElement('button'); b.className = 'step'; b.innerHTML = `<b>${i + 1}</b><span>${n}</span>`; b.setAttribute('aria-pressed', 'false');
+      b.onclick = () => goStep(i); stepsEl.append(b);
+    });
+    const visited = new Set(); let cur = -1;
+    let nudgeT = null;
+    function clearNudge() {clearTimeout(nudgeT); document.querySelectorAll('.tag.nudge').forEach(t => t.classList.remove('nudge')); hideFinger();}
+    function nudgeTag(k, ms = 3000) {clearNudge(); nudgeT = setTimeout(() => LBL[k].tag.classList.add('nudge'), ms);}
+
+    function goStep(i) {
+      i = Math.max(0, Math.min(STEP_NAMES.length - 1, i));
+      clearNudge(); anim.playing = false; syncAnimBtns();
+      if (cur >= 0) visited.add(cur);
+      cur = i;
+      document.querySelectorAll('.sec').forEach(el => el.classList.toggle('on', +el.dataset.step === i));
+      [...stepsEl.children].forEach((b, k) => {b.setAttribute('aria-pressed', k === i); b.classList.toggle('done', visited.has(k) && k !== i);});
+      const act = stepsEl.children[i].getBoundingClientRect(), bar = stepsEl.getBoundingClientRect();
+      stepsEl.scrollTo({left: stepsEl.scrollLeft + act.left - bar.left - (bar.width - act.width) / 2, behavior: 'smooth'});
+      $('btnPrev').disabled = i === 0; $('btnNext').disabled = i === STEP_NAMES.length - 1;
+      $('lessonTitle').textContent = 'Bước ' + (i + 1) + ' · ' + STEP_NAMES[i];
+      $('sidebody').scrollTop = 0;
+      controls.autoRotate = false; $('btnSpin').classList.toggle('on', controls.autoRotate);
+      $('btnReset').classList.remove('on');
+      setFlow(i === 2); setGlow(null); setHairGlow(false);
+      if (i === 0) {showScene('plant'); setLabels(found.zone ? ['zone', 'hairL'] : ['zone']); goView('plant'); nudgeTag(found.zone && !found.hair ? 'hairL' : 'zone', 4000);}
+      if (i === 1) {showScene('sec'); upGroup.visible = anim.t >= T_IN; setLabels(stageLabels()); goView(anim.t >= T_IN ? 'secUp' : 'sec');}
+      if (i === 2) {showScene('plant'); setLabels([]); goView('plant');}
+      if (i === 3) {setEnv(env, true);}
+      if (started) sayV('step', i);
+    }
+    $('btnPrev').onclick = () => goStep(cur - 1);
+    $('btnNext').onclick = () => goStep(cur + 1);
+
+    /* ---------- trắc nghiệm: chọn lại không giới hạn, sai 2 lần có gợi ý ---------- */
+    function mcq(rootId, fbId, {ok, no, hint, okKey, noKey, onOk}) {
+      const root = $(rootId); let wrong = 0;
+      root.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+        if (+b.dataset.c) {
+          sfx('correct'); b.classList.add('ok'); root.querySelectorAll('.opt').forEach(x => x.disabled = true);
+          fb(fbId, 'ok', '👏 ' + ok); say(okKey); onOk && onOk();
+        } else {
+          wrong++; sfx('wrong'); b.classList.add('no'); b.disabled = true;
+          fb(fbId, 'no', no + (wrong >= 2 && hint ? '<br>💡 ' + hint : '')); say(noKey);
+        }
+      });
+    }
+
+    /* ===== Bước 1: miền lông hút ===== */
+    const found = {zone: false, hair: false};
+    function markFound(k) {
+      if (!found[k]) sfx('ding'); found[k] = true; $('ck-' + k).classList.add('done');
+      const n = +found.zone + +found.hair; $('cnt0').textContent = `Đã khám phá ${n}/2`;
+      if (n === 2) {fb('fb0', 'ok', '👏 Giỏi lắm! Em đã tìm thấy miền lông hút và lông hút. Trả lời câu hỏi bên dưới nhé.'); $('q1card').classList.remove('hide'); setTimeout(() => $('q1card').scrollIntoView({block: 'nearest', behavior: 'smooth'}), 200);}
+    }
+    let hairGlow = false; const setHairGlow = on => {hairGlow = on; if (!on) {M.hair.emissive.set(0); epiMat.emissive.set(0);} };
+    function onZone() {
+      if (cur !== 0) return;
+      clearNudge(); markFound('zone'); showScene('plant'); setHairGlow(true);
+      setLabels(['zone', 'hairL']); goView('zone'); $('btnReset').classList.add('on');
+      toast('Miền lông hút: gần đầu rễ có rất nhiều lông hút nhỏ li ti'); sayV('zone');
+      if (!found.hair) nudgeTag('hairL', 6000);
+    }
+    function onHair() {
+      if (cur !== 0) return;
+      if (!found.zone) return toast('Em chạm nhãn “Miền lông hút” trước nhé');
+      clearNudge(); markFound('hair'); fadeSwap(() => {showScene('hair'); setLabels(['dHair', 'dNuc', 'dEpi', 'dSoil', 'dWater']); goView('hair', true);});
+      $('btnReset').classList.add('on'); setHairGlow(true);
+      toast('Lông hút là một tế bào biểu bì của rễ kéo dài ra'); sayV('hair');
+    }
+    mcq('q1', 'fbq1', {ok: V.q1ok, no: V.q1no, hint: V.q1hint, okKey: 'q1ok', noKey: 'q1no', onOk: () => $('kc0').classList.remove('hide')});
+
+    function fadeSwap(fn) {const f = $('fade'); f.classList.add('on'); setTimeout(() => {fn(); f.classList.remove('on');}, 290);}
+
+    /* ===== Bước 2: lát cắt ngang rễ + hoạt ảnh 4 chặng ===== */
+    const STAGE_LAYER = ['hair', 'epi', 'cortex', 'xylem'];
+    let glowLayer = null; const setGlow = L => {glowLayer = L; Object.values(LAYER).forEach(o => o.mat.emissive.set(0));};
+    function stageLabels() {const k = anim.stage; if (anim.t >= T_IN) return ['s3', 'up']; return k >= 0 ? ['s' + k] : ['s0', 's1', 's2', 's3'];}
+    function syncAnimBtns() {
+      $('aPlay').textContent = anim.playing ? '⏸ Tạm dừng' : anim.done ? '▶ Chạy lại' : anim.t > 0 ? '▶ Tiếp tục' : '▶ Bắt đầu';
+      $('aPlay').classList.toggle('on', !anim.playing); $('aSlow').classList.toggle('on', anim.speed < 1); $('aNorm').classList.toggle('on', anim.speed === 1);
+      [...$('stageList').children].forEach((c, k) => {c.classList.toggle('done', anim.t >= (k + 1) * STG); c.classList.toggle('cur', anim.stage === k && anim.t < (k + 1) * STG && anim.t > 0);});
+    }
+    function animReset() {anim.t = 0; anim.stage = -1; anim.done = false; upGroup.visible = false; setGlow(null); placeSecParts(); setLabels(stageLabels()); goView('sec');}
+    $('aPlay').onclick = () => {if (anim.done) animReset(); anim.playing = !anim.playing; if (anim.playing && anim.t === 0) goView('sec'); syncAnimBtns();};
+    $('aSlow').onclick = () => {anim.speed = .5; syncAnimBtns();};
+    $('aNorm').onclick = () => {anim.speed = 1; syncAnimBtns();};
+    $('aReplay').onclick = () => {animReset(); anim.playing = true; syncAnimBtns();};
+    function updateAnim(dt) {
+      if (!anim.playing) return;
+      anim.t = Math.min(T_END, anim.t + dt * anim.speed);
+      const k = anim.t < T_IN ? Math.floor(anim.t / STG) : 4;
+      if (k !== anim.stage) {
+        anim.stage = k;
+        if (k < 4) {setGlow(STAGE_LAYER[k]); setLabels(['s' + k]); sayV('stage', k); toast(['Chặng 1: Lông hút hút nước và muối khoáng từ đất', 'Chặng 2: đi qua lớp biểu bì', 'Chặng 3: đi qua lớp thịt vỏ', 'Chặng 4: vào mạch gỗ của rễ'][k]);}
+        else {setGlow('xylem'); upGroup.visible = true; setLabels(['s3', 'up']); goView('secUp'); sayV('up'); toast('Mạch gỗ của rễ → mạch gỗ của thân → mạch gỗ của lá');}
+      }
+      if (anim.t >= T_END) {anim.playing = false; anim.done = true; $('ordCard').classList.remove('hide'); setTimeout(() => $('ordCard').scrollIntoView({block: 'nearest', behavior: 'smooth'}), 200);}
+      placeSecParts(); syncAnimBtns();
+    }
+
+    /* ---------- ghép thẻ dùng chung (sắp xếp + sơ đồ) ---------- */
+    function matcher({slots, tray, chips, check, reset, fbId, counter, bounce, ok, no, hint, okKey, noKey, onWin, onDraw}) {
+      const st = {sel: null, val: slots.map(() => null), fails: 0, won: false};
+      const shuffled = [...chips].sort(() => rand() - .5);
+      const draw = () => {
+        slots.forEach((el, i) => {const v = st.val[i]; el.textContent = v || el.dataset.ph || '?'; el.classList.toggle('filled', !!v); if (!v) el.classList.remove('good', 'bad');});
+        tray.innerHTML = shuffled.map(c => `<button class="chipcard ${st.sel === c ? 'sel' : ''} ${st.val.includes(c) ? 'used' : ''}" data-c="${c}">${c}</button>`).join('');
+        tray.querySelectorAll('.chipcard').forEach(b => b.onclick = () => {if (st.won) return; st.sel = st.sel === b.dataset.c ? null : b.dataset.c; draw();});
+        check.disabled = st.val.includes(null) || st.won;
+        counter && (counter.textContent = `Đã ghép ${st.val.filter(Boolean).length}/${slots.length}`);
+        onDraw && onDraw(st);
+      };
+      slots.forEach((el, i) => el.onclick = () => {
+        if (st.won) return; $(fbId).className = 'fb';
+        if (st.val[i] && !st.sel) {sfx('click'); st.val[i] = null; el.classList.remove('good', 'bad'); return draw();}
+        if (!st.sel) return toast('Em chọn một thẻ trước nhé');
+        sfx('place'); el.classList.remove('good', 'bad'); st.val[i] = st.sel; st.sel = null; draw();
+      });
+      check.onclick = () => {
+        let good = 0; slots.forEach((el, i) => {const g = st.val[i] === el.dataset.ans; if (g) good++; el.classList.add(g ? 'good' : 'bad');});
+        if (good === slots.length) {st.won = true; sfx('success'); fb(fbId, 'ok', '🎉 ' + ok); say(okKey); check.disabled = true; onWin && onWin(); return;}
+        st.fails++; sfx('wrong');
+        fb(fbId, 'no', `Đúng ${good}/${slots.length}. ${no}` + (st.fails >= 2 ? '<br>💡 ' + hint : '')); say(noKey);
+        if (bounce) setTimeout(() => {slots.forEach((el, i) => {if (st.val[i] !== el.dataset.ans) {st.val[i] = null; el.classList.remove('bad');}}); draw();}, 900);
+      };
+      reset.onclick = () => {st.val = slots.map(() => null); st.sel = null; st.won = false; slots.forEach(el => el.classList.remove('good', 'bad')); $(fbId).className = 'fb'; draw();};
+      draw(); return st;
+    }
+    // sắp xếp thứ tự (Hoạt động 1b)
+    {
+      const row = $('ordRow'), order = ['Lông hút', 'Biểu bì', 'Thịt vỏ', 'Mạch gỗ'];
+      row.innerHTML = order.map((a, i) => `<button class="mslot" data-ans="${a}" data-ph="${i + 1}">${i + 1}</button>`).join('<em>→</em>');
+      matcher({slots: [...row.querySelectorAll('.mslot')], tray: $('ordTray'), chips: order, check: $('ordCheck'), reset: $('ordReset'), fbId: 'fbOrd', bounce: true,
+        ok: 'Giỏi lắm! Lông hút → biểu bì → thịt vỏ → mạch gỗ.', no: 'Chưa đúng thứ tự rồi, em xem lại hoạt ảnh nhé. Thẻ sai đã quay về khay.', hint: V.ordHint, okKey: 'ordOk', noKey: 'ordNo'});
+    }
+    // sơ đồ (Hoạt động 1c)
+    matcher({slots: [...document.querySelectorAll('#diag .mslot')], tray: $('dTray'), chips: ['Lông hút', 'Biểu bì', 'Thịt vỏ', 'Mạch gỗ ở rễ', 'Mạch gỗ ở thân', 'Mạch gỗ ở lá', 'Mạch rây'], check: $('dCheck'), reset: $('dReset'), fbId: 'fbD', counter: $('cntD'),
+      ok: 'Chính xác! Con đường vận chuyển là: lông hút → biểu bì → thịt vỏ → mạch gỗ ở rễ → mạch gỗ ở thân → mạch gỗ ở lá.', no: 'Có ô chưa đúng, ô đó được viền đỏ. Em chạm để lấy thẻ ra và ghép lại nhé.', hint: V.dHint, okKey: 'dOk', noKey: 'dNo',
+      onWin: () => $('diag').classList.add('run'), onDraw: st => {if (!st.won) $('diag').classList.remove('run');}});
+
+    /* ===== Bước 4: cây trên cạn ⇄ cây thủy sinh ===== */
+    let env = 'land'; const envSeen = new Set();
+    const ENV_CAP = {
+      land: '🌱 <b>Cây trên cạn:</b> rễ mọc trong đất, nước và muối khoáng đi vào cây chủ yếu qua <b>lông hút của rễ</b>.',
+      aqua: '🌊 <b>Cây thủy sinh</b> (rong, bèo) sống ngập trong nước: nước và muối khoáng thấm qua <b>bề mặt các tế bào biểu bì</b> của cây.',
+    };
+    function setEnv(e, instant) {
+      env = e; envSeen.add(e);
+      document.querySelectorAll('#envSeg button').forEach(b => b.classList.toggle('on', b.dataset.env === e));
+      $('envCap').innerHTML = ENV_CAP[e]; $('cnt3').textContent = `Đã xem ${envSeen.size}/2`;
+      const apply = () => {showScene(e === 'land' ? 'plant' : 'aqua'); setLabels(e === 'land' ? ['landHair'] : ['aquaSurf']); goView(e === 'land' ? 'land' : 'aqua', true);};
+      instant ? apply() : fadeSwap(apply);
+      if (envSeen.size === 2 && $('q4card').classList.contains('hide')) {$('q4card').classList.remove('hide'); clearNudge(); setTimeout(() => {say('q4');}, 5200);}
+    }
+    document.querySelectorAll('#envSeg button').forEach(b => b.onclick = () => {if (cur !== 3) return; setEnv(b.dataset.env); say(b.dataset.env);});
+    mcq('q4a', 'fbq4a', {ok: V.q4aOk, no: V.q4no, hint: 'Cô gợi ý: ở cảnh cây trên cạn, các hạt nước đi tới những sợi lông nhỏ ở đầu rễ.', okKey: 'q4aOk', noKey: 'q4no'});
+    mcq('q4b', 'fbq4b', {ok: V.q4bOk, no: V.q4no, hint: 'Cô gợi ý: ở bể thủy sinh, các hạt nước đi tới khắp bề mặt thân và lá rong.', okKey: 'q4bOk', noKey: 'q4no'});
+
+    $('btnNextPart').onclick = () => {location.href = encodeURI(NEXT_PART);};
+
+    /* ---------- chạm vào mô hình ---------- */
+    const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(); let downAt = null;
+    canvas.addEventListener('pointerdown', e => {downAt = {x: e.clientX, y: e.clientY};});
+    canvas.addEventListener('pointerup', e => {
+      if (!downAt) return; const moved = Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y); downAt = null; if (moved > 6) return;
+      const r = canvas.getBoundingClientRect(); ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      if (sceneName === 'sec') {
+        const h = ray.intersectObjects(secPick, false)[0]; if (!h) return;
+        const L = LAYER[h.object.userData.layer]; toast(`${L.name}: ${L.info}`); sfx('pop');
+      } else if (sceneName === 'plant' && cur === 0 && !found.zone) {
+        const h = ray.intersectObjects(roots, false)[0]; if (h && h.point.y < -1.6) onZone();
+      } else if (sceneName === 'hair') toast('Lông hút là tế bào biểu bì kéo dài, len lỏi vào khe đất để hút nước và muối khoáng');
+    });
+
+    /* ---------- công cụ chung ---------- */
+    let fingerT = null;
+    function hideFinger() {clearTimeout(fingerT); $('finger').classList.remove('show'); $('btnReset').classList.remove('nudge');}
+    $('btnSpin').onclick = () => {controls.autoRotate = !controls.autoRotate; $('btnSpin').classList.toggle('on', controls.autoRotate); tween = null;};
+    $('btnReset').onclick = () => {
+      hideFinger(); controls.autoRotate = false; $('btnSpin').classList.toggle('on', controls.autoRotate); $('btnReset').classList.remove('on');
+      if (cur === 0) {
+        const back = () => {showScene('plant'); setLabels(found.zone ? ['zone', 'hairL'] : ['zone']); goView('plant', sceneName !== 'plant');};
+        sceneName === 'hair' ? fadeSwap(back) : back();
+        if (!found.hair) nudgeTag(found.zone ? 'hairL' : 'zone');
+      } else if (cur === 1) goView(anim.t >= T_IN ? 'secUp' : 'sec');
+      else if (cur === 3) goView(env === 'land' ? 'land' : 'aqua');
+      else goView('plant');
+    };
+    $('btnFull').onclick = () => {document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();};
+    addEventListener('keydown', e => {if (e.target.matches('input,textarea')) return; if (e.key === 'ArrowRight') goStep(cur + 1); if (e.key === 'ArrowLeft') goStep(cur - 1);});
+
+    /* ---------- vòng lặp ---------- */
+    function resize() {
+      const w = viewer.clientWidth, h = viewer.clientHeight; if (!w || !h) return;
+      renderer.setSize(w, h, false); camera.aspect = w / h;
+      const les = $('lesson'), wide = w > 900;
+      const cw = wide ? les.offsetWidth + 72 : 0, ch = wide ? 0 : (les.offsetHeight + 20);
+      avail.w = Math.max(1, w - cw); avail.h = Math.max(1, h - ch);
+      const lay = $('layers'), lh = !wide && lay.offsetHeight ? lay.offsetHeight + 8 : 0; // chừa hàng chú giải phía trên thẻ bài học
+      avail.top = 0; avail.bottom = wide ? h - 44 : h - ch - lh;
+      camera.setViewOffset(w, h, cw / 2, ch / 2, w, h); camera.updateProjectionMatrix();
+    }
+    new ResizeObserver(() => resize()).observe($('lesson'));
+    new ResizeObserver(() => resize()).observe(viewer);
+    $('lessonToggle').onclick = () => {const c = $('lesson').classList.toggle('collapsed'); $('lessonToggle').textContent = c ? '▴' : '▾'; resize();};
+    const clock = new THREE.Clock();
+    function loop(now) {
+      requestAnimationFrame(loop);
+      const dt = Math.min(clock.getDelta(), .05), t = now / 1000;
+      stepTween(now); controls.update();
+      if (gPlant.visible) {plantW.userData.update(dt); plantI.userData.update(dt); if (flowOn) flowIM.userData.update(dt);}
+      if (gHair.visible) {hairDet.w.userData.update(dt); hairDet.i.userData.update(dt);}
+      if (gAqua.visible) {aquaW.userData.update(dt); aquaI.userData.update(dt); weeds.forEach(w => {w.g.rotation.z = .06 * Math.sin(t * .9 + w.ph); w.g.rotation.x = .04 * Math.sin(t * .7 + w.ph * 1.3);});}
+      if (gSec.visible) updateAnim(dt);
+      const pulse = .25 + .25 * Math.sin(t * 5);
+      if (hairGlow) {M.hair.emissive.setHex(0xffc94a); M.hair.emissiveIntensity = pulse; epiMat.emissive.setHex(0xffb300); epiMat.emissiveIntensity = pulse * .6;}
+      if (glowLayer) {const L = LAYER[glowLayer]; L.mat.emissive.setHex(L.glow); L.mat.emissiveIntensity = .2 + pulse;}
+      updateLabels();
+      renderer.render(scene, camera);
+    }
+
+    /* ---------- khởi động ---------- */
+    const bar = $('introBar'), status = $('introStatus');
+    applyLayers(); resize(); goStep(0); goView('plant', true);
+    let pct = 0; const prog = setInterval(() => {
+      pct = Math.min(100, pct + 9); bar.style.width = pct + '%'; status.textContent = `Đang dựng mô hình 3D… ${pct}%`;
+      if (pct >= 100) {clearInterval(prog); status.textContent = 'Sẵn sàng!'; $('introLoader').classList.add('ready');}
+    }, 60);
+    $('btnExplore').onclick = () => {
+      const l = $('introLoader'); l.classList.add('gone'); setTimeout(() => l.remove(), 600);
+      resize(); goView(currentView, true); started = true; sfx('click'); sayV('step', cur);
+      setTimeout(() => {$('hint').style.opacity = 0;}, 9000);
+    };
+    requestAnimationFrame(loop);
+    window.__app = {goStep, anim, THREE, camera, controls, scene, setEnv, onZone, onHair};
+  </script>
+</body>
+
+</html>
