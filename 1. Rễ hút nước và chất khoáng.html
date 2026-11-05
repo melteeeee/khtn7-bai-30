@@ -1853,8 +1853,6 @@
                     </div>
                     <div class="fb" id="fbq4b"></div>
                   </div>
-                  <button class="qbtn" id="btnNextPart" type="button" style="width:100%;margin-top:12px">Sang Phần 2:
-                    Vận chuyển các chất trong thân ▶</button>
                 </section>
 
               </div>
@@ -1874,7 +1872,6 @@
 
     const $ = id => document.getElementById(id);
     const STEP_NAMES = ['Lông hút', 'Đường đi của nước', 'Sơ đồ vận chuyển', 'Trên cạn – thủy sinh'];
-    const NEXT_PART = '2. Vận chuyển các chất trong thân.html';
 
     let seed = 300701;
     const rand = () => {seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296;};
@@ -2581,7 +2578,6 @@
     mcq('q4a', 'fbq4a', {ok: V.q4aOk, no: V.q4no, hint: 'Cô gợi ý: ở cảnh cây trên cạn, các hạt nước đi tới những sợi lông nhỏ ở đầu rễ.', okKey: 'q4aOk', noKey: 'q4no'});
     mcq('q4b', 'fbq4b', {ok: V.q4bOk, no: V.q4no, hint: 'Cô gợi ý: ở bể thủy sinh, các hạt nước đi tới khắp bề mặt thân và lá rong.', okKey: 'q4bOk', noKey: 'q4no'});
 
-    $('btnNextPart').onclick = () => {location.href = encodeURI(NEXT_PART);};
 
     /* ---------- chạm vào mô hình ---------- */
     const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(); let downAt = null;
