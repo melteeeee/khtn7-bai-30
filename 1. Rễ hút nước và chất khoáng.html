@@ -1984,7 +1984,7 @@
        CẢNH A: cây non trong khối đất cắt dọc
        ===================================================================== */
     const gPlant = new THREE.Group(); scene.add(gPlant);
-    const SOIL = {w: 4.4, h: 3.3, d: 2.6};
+    const SOIL = {w: 4.4, h: 2.6, d: 2.6};
     const gSoil = new THREE.Group(); gPlant.add(gSoil);
     {
       const box = new THREE.Mesh(new THREE.BoxGeometry(SOIL.w, SOIL.h, SOIL.d), new THREE.MeshStandardMaterial({color: 0x9a6a3c, transparent: true, opacity: .2, depthWrite: false, roughness: 1, side: THREE.DoubleSide}));
@@ -1993,7 +1993,7 @@
       edges.position.copy(box.position); gSoil.add(edges);
       const top = new THREE.Mesh(new THREE.PlaneGeometry(SOIL.w, SOIL.d), new THREE.MeshStandardMaterial({color: 0x5b3b1f, transparent: true, opacity: .55, depthWrite: false, side: THREE.DoubleSide}));
       top.rotation.x = -Math.PI / 2; top.position.y = .002; gSoil.add(top);
-      const ps = []; for (let i = 0; i < 300; i++) ps.push({p: V3(R(-2.1, 2.1), R(-3.2, -.05), R(-1.25, 1.25)), s: R(.02, .055), q: new THREE.Quaternion().setFromEuler(new THREE.Euler(R(0, 3), R(0, 3), 0))});
+      const ps = []; for (let i = 0; i < 300; i++) ps.push({p: V3(R(-2.1, 2.1), R(-2.5, -.05), R(-1.25, 1.25)), s: R(.02, .055), q: new THREE.Quaternion().setFromEuler(new THREE.Euler(R(0, 3), R(0, 3), 0))});
       gSoil.add(instanced(rock, M.soilP, ps));
     }
     // rễ cọc + rễ con
@@ -2007,7 +2007,7 @@
       gPlant.add(m); roots.push(m);
     });
     // lông hút ở miền lông hút (gần đầu rễ, chừa chóp rễ)
-    const hairTips = [];
+    const hairTips = []; let plantHairGeo, plantHairIM;
     {
       const geo = new THREE.CylinderGeometry(.35, 1, 1, 6, 10, true); geo.translate(0, .5, 0);
       { // uốn xoăn nhẹ: bán kính xoắn tăng dần từ gốc đến ngọn (đơn vị hình học, nhân với tỉ lệ ngang rất nhỏ)
@@ -2030,7 +2030,7 @@
           if (i % 3 === 0) hairTips.push(base.clone().addScaledVector(N, L));
         }
       });
-      gPlant.add(instanced(geo, M.hair, list));
+      plantHairGeo = geo; plantHairIM = instanced(geo, M.hair, list); gPlant.add(plantHairIM);
     }
     const zoneAnchor = mainRoot.userData.curve.getPointAt(.8);
     const zoneHairAnchor = mainRoot.userData.curve.getPointAt(.86).add(V3(.16, 0, .05));
@@ -2053,6 +2053,81 @@
     });
     gPlant.updateMatrixWorld(true);
 
+    /* ---------- mô hình cây con (GLB) thay cho cây dựng bằng code ---------- */
+    const PLANT_GLB = 'https://3d-cdn.yoolife.com.vn/Y59LynnFmORLYdLfNl/Y59LynnFmORLYdLfNl.glb';
+    async function loadSeedling() {
+      const {GLTFLoader} = await import('three/addons/loaders/GLTFLoader.js');
+      const g = await new GLTFLoader().loadAsync(PLANT_GLB);
+      let mesh = null; g.scene.traverse(o => {if (o.isMesh && !mesh) mesh = o;});
+      return mesh;
+    }
+    const seedling = await loadSeedling().catch(e => {console.warn('Không tải được mô hình cây, dùng cây dựng sẵn', e); return null;});
+    let rootPick = roots, glbFlow = null;
+    if (seedling) {
+      const SC = 3.2, SOIL_Y = -.34; // mặt đất nằm ở gốc thân của mô hình
+      seedling.parent?.remove(seedling);
+      seedling.scale.setScalar(SC); seedling.position.set(-.02 * SC, -SOIL_Y * SC, 0);
+      gPlant.add(seedling); gPlant.updateMatrixWorld(true);
+      [...roots, stem, plantHairIM, ...leaves.map(l => l.lf.parent)].forEach(o => {o.visible = false;});
+      M.seed = seedling.material; rootPick = [seedling];
+      // đồ thị đỉnh của lưới (gộp các đỉnh trùng vị trí ở đường nối UV)
+      const geo = seedling.geometry, P = geo.attributes.position, I = geo.index.array, N = P.count;
+      const canon = new Int32Array(N), seen = new Map();
+      for (let i = 0; i < N; i++) {const k = Math.round(P.getX(i) * 1e4) + ',' + Math.round(P.getY(i) * 1e4) + ',' + Math.round(P.getZ(i) * 1e4); let c = seen.get(k); if (c === undefined) {c = i; seen.set(k, i);} canon[i] = c;}
+      const off = new Int32Array(N + 1);
+      for (let t = 0; t < I.length; t += 3) {off[canon[I[t]] + 1] += 2; off[canon[I[t + 1]] + 1] += 2; off[canon[I[t + 2]] + 1] += 2;}
+      for (let i = 0; i < N; i++) off[i + 1] += off[i];
+      const adj = new Int32Array(off[N]), fill = off.slice(0, N);
+      for (let t = 0; t < I.length; t += 3) {
+        const a = canon[I[t]], b = canon[I[t + 1]], c = canon[I[t + 2]];
+        adj[fill[a]++] = b; adj[fill[a]++] = c; adj[fill[b]++] = a; adj[fill[b]++] = c; adj[fill[c]++] = a; adj[fill[c]++] = b;
+      }
+      const px = i => P.getX(i), py = i => P.getY(i), pz = i => P.getZ(i);
+      const near = (x, y, z, ok = () => true) => {let b = -1, bd = 1e9; for (let i = 0; i < N; i++) {if (canon[i] !== i || !ok(i)) continue; const d = (px(i) - x) ** 2 + (py(i) - y) ** 2 + (pz(i) - z) ** 2; if (d < bd) {bd = d; b = i;}} return b;};
+      const src = near(.02, SOIL_Y, 0);
+      // Dijkstra từ gốc thân: đường ngắn nhất dọc theo bề mặt rễ / thân / lá
+      const dist = new Float64Array(N).fill(Infinity), prev = new Int32Array(N).fill(-1);
+      const hv = [], hd = [];
+      const push = (v, d) => {let i = hv.length; hv.push(v); hd.push(d); while (i) {const p = (i - 1) >> 1; if (hd[p] <= hd[i]) break; let t = hv[p]; hv[p] = hv[i]; hv[i] = t; t = hd[p]; hd[p] = hd[i]; hd[i] = t; i = p;}};
+      const pop = () => {const v = hv[0], d = hd[0], lv = hv.pop(), ld = hd.pop(); if (hv.length) {hv[0] = lv; hd[0] = ld; let i = 0; for (;;) {const l = 2 * i + 1, r = l + 1; let m = i; if (l < hv.length && hd[l] < hd[m]) m = l; if (r < hv.length && hd[r] < hd[m]) m = r; if (m === i) break; let t = hv[m]; hv[m] = hv[i]; hv[i] = t; t = hd[m]; hd[m] = hd[i]; hd[i] = t; i = m;}} return [v, d];};
+      dist[src] = 0; push(src, 0);
+      while (hv.length) {
+        const [v, d] = pop(); if (d > dist[v] + 1e-12) continue;
+        for (let e = off[v]; e < off[v + 1]; e++) {const u = adj[e]; const nd = d + Math.hypot(px(u) - px(v), py(u) - py(v), pz(u) - pz(v)); if (nd < dist[u]) {dist[u] = nd; prev[u] = v; push(u, nd);}}
+      }
+      const toW = i => V3(px(i), py(i), pz(i)).applyMatrix4(seedling.matrixWorld);
+      const chain = v => {const o = []; for (let g = 0; v >= 0 && g < 20000; v = prev[v], g++) o.push(v); return o;}; // v → gốc thân
+      const thin = (arr, step) => arr.filter((_, k) => k % step === 0 || k === arr.length - 1);
+      const spread = (list, gap, max) => {const out = []; for (const i of list) {if (out.length >= max) break; if (out.every(j => Math.hypot(px(i) - px(j), py(i) - py(j), pz(i) - pz(j)) > gap)) out.push(i);} return out;};
+      const reach = []; for (let i = 0; i < N; i++) if (canon[i] === i && dist[i] < Infinity) reach.push(i);
+      const byFar = a => a.sort((x, y) => dist[y] - dist[x]);
+      const rootTips = spread(byFar(reach.filter(i => py(i) < SOIL_Y - .06)), .14, 10);
+      const leafPts = spread(byFar(reach.filter(i => py(i) > .47)), .22, 6);
+      // dòng nước trong mạch: đầu rễ → gốc thân → lá
+      glbFlow = [];
+      rootTips.forEach((r, ri) => [0, 1].forEach(k => {
+        const l = leafPts[(ri + k * 3) % leafPts.length]; if (l === undefined) return;
+        const up = thin(chain(r), 3).map(toW), out = thin(chain(l).reverse(), 3).map(toW);
+        glbFlow.push(poly(up.concat(out)));
+      }));
+      // miền lông hút ở gần chóp rễ chính
+      const tip = reach.reduce((b, i) => py(i) < py(b) ? i : b, reach[0]);
+      const tc = chain(tip); let acc = 0, zi = tc[0];
+      for (let k = 1; k < tc.length; k++) {acc += Math.hypot(px(tc[k]) - px(tc[k - 1]), py(tc[k]) - py(tc[k - 1]), pz(tc[k]) - pz(tc[k - 1])); zi = tc[k]; if (acc > .09) break;}
+      zoneAnchor.copy(toW(zi)); zoneHairAnchor.copy(zoneAnchor).add(V3(.16, -.05, .05));
+      // lông hút mọc trên bề mặt các rễ (nửa dưới bộ rễ)
+      if (!geo.attributes.normal) geo.computeVertexNormals();
+      const Nn = geo.attributes.normal, Y = V3(0, 1, 0), hl = [];
+      const cand = reach.filter(i => py(i) < SOIL_Y - .22);
+      hairTips.length = 0;
+      for (let k = 0; k < 900 && cand.length; k++) {
+        const i = cand[(rand() * cand.length) | 0], base = toW(i), n = V3(Nn.getX(i), Nn.getY(i), Nn.getZ(i)).normalize(), L = R(.04, .11);
+        hl.push({p: base, q: new THREE.Quaternion().setFromUnitVectors(Y, n), s: V3(.0018, L, .0018)});
+        if (k % 3 === 0) hairTips.push(base.clone().addScaledVector(n, L));
+      }
+      gPlant.add(instanced(plantHairGeo, M.hair, hl));
+    }
+
     /* hạt nước, ion trôi tới lông hút rồi được hút vào */
     function absorber(parent, {count, mat, size, spawn, targets, speed}) {
       const im = new THREE.InstancedMesh(ball, mat, count); parent.add(im);
@@ -2069,7 +2144,7 @@
       };
       return im;
     }
-    const soilSpawn = () => V3(R(-2.1, 2.1), R(-3.2, -.2), R(-1.25, 1.25));
+    const soilSpawn = () => V3(R(-2.1, 2.1), R(-2.5, -.2), R(-1.25, 1.25));
     const plantW = absorber(gPlant, {count: 90, mat: M.water, size: .03, spawn: soilSpawn, targets: hairTips, speed: .35});
     const plantI = absorber(gPlant, {count: 55, mat: M.ion, size: .022, spawn: soilSpawn, targets: hairTips, speed: .3});
 
@@ -2089,6 +2164,7 @@
         });
       });
     }
+    if (glbFlow && glbFlow.length) flowPaths.splice(0, flowPaths.length, ...glbFlow);
     const flowIM = new THREE.InstancedMesh(ball, M.flow, 160); gPlant.add(flowIM);
     const flowP = []; for (let i = 0; i < 160; i++) flowP.push({path: flowPaths[i % flowPaths.length], u: rand(), v: R(.07, .11)});
     flowIM.userData.update = dt => {
@@ -2101,6 +2177,7 @@
       flowOn = on; flowIM.visible = on;
       [M.root, M.stem].forEach(m => {m.transparent = on; m.opacity = on ? .42 : 1; m.depthWrite = !on; m.needsUpdate = true;});
       M.leaf.transparent = on; M.leaf.opacity = on ? .7 : 1; M.leaf.needsUpdate = true;
+      if (M.seed) {M.seed.transparent = on; M.seed.opacity = on ? .45 : 1; M.seed.depthWrite = !on; M.seed.needsUpdate = true;}
     }
 
     /* =====================================================================
@@ -2324,8 +2401,8 @@
       return {target, pos: target.clone().add(dir.clone().normalize().multiplyScalar(d))};
     }
     const VIEWS = {
-      plant: () => fitView(V3(0, -.45, 0), 3.05, V3(.35, .42, 1)),
-      land: () => fitView(V3(0, -.9, 0), 2.6, V3(.45, .2, 1)),
+      plant: () => fitView(V3(0, .75, 0), 3.55, V3(.35, .3, 1)),
+      land: () => fitView(V3(0, -1.0, 0), 2.5, V3(.45, .2, 1)),
       zone: () => fitView(zoneAnchor.clone(), .42, V3(.4, .1, 1)),
       hair: () => fitView(H(V3(.2, 1.25, 0)), 2.55, V3(.25, .18, 1)),
       sec: () => fitView(gSec.position.clone().add(V3(0, 0, .2)), 3.9, V3(0, 1.15, 1)),
@@ -2615,7 +2692,7 @@
         const h = ray.intersectObjects(secPick, false)[0]; if (!h) return;
         const L = LAYER[h.object.userData.layer]; toast(`${L.name}: ${L.info}`); sfx('pop');
       } else if (sceneName === 'plant' && cur === 0 && !found.zone) {
-        const h = ray.intersectObjects(roots, false)[0]; if (h && h.point.y < -1.6) onZone();
+        const h = ray.intersectObjects(rootPick, false)[0]; if (h && h.point.y < zoneAnchor.y + .6) onZone();
       } else if (sceneName === 'hair') toast('Lông hút là tế bào biểu bì kéo dài, len lỏi vào khe đất để hút nước và muối khoáng');
     });
 
