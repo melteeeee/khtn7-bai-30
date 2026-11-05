@@ -2009,7 +2009,15 @@
     // lông hút ở miền lông hút (gần đầu rễ, chừa chóp rễ)
     const hairTips = [];
     {
-      const geo = new THREE.CylinderGeometry(.35, 1, 1, 6, 1, true); geo.translate(0, .5, 0);
+      const geo = new THREE.CylinderGeometry(.35, 1, 1, 6, 10, true); geo.translate(0, .5, 0);
+      { // uốn xoăn nhẹ: bán kính xoắn tăng dần từ gốc đến ngọn (đơn vị hình học, nhân với tỉ lệ ngang rất nhỏ)
+        const P = geo.attributes.position;
+        for (let i = 0; i < P.count; i++) {
+          const y = P.getY(i), a = 22 * y * y, ph = y * Math.PI * 2.2;
+          P.setX(i, P.getX(i) + a * Math.sin(ph)); P.setZ(i, P.getZ(i) + a * (Math.cos(ph) - 1));
+        }
+        geo.computeVertexNormals();
+      }
       const list = [], Y = V3(0, 1, 0), tmpT = new THREE.Vector3();
       roots.forEach((m, ri) => {
         const n = ri === 0 ? 360 : 120, c = m.userData.curve;
