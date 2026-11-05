@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Luyện tập</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#195856;--brand-dark:#0f3f3d;--brand-light:#2f827d;--brand-soft:#e6f0ee;--ink:#10302d;--muted:#5f8b89;--line:#dbe8e5;--r:16px;--r-sm:11px;--sh-1:0 1px 2px rgba(13,42,40,.05);--sh-3:0 10px 30px -12px rgba(13,42,40,.32)}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{font-family:'Roboto',system-ui,sans-serif;font-size:15px;line-height:1.5;color:var(--ink);background:#195658;overflow:hidden}
+.stage{position:absolute;inset:0;overflow-y:auto;padding:18px 60px;display:flex}
+.card{margin:auto;width:min(75vw,100%);background:#fff;border-radius:26px;box-shadow:var(--sh-3);padding:36px 44px 40px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.chip{font-size:18px;font-weight:700;color:var(--brand);background:var(--brand-soft);border-radius:99px;padding:4px 18px}
+.chip.lv{background:#f6efe2;color:#8a6a35}
+.count{margin-left:auto;font-size:19px;font-weight:700;color:var(--muted)}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin:18px 0 24px}
+.bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--brand-light));border-radius:99px;transition:width .3s}
+.q{white-space:pre-line;font-size:clamp(26px,2.4vw,34px);font-weight:700;line-height:1.4;margin:0 0 22px;color:var(--ink)}
+.opts{display:flex;flex-direction:column;gap:14px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;padding:18px 22px;border-radius:16px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-size:24px;cursor:pointer;transition:.15s;font-family:inherit}
+.opt i{font-style:normal;flex:0 0 40px;height:40px;border-radius:50%;background:var(--brand-soft);color:var(--brand);font-weight:700;font-size:19px;display:flex;align-items:center;justify-content:center}
+.opt:hover:not(:disabled){border-color:var(--brand-light);background:#f1f9f7}
+.opt:disabled{cursor:default}
+.opt.ok{border-color:var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-weight:600}.opt.ok i{background:var(--brand);color:#fff}
+.opt.no{border-color:#c96a4f;background:#fbeae4;color:#a54527}.opt.no i{background:#c96a4f;color:#fff}
+.fb{display:none;margin-top:18px;padding:16px 22px;border-radius:16px;font-size:22px;line-height:1.6}
+.fb.show{display:block}.fb.ok{background:var(--brand-soft);color:var(--brand-dark)}.fb.no{background:#fbeae4;color:#a54527}
+.row{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+.btn{border:0;border-radius:99px;padding:16px 38px;font-size:22px;font-weight:700;cursor:pointer;background:var(--brand);color:#fff;font-family:inherit}
+.btn:hover{background:var(--brand-dark)}.btn[hidden]{display:none}
+.done{text-align:center;padding:10px 0}
+.done h2{margin:0 0 6px;font-size:clamp(24px,3.4vw,32px);color:var(--brand-dark)}
+.score{font-size:54px;font-weight:800;color:var(--brand);line-height:1.1;margin:8px 0}
+.done p{margin:0 0 14px;color:var(--muted);font-size:16px}
+.lvs{display:flex;flex-direction:column;gap:10px;max-width:520px;margin:18px auto 24px}
+.lvrow{display:flex;align-items:center;gap:14px;padding:12px 18px;border-radius:14px;background:#f1f9f7;border:1px solid var(--line);font-size:20px;font-weight:600;color:var(--ink);text-align:left}
+.lvrow b{margin-left:auto;font-size:24px;color:var(--brand)}
+.lvrow .mini{flex:0 0 120px;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.lvrow .mini span{display:block;height:100%;background:var(--brand);border-radius:99px}
+@media (max-width:620px){.stage{padding:14px 52px}.card{padding:18px 16px}.opt{font-size:18px;padding:12px 14px}.q{font-size:22px}.fb{font-size:17px}.btn{font-size:18px;padding:12px 28px}.lvrow{font-size:16px}.lvrow .mini{flex-basis:60px}}
+</style></head><body>
+<div class="stage"><div class="card" id="card"></div></div>
+
+<script>
+const Q=[{"level": "Nhận biết", "q": "Với những cây trồng trên cạn, cây hấp thụ nước và muối khoáng chủ yếu nhờ bộ phận nào?", "opts": ["Lông hút của rễ", "Tế bào biểu bì của rễ", "Tế bào biểu bì của thân", "Tế bào biểu bì của lá"], "ans": 0}, {"level": "Nhận biết", "q": "Cơ quan thoát hơi nước của cây là", "opts": ["rễ", "thân", "lá", "cành"], "ans": 2}, {"level": "Nhận biết", "q": "Rễ cây hấp thụ những chất nào sau đây?", "opts": ["Nước cùng các ion khoáng", "Nước cùng các chất dinh dưỡng", "Nước và các chất khí", "Oxygen và các chất dinh dưỡng hòa tan trong nước"], "ans": 0}, {"level": "Nhận biết", "q": "Thành phần của dịch mạch gỗ chủ yếu gồm", "opts": ["Amin và hormon", "Nước và muối khoáng", "Các chất hữu cơ tổng hợp từ lá", "Hormon và muối khoáng"], "ans": 1}, {"level": "Thông hiểu", "q": "Trong các phát biểu sau về khí khổng, có bao nhiêu phát biểu đúng?\n(1) Mỗi khí khổng gồm 2 tế bào hình hạt đậu xếp úp vào nhau. (2) Mỗi tế bào khí khổng không chứa lục lạp. (3) Tế bào khí khổng có vách dày mỏng không đều; thành trong sát lỗ khí dày hơn thành ngoài. (4) Các tế bào khí khổng nằm trên lớp biểu bì của lá.", "opts": ["1", "2", "3", "4"], "ans": 2}, {"level": "Thông hiểu", "q": "Yếu tố nào sau đây không ảnh hưởng đến trao đổi nước và chất dinh dưỡng ở thực vật?", "opts": ["Ánh sáng", "Nhiệt độ", "Độ ẩm", "Nồng độ khí carbon dioxide"], "ans": 3}, {"level": "Thông hiểu", "q": "Khi nói về thoát hơi nước ở lá cây, phát biểu nào sau đây đúng?", "opts": ["Thoát hơi nước tạo động lực hút để vận chuyển các chất hữu cơ trong cây", "Thoát hơi nước làm mở khí khổng giúp carbon dioxide khuếch tán vào lá cung cấp cho quang hợp", "Thoát hơi nước làm tăng nhiệt độ của lá, làm ấm cây trong ngày giá rét", "Thoát hơi nước ngăn cản quá trình hút nước và muối khoáng của cây"], "ans": 1}, {"level": "Thông hiểu", "q": "Khi tế bào khí khổng mất nước thì", "opts": ["Thành mỏng hết căng làm cho thành dày duỗi thẳng, khí khổng đóng lại", "Thành dày căng ra làm cho thành mỏng căng theo, khí khổng đóng lại", "Thành dày căng ra làm cho thành mỏng co lại, khí khổng đóng lại", "Thành dày căng ra làm cho thành mỏng duỗi thẳng, khí khổng đóng lại"], "ans": 0}, {"level": "Thông hiểu", "q": "Khi cắm một cành cần tây vào dung dịch phẩm màu đỏ, sau một thời gian phần thân bên trong cành cần tây thay đổi như thế nào?", "opts": ["Chuyển sang màu hồng đỏ", "Không chuyển màu", "Chuyển sang màu xanh", "Chuyển sang màu vàng"], "ans": 0}, {"level": "Vận dụng", "q": "Cây sống ở vùng khô hạn, mặt trên của lá thường không có khí khổng. Hiện tượng này có tác dụng gì?", "opts": ["Tránh nhiệt độ cao làm hư hại các tế bào bên trong lá", "Giảm sự thoát hơi nước của cây", "Giảm ánh nắng gay gắt của mặt trời", "Tăng số lượng tế bào khí khổng ở mặt dưới lá"], "ans": 1}, {"level": "Vận dụng", "q": "Vì sao khi chuyển cây đi trồng nơi khác, người ta thường cắt bớt cành, lá?", "opts": ["Để cây trông gọn đẹp hơn", "Để giảm thoát hơi nước vì rễ bị tổn thương chưa hút đủ nước", "Để cây nhận được nhiều ánh sáng hơn"], "ans": 1}, {"level": "Vận dụng", "q": "Giai đoạn nào sau đây cây cần được tưới nhiều nước?", "opts": ["Cây chuẩn bị ra hoa", "Cây ở thời kì thu hoạch quả", "Cây đã già, sắp tàn"], "ans": 0}, {"level": "Vận dụng", "q": "Vì sao đáy chậu trồng cây cần có lỗ thoát nước?", "opts": ["Để rễ mọc ra ngoài chậu", "Để tránh đất ngập nước, thiếu oxygen làm thối rễ", "Để chậu nhẹ hơn"], "ans": 1}, {"level": "Vận dụng", "q": "Ngày hè nắng nóng, nên tưới cây vào thời điểm nào?", "opts": ["Giữa trưa nắng gắt", "Sáng sớm hoặc chiều mát", "Không cần tưới vì cây tự lấy nước"], "ans": 1}, {"level": "Vận dụng", "q": "Cây liễu của Van Helmont tăng khoảng 74 kg, còn đất chỉ hụt 0,1 kg. Kết luận “cây lớn lên chỉ nhờ nước” có đúng không?", "opts": ["Đúng hoàn toàn", "Chưa đúng: cây còn lấy chất khoáng từ đất và CO₂ từ không khí để tạo chất hữu cơ", "Sai, vì cây không cần nước"], "ans": 1}];
+const LEVELS=['Nhận biết','Thông hiểu','Vận dụng'];
+const sfx=(()=>{let ctx=null;
+  const ac=()=>{try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();if(ctx.state==='suspended')ctx.resume();}catch(e){}return ctx};
+  const tone=(f,t0,d,type,vol)=>{const c=ac();if(!c)return;const o=c.createOscillator(),g=c.createGain();o.type=type||'sine';o.frequency.value=f;
+    const s=c.currentTime+t0;g.gain.setValueAtTime(0.0001,s);g.gain.exponentialRampToValueAtTime(vol||.12,s+.015);g.gain.exponentialRampToValueAtTime(0.0001,s+d);
+    o.connect(g);g.connect(c.destination);o.start(s);o.stop(s+d+.02)};
+  return{click:()=>tone(660,0,.07,'triangle',.08),
+    ok:()=>{tone(523,0,.14,'sine',.13);tone(659,.1,.14,'sine',.13);tone(784,.2,.26,'sine',.13)},
+    no:()=>{tone(220,0,.16,'square',.07);tone(165,.13,.26,'square',.07)}}})();
+
+const $=id=>document.getElementById(id), card=$('card');
+let i=0, wrongOnce=false, firstTry=[];
+function render(){
+  if(i>=Q.length) return done();
+  const q=Q[i]; wrongOnce=false;
+  card.innerHTML=`<div class="top"><span class="chip">Luyện tập</span><span class="chip lv">${q.level}</span><span class="count">Câu ${i+1} / ${Q.length}</span></div>
+  <div class="bar"><span style="width:${i/Q.length*100}%"></span></div>
+  <p class="q"></p><div class="opts" id="opts"></div><div class="fb" id="fb"></div>
+  <div class="row"><button class="btn" id="next" hidden>${i===Q.length-1?'Xem kết quả':'Câu sau'}</button></div>`;
+  card.querySelector('.q').textContent=q.q;
+  q.opts.forEach((t,k)=>{
+    const b=document.createElement('button'); b.type='button'; b.className='opt';
+    b.innerHTML=`<i>${'ABCD'[k]}</i><span></span>`; b.lastChild.textContent=t;
+    b.onclick=()=>pick(k,b); $('opts').appendChild(b);
+  });
+  $('next').onclick=()=>{sfx.click();i++;render()};
+  $('card').parentNode.scrollTop=0;
+}
+function pick(k,btn){
+  const q=Q[i], fb=$('fb');
+  if(k===q.ans){
+    btn.classList.add('ok'); [...$('opts').children].forEach(b=>b.disabled=true);
+    if(!wrongOnce) firstTry[i]=true;
+    fb.className='fb show ok'; fb.innerHTML='<b>Chính xác!</b>'; sfx.ok();
+    $('next').hidden=false;
+  }else{
+    wrongOnce=true; btn.classList.add('no'); btn.disabled=true;
+    fb.className='fb show no'; fb.textContent='Chưa đúng rồi. Em suy nghĩ và chọn lại nhé!'; sfx.no();
+  }
+}
+function done(){
+  const total=firstTry.filter(Boolean).length;
+  const rows=LEVELS.map(l=>{const idx=Q.map((q,n)=>q.level===l?n:-1).filter(n=>n>=0);const ok=idx.filter(n=>firstTry[n]).length;
+    return `<div class="lvrow"><span>${l}</span><span class="mini"><span style="width:${ok/idx.length*100}%"></span></span><b>${ok} / ${idx.length}</b></div>`}).join('');
+  card.innerHTML=`<div class="done"><h2>Hoàn thành luyện tập! 🎉</h2><div class="score">${total} / ${Q.length}</div>
+  <p>Số câu em trả lời đúng ngay từ lần chọn đầu tiên.</p><div class="lvs">${rows}</div><button class="btn" id="again">Làm lại</button></div>`;
+  $('again').onclick=()=>{sfx.click();i=0;firstTry=[];render()};
+}
+render();
+</script></body></html>
