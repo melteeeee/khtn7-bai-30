@@ -2156,10 +2156,13 @@
     const SH = .3, TOP = SH / 2, PY = TOP + .05;
     const LAYER = {
       hair: {name: 'Lông hút', info: 'tế bào biểu bì kéo dài ra, hút nước và muối khoáng từ đất', color: 0xfff3d6, glow: 0xffd36b},
-      epi: {name: 'Biểu bì', info: 'lớp tế bào ngoài cùng của rễ', color: 0xffd25e, glow: 0xff9a00},
-      cortex: {name: 'Thịt vỏ', info: 'nhiều lớp tế bào nằm giữa biểu bì và trụ giữa', color: 0x93cf6a, glow: 0x5fd12a},
+      epi: {name: 'Biểu bì', info: 'lớp tế bào ngoài cùng của rễ', color: 0x7cc043, glow: 0xb6ff5e},
+      cortex: {name: 'Thịt vỏ', info: 'nhiều lớp tế bào nằm giữa biểu bì và trụ giữa', color: 0xb3dd8a, glow: 0x8fe04a},
       stele: {name: 'Trụ giữa', info: 'phần giữa rễ, chứa mạch gỗ và mạch rây', color: 0xf2aebd, glow: 0xff6f8f},
       xylem: {name: 'Mạch gỗ', info: 'dẫn nước và muối khoáng đi lên thân, lá', color: 0x9a68d6, glow: 0x8a3cff},
+      endo: {name: 'Nội bì', info: 'lớp tế bào xếp khít bao quanh trụ giữa, kiểm soát nước và muối khoáng đi vào', color: 0xe0533d, glow: 0xff7a5c},
+      peri: {name: 'Vỏ trụ', info: 'lớp tế bào nằm ngay trong nội bì, bao quanh các mạch', color: 0x4f8fe0, glow: 0x7fb4ff},
+      phloem: {name: 'Mạch rây', info: 'dẫn chất hữu cơ từ lá đi nuôi các bộ phận của cây', color: 0xf5c542, glow: 0xffe08a},
     };
     Object.values(LAYER).forEach(L => {L.mat = std(L.color, {roughness: .5}); glowMats.add(L.mat);});
     LAYER.hair.mat.transparent = true; LAYER.hair.mat.opacity = .95;
@@ -2167,20 +2170,37 @@
     const HAIR_A = [];
     {
       const cyl = new THREE.CylinderGeometry(1, 1, SH, 18);
-      const base = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, SH - .04, 64), std(0xd9c79c)); gSec.add(base);
-      const ring = (Rr, r, sq = 1) => {const n = Math.floor(2 * Math.PI * Rr / (2 * r)), o = []; for (let i = 0; i < n; i++) {const a = i / n * Math.PI * 2 + Rr; o.push({p: V3(Math.cos(a) * Rr, 0, Math.sin(a) * Rr), s: V3(r * .93, 1, r * .93 * sq)});} return o;};
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, SH - .04, 64), std(0xe4eecb)); gSec.add(base);
+      const Yax = V3(0, 1, 0);
+      // tế bào xếp thành vòng; trục x của tế bào hướng ra ngoài (dẹt theo bán kính, dài theo chu vi)
+      const cells = (Rr, rr, tt, off = 0) => {
+        const n = Math.floor(2 * Math.PI * Rr / (2 * tt * 1.06)), o = [];
+        for (let i = 0; i < n; i++) {const a = (i + off) / n * Math.PI * 2; o.push({p: V3(Math.cos(a) * Rr, 0, Math.sin(a) * Rr), s: V3(rr, 1, tt), q: new THREE.Quaternion().setFromAxisAngle(Yax, -a)});}
+        return o;
+      };
       const add = (list, L) => {const im = instanced(cyl, LAYER[L].mat, list); im.userData.layer = L; gSec.add(im); secPick.push(im); return im;};
-      add(ring(2.08, .11), 'epi');
-      add([...ring(1.85, .15), ...ring(1.55, .16), ...ring(1.24, .16)], 'cortex');
-      const XY = [[0, 0, .18]]; for (let k = 0; k < 5; k++) {const a = k / 5 * Math.PI * 2 - Math.PI / 2; XY.push([Math.cos(a) * .42, Math.sin(a) * .42, .13], [Math.cos(a) * .7, Math.sin(a) * .7, .095]);}
+      add(cells(2.08, .1, .13), 'epi');
+      add([...cells(1.86, .1, .15, .5), ...cells(1.64, .1, .15), ...cells(1.42, .1, .15, .5), ...cells(1.2, .1, .15)], 'cortex');
+      add(cells(1.0, .075, .08, .5), 'endo');
+      add(cells(.85, .07, .075), 'peri');
+      // mạch gỗ hình chữ thập (4 cánh) + mạch rây xen giữa các cánh
+      const XY = [[0, 0, .1]], PH = [];
+      for (let k = 0; k < 4; k++) {
+        const a = k / 4 * Math.PI * 2 - Math.PI / 2;
+        [.2, .38, .56].forEach((r, j) => XY.push([Math.cos(a) * r, Math.sin(a) * r, .095 - j * .008]));
+        const b = a + Math.PI / 4;
+        [[.52, 0], [.6, .09], [.6, -.09], [.42, .07], [.42, -.07]].forEach(([r, d]) => PH.push([Math.cos(b) * r - Math.sin(b) * d, Math.sin(b) * r + Math.cos(b) * d, .065]));
+      }
+      gSec.userData.xy = XY;
       const steleL = [];
-      for (let y = -1; y <= 1; y += .15) for (let x = -1; x <= 1; x += .15) {
-        const px = x + (Math.round(y / .15) % 2 ? .075 : 0), r = Math.hypot(px, y);
-        if (r > .98 || XY.some(([a, b, c]) => Math.hypot(px - a, y - b) < c + .07)) continue;
-        steleL.push({p: V3(px, -.005, y), s: V3(.07, .97, .07)});
+      for (let y = -1; y <= 1; y += .13) for (let x = -1; x <= 1; x += .13) {
+        const px = x + (Math.round(y / .13) % 2 ? .065 : 0), r = Math.hypot(px, y);
+        if (r > .72 || [...XY, ...PH].some(([c, d, e]) => Math.hypot(px - c, y - d) < e + .06)) continue;
+        steleL.push({p: V3(px, -.005, y), s: V3(.055, .97, .055)});
       }
       add(steleL, 'stele');
       add(XY.map(([x, z, r]) => ({p: V3(x, .005, z), s: V3(r, 1.03, r)})), 'xylem');
+      add(PH.map(([x, z, r]) => ({p: V3(x, .005, z), s: V3(r, 1.03, r)})), 'phloem');
       gSec.add(instanced(new THREE.CircleGeometry(1, 20).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({color: 0x5e3f8c}), XY.map(([x, z, r]) => ({p: V3(x, TOP + .01, z), s: r * .62}))));
       // lông hút
       for (let i = 0; i < 9; i++) {
@@ -2199,13 +2219,13 @@
     {
       const tube = new THREE.Mesh(new THREE.CylinderGeometry(.85, .85, 4.6, 40, 1, true), upMat); tube.position.y = TOP + 2.3; upGroup.add(tube);
       const vm = new THREE.MeshStandardMaterial({color: 0xb98ee0, transparent: true, opacity: .45, depthWrite: false});
-      [[0, 0, .14], ...[0, 1, 2, 3, 4].map(k => {const a = k / 5 * Math.PI * 2 - Math.PI / 2; return [Math.cos(a) * .42, Math.sin(a) * .42, .1];})].forEach(([x, z, r]) => {const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 4.6, 16, 1, true), vm); c.position.set(x, TOP + 2.3, z); upGroup.add(c);});
+      gSec.userData.xy.map(([x, z, r]) => [x, z, r * 1.05]).forEach(([x, z, r]) => {const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 4.6, 16, 1, true), vm); c.position.set(x, TOP + 2.3, z); upGroup.add(c);});
     }
     upGroup.visible = false;
     // đường đi của từng hạt (4 chặng)
     const secParts = [];
     {
-      const XA = [0, 1, 2, 3, 4].map(k => k / 5 * Math.PI * 2 - Math.PI / 2);
+      const XA = [0, 1, 2, 3].map(k => k / 4 * Math.PI * 2 - Math.PI / 2);
       const P = (r, a) => V3(Math.cos(a) * r, PY, Math.sin(a) * r);
       const mk = (n, mat, size, off) => {
         const im = new THREE.InstancedMesh(ball, mat, n); gSec.add(im);
