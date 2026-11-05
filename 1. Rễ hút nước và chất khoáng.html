@@ -2009,7 +2009,7 @@
     // lông hút ở miền lông hút (gần đầu rễ, chừa chóp rễ)
     const hairTips = [];
     {
-      const geo = new THREE.CylinderGeometry(.04, 1.1, 1, 6, 1, true); geo.translate(0, .5, 0);
+      const geo = new THREE.CylinderGeometry(.35, 1, 1, 6, 1, true); geo.translate(0, .5, 0);
       const list = [], Y = V3(0, 1, 0), tmpT = new THREE.Vector3();
       roots.forEach((m, ri) => {
         const n = ri === 0 ? 360 : 120, c = m.userData.curve;
@@ -2018,7 +2018,7 @@
           const N = V3(R(-1, 1), R(-1, 1), R(-1, 1)).cross(tmpT).normalize();
           const L = ri === 0 ? R(.07, .17) : R(.04, .1), r = m.userData.rAt(t);
           const base = p.clone().addScaledVector(N, r * .85);
-          list.push({p: base, q: new THREE.Quaternion().setFromUnitVectors(Y, N), s: V3(ri ? .0035 : .0045, L, ri ? .0035 : .0045)});
+          list.push({p: base, q: new THREE.Quaternion().setFromUnitVectors(Y, N), s: V3(ri ? .0017 : .0022, L, ri ? .0017 : .0022)});
           if (i % 3 === 0) hairTips.push(base.clone().addScaledVector(N, L));
         }
       });
