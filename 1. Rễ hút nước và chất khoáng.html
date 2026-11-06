@@ -1643,11 +1643,11 @@
             <div class="stage-tools">
               <button class="ghost" id="btnReset" type="button">⤢ <span>Toàn cảnh</span></button>
               <button class="ghost" id="btnSpin" type="button">↻ <span>Tự xoay</span></button>
-              <button class="ghost" id="btnNarration" type="button" aria-pressed="true">🔊 <span>Thuyết minh</span></button>
+              <button class="ghost" id="btnNarration" type="button" aria-pressed="true"><span>Thuyết minh</span></button>
             </div>
             <button class="stage-nav prev" id="btnPrev" type="button" aria-label="Bước trước">◀</button>
             <button class="stage-nav next" id="btnNext" type="button" aria-label="Bước sau">▶</button>
-            <div class="finger" id="finger" aria-hidden="true">👆</div>
+            <div class="finger" id="finger" aria-hidden="true"></div>
             <div class="stage-hint" id="hint">↻ Chạm và kéo để xoay mô hình • cuộn / chụm để phóng to</div>
             <div class="layers" id="layers">
               <button class="lyr" data-l="soil"><i></i>Đất</button>
@@ -1704,7 +1704,7 @@
                     <span class="chip">Hoạt ảnh</span>
                     <div class="seg" id="animSeg">
                       <button id="aPlay" class="on">▶ Bắt đầu</button>
-                      <button id="aSlow">🐢 Chậm</button>
+                      <button id="aSlow">Chậm</button>
                       <button id="aNorm" class="on">Bình thường</button>
                       <button id="aReplay">↺ Xem lại</button>
                     </div>
@@ -2437,7 +2437,6 @@
     $('btnNarration').onclick = () => {
       muted = !muted; stopVoice();
       $('btnNarration').setAttribute('aria-pressed', !muted);
-      $('btnNarration').firstChild.textContent = muted ? '🔇 ' : '🔊 ';
     };
 
     /* ---------- hiệu ứng âm thanh (WebAudio) ---------- */
@@ -2506,10 +2505,10 @@
       root.querySelectorAll('.opt').forEach(b => b.onclick = () => {
         if (+b.dataset.c) {
           sfx('correct'); b.classList.add('ok'); root.querySelectorAll('.opt').forEach(x => x.disabled = true);
-          fb(fbId, 'ok', '👏 ' + ok); say(okKey); onOk && onOk();
+          fb(fbId, 'ok', ok); say(okKey); onOk && onOk();
         } else {
           wrong++; sfx('wrong'); b.classList.add('no'); b.disabled = true;
-          fb(fbId, 'no', no + (wrong >= 2 && hint ? '<br>💡 ' + hint : '')); say(noKey);
+          fb(fbId, 'no', no + (wrong >= 2 && hint ? '<br>' + hint : '')); say(noKey);
         }
       });
     }
@@ -2519,7 +2518,7 @@
     function markFound(k) {
       if (!found[k]) sfx('ding'); found[k] = true; $('ck-' + k).classList.add('done');
       const n = +found.zone + +found.hair; $('cnt0').textContent = `Đã khám phá ${n}/2`;
-      if (n === 2) {fb('fb0', 'ok', '👏 Giỏi lắm! Em đã tìm thấy miền lông hút và lông hút. Trả lời câu hỏi bên dưới nhé.'); $('q1card').classList.remove('hide'); setTimeout(() => $('q1card').scrollIntoView({block: 'nearest', behavior: 'smooth'}), 200);}
+      if (n === 2) {fb('fb0', 'ok', 'Giỏi lắm! Em đã tìm thấy miền lông hút và lông hút. Trả lời câu hỏi bên dưới nhé.'); $('q1card').classList.remove('hide'); setTimeout(() => $('q1card').scrollIntoView({block: 'nearest', behavior: 'smooth'}), 200);}
     }
     let hairGlow = false; const setHairGlow = on => {hairGlow = on; if (!on) {M.hair.emissive.set(0); epiMat.emissive.set(0);} };
     function onZone() {
@@ -2587,9 +2586,9 @@
       });
       check.onclick = () => {
         let good = 0; slots.forEach((el, i) => {const g = st.val[i] === el.dataset.ans; if (g) good++; el.classList.add(g ? 'good' : 'bad');});
-        if (good === slots.length) {st.won = true; sfx('success'); fb(fbId, 'ok', '🎉 ' + ok); say(okKey); check.disabled = true; onWin && onWin(); return;}
+        if (good === slots.length) {st.won = true; sfx('success'); fb(fbId, 'ok', ok); say(okKey); check.disabled = true; onWin && onWin(); return;}
         st.fails++; sfx('wrong');
-        fb(fbId, 'no', `Đúng ${good}/${slots.length}. ${no}` + (st.fails >= 2 ? '<br>💡 ' + hint : '')); say(noKey);
+        fb(fbId, 'no', `Đúng ${good}/${slots.length}. ${no}` + (st.fails >= 2 ? '<br>' + hint : '')); say(noKey);
         if (bounce) setTimeout(() => {slots.forEach((el, i) => {if (st.val[i] !== el.dataset.ans) {st.val[i] = null; el.classList.remove('bad');}}); draw();}, 900);
       };
       reset.onclick = () => {st.val = slots.map(() => null); st.sel = null; st.won = false; slots.forEach(el => el.classList.remove('good', 'bad')); $(fbId).className = 'fb'; draw();};
