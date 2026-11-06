@@ -279,15 +279,6 @@
       }
     }
 
-    .eyebrow {
-      font-size: 11.5px;
-      font-weight: 700;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--brand-light);
-      margin: 0 0 4px
-    }
-
     .sec h2 {
       margin: 0 0 8px;
       font-size: 21px;
@@ -533,30 +524,6 @@
 
     .qbtn.alt:hover {
       background: var(--brand-soft)
-    }
-
-    .seg {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-top: 8px
-    }
-
-    .seg button {
-      border: 1.5px solid var(--line);
-      background: #fff;
-      border-radius: 99px;
-      padding: 7px 14px;
-      font-size: 13.5px;
-      font-weight: 600;
-      color: var(--ink);
-      cursor: pointer
-    }
-
-    .seg button.on {
-      background: var(--brand);
-      border-color: var(--brand);
-      color: #fff
     }
 
     .dots {
@@ -1243,10 +1210,6 @@
     }
 
     /* ===== Phần 2 – bổ sung ===== */
-    .seg button:disabled {
-      opacity: .45;
-      cursor: not-allowed
-    }
 
     /* Bảng 30.1 */
 
@@ -1315,10 +1278,6 @@
     }
 
     /* sơ đồ ghi nhớ */
-
-    .seg button.nudge {
-      animation: nudgePulse 1.2s ease infinite
-    }
 
     /* gợi ý kéo thả ở thí nghiệm */
     .dropRing {
@@ -1940,25 +1899,21 @@
                 <section class="sec" data-step="2">
                   <h2>Chứng minh lá thoát hơi nước</h2>
                   <p class="lead">Làm sao biết lá cây có <b>thoát hơi nước</b> thật không? Chúng mình cùng làm thí
-                    nghiệm nhé!</p>
+                    nghiệm với hai chậu cây cùng loài, cùng cỡ: <b>chậu A</b> và <b>chậu B</b>.</p>
                   <div class="card">
-                    <span class="chip">Các bước</span><span class="counter" id="cntL">Đã xong 0/5</span>
+                    <span class="chip">Các bước</span><span class="counter" id="cntL">Đã xong 0/4</span>
                     <div class="checks" id="labList">
                       <div class="check"><b>1</b>
-                        <div>Chọn 2 chậu cây cùng loài, cùng cỡ<small>Chạm vào 2 chậu giống nhau: chậu đầu tiên là chậu
-                            A, chậu thứ hai là chậu B</small></div>
-                      </div>
-                      <div class="check"><b>2</b>
                         <div>Cắt hết lá ở chậu A<small>Kéo cây kéo tới chậu A</small></div>
                       </div>
-                      <div class="check"><b>3</b>
+                      <div class="check"><b>2</b>
                         <div>Trùm túi nilon lên cả hai chậu, buộc kín<small>Kéo từng túi tới chậu A và chậu B (túi buộc
                             quanh gốc thân)</small></div>
                       </div>
-                      <div class="check"><b>4</b>
+                      <div class="check"><b>3</b>
                         <div>Đặt hai chậu ra chỗ có ánh sáng<small>Kéo từng chậu sang vùng nắng bên phải</small></div>
                       </div>
-                      <div class="check"><b>5</b>
+                      <div class="check"><b>4</b>
                         <div>Tua nhanh 1 giờ, quan sát thành túi<small>Bấm nút Tua nhanh phía trên hai chậu, xem đồng hồ chạy</small>
                         </div>
                       </div>
@@ -2053,6 +2008,8 @@
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
     import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
     import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+    import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+    import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
 
     const $ = id => document.getElementById(id);
     const STEP_NAMES = ['Khí khổng', 'Ngày hè nóng', 'Thí nghiệm', 'Vai trò'];
@@ -2082,7 +2039,7 @@
     const AUDIO = {
       step0: 'https://assets.yoolife.com.vn/yootek/1793862040634-2508.mp3',
       step1: 'https://assets.yoolife.com.vn/yootek/1793862070836-5289.mp3',
-      step2: 'https://assets.yoolife.com.vn/yootek/1793862112253-8154.mp3',
+      step2: 'https://assets.yoolife.com.vn/yootek/1793954687904-7069.mp3',
       step3: 'https://assets.yoolife.com.vn/yootek/1793862160791-5071.mp3',
       zoom: 'https://assets.yoolife.com.vn/yootek/1793862045504-1956.mp3',
       hi: 'https://assets.yoolife.com.vn/yootek/1793862049868-7716.mp3',
@@ -2094,12 +2051,10 @@
       q2: 'https://assets.yoolife.com.vn/yootek/1793862082154-1373.mp3',
       q2ok: 'https://assets.yoolife.com.vn/yootek/1793862089781-2968.mp3',
       q2no: 'https://assets.yoolife.com.vn/yootek/1793862106995-9431.mp3',
-      labWrong: 'https://assets.yoolife.com.vn/yootek/1793862116749-1184.mp3',
-      lab1: 'https://assets.yoolife.com.vn/yootek/1793862121743-1247.mp3',
-      lab2: 'https://assets.yoolife.com.vn/yootek/1793862126151-9150.mp3',
-      lab3: 'https://assets.yoolife.com.vn/yootek/1793862130351-3960.mp3',
+      lab2: 'https://assets.yoolife.com.vn/yootek/1793954691865-4015.mp3',
+      lab3: 'https://assets.yoolife.com.vn/yootek/1793954695539-5230.mp3',
       pred: 'https://assets.yoolife.com.vn/yootek/1793862134570-5411.mp3',
-      lab4: 'https://assets.yoolife.com.vn/yootek/1793862139032-9560.mp3',
+      lab4: 'https://assets.yoolife.com.vn/yootek/1793954699368-8987.mp3',
       labDone: 'https://assets.yoolife.com.vn/yootek/1793862143633-3850.mp3',
       rep: 'https://assets.yoolife.com.vn/yootek/1793862147767-5833.mp3',
       rOk: 'https://assets.yoolife.com.vn/yootek/1793862152077-5561.mp3',
@@ -2115,7 +2070,7 @@
     /* ---------- renderer / scene ---------- */
     const canvas = $('gl'), viewer = $('viewer');
     const renderer = new THREE.WebGLRenderer({canvas, antialias: true, alpha: true, powerPreference: 'high-performance'});
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));   // giới hạn độ phân giải để nhẹ máy
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     const scene = new THREE.Scene();
     scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
@@ -2132,46 +2087,11 @@
 
     /* ---------- vật liệu + hình học dùng chung ---------- */
     const std = (color, o = {}) => new THREE.MeshStandardMaterial({color, roughness: .65, ...o});
-    function grainTex(base, dark, light, n = 70) {
-      const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
-      g.fillStyle = base; g.fillRect(0, 0, 256, 256);
-      for (let i = 0; i < n; i++) {
-        const x = rand() * 256, ph = rand() * 6; g.beginPath(); g.moveTo(x, -8);
-        for (let y = 0; y <= 264; y += 12) g.lineTo(x + Math.sin(y * .045 + ph) * 3.5, y);
-        g.lineWidth = 1 + rand() * 3.5; g.strokeStyle = i % 3 ? dark : light; g.globalAlpha = .25 + rand() * .4; g.stroke();
-      }
-      g.globalAlpha = 1;
-      const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
-    }
-    const barkT = grainTex('#b48656', '#6e4a2a', '#d8b588'); barkT.repeat.set(2, 1.4);
-    const barkB = barkT.clone(); barkB.center.set(.5, .5); barkB.rotation = Math.PI / 2; barkB.repeat.set(1, 3); barkB.needsUpdate = true;
-    const M = {
-      stem: std(0xffffff, {map: barkT, bumpMap: barkT, bumpScale: 1.2, roughness: .9}),
-      branch: std(0xffffff, {map: barkB, bumpMap: barkB, bumpScale: 1, roughness: .9}),
-      leaf: std(0xffffff, {vertexColors: true, roughness: .85}),
-      leaves: std(0xffffff, {roughness: .6, side: THREE.DoubleSide}),
-      green: std(0x4f9a3a, {roughness: .55, side: THREE.DoubleSide}),
-      gstem: std(0x5f9f3e, {roughness: .6}),
-    };
     const ball = new THREE.SphereGeometry(1, 12, 9);
     const ZERO = new THREE.Matrix4().makeScale(0, 0, 0);
+    // model tĩnh: tính ma trận một lần rồi bỏ cập nhật mỗi khung hình
+    const freeze = obj => obj.traverse(o => {o.updateMatrix(); o.matrixAutoUpdate = false;});
 
-    function taperTube(pts, r0, r1, mat, opt = {}) {
-      const curve = new THREE.CatmullRomCurve3(pts.map(p => p.isVector3 ? p : V3(...p)));
-      const tub = opt.seg || 48, rad = opt.rad || 10;
-      const geo = new THREE.TubeGeometry(curve, tub, 1, rad, false);
-      const pos = geo.attributes.position, v = new THREE.Vector3(), c = new THREE.Vector3();
-      const rAt = t => {let r = THREE.MathUtils.lerp(r0, r1, t); if (opt.round && t > .9) r *= Math.sqrt(Math.max(0, (1 - t) / .1)) * .85 + .15; return r;};
-      for (let i = 0; i <= tub; i++) {
-        const t = i / tub; curve.getPointAt(t, c); const r = rAt(t);
-        for (let j = 0; j <= rad; j++) {const k = i * (rad + 1) + j; v.fromBufferAttribute(pos, k).sub(c).normalize().multiplyScalar(r).add(c); pos.setXYZ(k, v.x, v.y, v.z);}
-      }
-      geo.computeVertexNormals();
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.userData.curve = curve; mesh.userData.rAt = rAt;
-      if (opt.cap !== false) {const tip = new THREE.Mesh(ball, mat); tip.scale.setScalar(Math.max(r1 * (opt.round ? .2 : 1), .002)); tip.position.copy(curve.getPointAt(1)); mesh.add(tip);}
-      return mesh;
-    }
     function instanced(geo, mat, list) {
       const im = new THREE.InstancedMesh(geo, mat, list.length), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3();
       list.forEach((o, i) => {s.copy(typeof o.s === 'number' ? V3(o.s, o.s, o.s) : o.s); m4.compose(o.p, o.q || q.identity(), s); im.setMatrixAt(i, m4);});
@@ -2185,25 +2105,6 @@
       }};
     }
     const smooth = (pts, n) => new THREE.CatmullRomCurve3(pts, false, 'centripetal', .5).getSpacedPoints(n);
-    function bend(g, len, k = .32, cup = 1.2) {
-      const p = g.attributes.position;
-      for (let i = 0; i < p.count; i++) {const x = p.getX(i), y = p.getY(i); p.setZ(i, k * len * (y / len) ** 2 - cup * x * x);}
-      g.computeVertexNormals(); return g;
-    }
-    function leafGeo(len, w, k, cup, seg = 16) {
-      const s = new THREE.Shape(); s.moveTo(0, 0); s.bezierCurveTo(w, len * .25, w * .9, len * .75, 0, len); s.bezierCurveTo(-w * .9, len * .75, -w, len * .25, 0, 0);
-      return bend(new THREE.ShapeGeometry(s, seg), len, k, cup);
-    }
-    // khối tán lá: cầu méo, chuyển màu đậm dưới – sáng trên
-    function blob(parent, [x, y, z, r], cLo, cHi, yLo, ySpan) {
-      const geo = new THREE.SphereGeometry(1, 36, 24), p = geo.attributes.position, v = new THREE.Vector3(), col = [], c = new THREE.Color(), ph = R(0, 6);
-      for (let i = 0; i < p.count; i++) {
-        v.fromBufferAttribute(p, i); const n = 1 + .08 * Math.sin(v.x * 6 + v.y * 5 + ph) * Math.cos(v.z * 6 - v.y * 3 + ph); v.multiplyScalar(n); p.setXYZ(i, v.x, v.y, v.z);
-        c.copy(cLo).lerp(cHi, clamp((y + v.y * r - yLo) / ySpan + v.y * .12, 0, 1)); col.push(c.r, c.g, c.b);
-      }
-      geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); geo.computeVertexNormals();
-      const m = new THREE.Mesh(geo, M.leaf); m.position.set(x, y, z); m.scale.setScalar(r); parent.add(m); return m;
-    }
     function glowSprite(color, size) {
       const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
       const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, color); gr.addColorStop(.35, color.replace(/[\d.]+\)$/, '.35)')); gr.addColorStop(1, 'rgba(255,255,255,0)');
@@ -2267,58 +2168,83 @@
        CẢNH 1: chiếc lá lớn (mặt trên xanh đậm, mặt dưới nhạt có chấm khí khổng)
        ===================================================================== */
     const gLeaf = new THREE.Group(); scene.add(gLeaf);
-    const LEAF_L = 3.0, LEAF_W = 1.3, LK = .16, LCUP = .22;
-    const leafZ = (x, y) => LK * LEAF_L * (y / LEAF_L) ** 2 - LCUP * x * x;
-    const leafHW = u => .74 * LEAF_W * Math.sin(Math.PI * clamp(u, 0, 1)) ** .85;
+    // khung lá (leafPiv): x = bề ngang, y = dọc phiến lá tính từ gốc (0 → LEAF_L), z = phía mặt trên
+    const LEAF_L = 3.0;
     const leafPiv = new THREE.Group(); leafPiv.position.set(-.55, -1.35, 0); leafPiv.rotation.set(-.12, .32, -.42); gLeaf.add(leafPiv);
     const leafPick = [];
-    {
-      const lg = new THREE.PlaneGeometry(1, 1, 28, 64), lp = lg.attributes.position;
-      for (let i = 0; i < lp.count; i++) {const u = lp.getY(i) + .5, x = lp.getX(i) * 2 * leafHW(u), y = u * LEAF_L; lp.setXYZ(i, x, y, leafZ(x, y));}
-      lg.computeVertexNormals();
-      const front = new THREE.Mesh(lg, std(0x4c9a3a, {roughness: .5, side: THREE.FrontSide}));
-      const back = new THREE.Mesh(lg, std(0xa3d27f, {roughness: .8, side: THREE.BackSide}));
-      leafPiv.add(front, back); leafPick.push(front, back);
-      const veinM = std(0xc4e69a, {roughness: .5});
-      const rib = []; for (let i = 0; i <= 30; i++) {const y = LEAF_L * .97 * i / 30; rib.push(V3(0, y, leafZ(0, y) + .012));}
-      leafPiv.add(taperTube(rib, .028, .006, veinM, {seg: 40, rad: 6}));
-      const ribB = rib.map(p => p.clone().setZ(p.z - .024)); leafPiv.add(taperTube(ribB, .024, .005, veinM, {seg: 40, rad: 6}));
-      for (let k = 0; k < 7; k++) {
-        const y0 = LEAF_L * (.12 + k * .11), u1 = (y0 + LEAF_L * .16) / LEAF_L;
-        [-1, 1].forEach(sg => {
-          const x1 = sg * leafHW(u1) * .86, pts = [];
-          for (let i = 0; i <= 8; i++) {const t = i / 8, x = x1 * t, y = y0 + LEAF_L * .16 * (t * .7 + t * t * .3); pts.push(V3(x, y, leafZ(x, y) + .01));}
-          leafPiv.add(taperTube(pts, .012, .003, veinM, {seg: 12, rad: 4, cap: false}));
-        });
+    // bản đồ bề mặt lá dựng từ đỉnh của model: mỗi ô (x, y) lưu z mặt trên / mặt dưới
+    const LG = {nx: 40, ny: 80, x0: -1.3, x1: 1.3, top: null, bot: null, hw: null};
+    const lgCell = (x, y) => [clamp(Math.floor((x - LG.x0) / (LG.x1 - LG.x0) * LG.nx), 0, LG.nx - 1), clamp(Math.floor(y / LEAF_L * LG.ny), 0, LG.ny - 1)];
+    const leafSurf = (x, y, under = false) => {if (!LG.top) return 0; const [i, j] = lgCell(x, y); return (under ? LG.bot : LG.top)[j * LG.nx + i];};
+    const leafHW = u => LG.hw ? LG.hw[clamp(Math.round(u * (LG.ny - 1)), 0, LG.ny - 1)] : 0;
+    let leafFlow = null, leafStem = [];
+    function buildLeafMap(pos) {
+      const {nx, ny} = LG, top = new Float32Array(nx * ny).fill(-1e9), bot = new Float32Array(nx * ny).fill(1e9), hw = new Float32Array(ny), stem = {};
+      for (let k = 0; k < pos.count; k++) {
+        const x = pos.getX(k), y = pos.getY(k), z = pos.getZ(k);
+        if (y < 0) {const b = Math.floor(-y / .08); (stem[b] ||= [0, 0, 0, 0]); stem[b][0] += x; stem[b][1] += y; stem[b][2] += z; stem[b][3]++; continue;}
+        const [i, j] = lgCell(x, y), c = j * nx + i;
+        if (z > top[c]) top[c] = z; if (z < bot[c]) bot[c] = z; if (Math.abs(x) > hw[j]) hw[j] = Math.abs(x);
       }
-      // cuống lá + cành nhỏ
-      leafPiv.add(taperTube([[0, .05, leafZ(0, 0)], [0, -.3, -.02], [-.05, -.62, -.08]], .035, .045, M.gstem, {seg: 14, rad: 8}));
+      // lấp các ô trống bằng ô lân cận (để đường nước, chấm khí khổng luôn bám mặt lá)
+      for (let pass = 0; pass < 40; pass++) {
+        let left = 0;
+        for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+          const c = j * nx + i; if (top[c] > -1e8) continue;
+          for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {const ii = i + di, jj = j + dj; if (ii < 0 || jj < 0 || ii >= nx || jj >= ny) continue; const d = jj * nx + ii; if (top[d] > -1e8 && top[d] < 1e8) {top[c] = top[d] + 1e-9; bot[c] = bot[d]; break;}}
+          if (top[c] < -1e8) left++;
+        }
+        if (!left) break;
+      }
+      for (let j = 1; j < ny - 1; j++) hw[j] = Math.max(hw[j], (hw[j - 1] + hw[j + 1]) / 2 * .98);
+      Object.assign(LG, {top, bot, hw});
+      leafStem = Object.keys(stem).map(Number).sort((p, q) => p - q).map(b => V3(stem[b][0] / stem[b][3], stem[b][1] / stem[b][3], stem[b][2] / stem[b][3]));
+    }
+    function buildLeafFx() {
       // chấm khí khổng ở mặt dưới
       const dots = [];
       for (let i = 0; i < 900; i++) {
-        const u = R(.04, .96), y = u * LEAF_L, x = R(-1, 1) * leafHW(u) * .9;
-        dots.push({p: V3(x, y, leafZ(x, y) - .004), s: V3(.012, .006, .002), q: qE(0, 0, R(0, 3.14))});
+        const u = R(.04, .96), y = u * LEAF_L, x = R(-1, 1) * leafHW(u) * .88;
+        dots.push({p: V3(x, y, leafSurf(x, y, true) - .004), s: V3(.012, .006, .002), q: qE(0, 0, R(0, 3.14))});
       }
       leafPiv.add(instanced(ball, new THREE.MeshBasicMaterial({color: 0x3d6b2a}), dots));
       leafPiv.userData.dots = dots;
-    }
-    // dòng nước theo gân lá
-    const leafFlow = (() => {
-      const paths = [];
-      const base = [V3(-.05, -.62, -.08), V3(0, -.3, -.02), V3(0, .05, leafZ(0, 0) + .03)];
+      // dòng nước: từ cuống theo gân chính rồi rẽ ra gân bên
+      const on = (x, y, h = .025) => V3(x, y, leafSurf(x, y) + h);
+      const base = [...[...leafStem].reverse().map(p => p.clone().setZ(p.z + .02)), on(0, .05)], paths = [];
       for (let k = 0; k < 7; k++) {
         const y0 = LEAF_L * (.12 + k * .11), u1 = (y0 + LEAF_L * .16) / LEAF_L;
         [-1, 1].forEach(sg => {
-          const x1 = sg * leafHW(u1) * .86, mid = [];
-          for (let i = 1; i <= 6; i++) {const y = y0 * i / 6; mid.push(V3(0, y, leafZ(0, y) + .03));}
-          const side = []; for (let i = 1; i <= 6; i++) {const t = i / 6, x = x1 * t, y = y0 + LEAF_L * .16 * (t * .7 + t * t * .3); side.push(V3(x, y, leafZ(x, y) + .025));}
+          const x1 = sg * leafHW(u1) * .8, mid = [], side = [];
+          for (let i = 1; i <= 6; i++) mid.push(on(0, y0 * i / 6, .03));
+          for (let i = 1; i <= 6; i++) {const t = i / 6; side.push(on(x1 * t, y0 + LEAF_L * .16 * (t * .7 + t * t * .3)));}
           paths.push(poly(smooth([...base, ...mid, ...side], 120)));
         });
       }
-      return flowSys(leafPiv, paths, 2, 0x4aa8ff, .02, .5, false);
-    })();
+      leafFlow = flowSys(leafPiv, paths, 2, 0x4aa8ff, .02, .5, false);
+    }
+    // model lá (GLB): phiến lá dài theo trục -x của model, mặt trên hướng +y, cuống ở đầu +x
+    const leafReady = new Promise((resolve, reject) => {
+      new GLTFLoader().load('https://3d-cdn.yoolife.com.vn/zh_VKOL19QOkBO9Si-/zh_VKOL19QOkBO9Si-.glb', gltf => {
+        let mesh = null; gltf.scene.traverse(o => {if (o.isMesh && !mesh) mesh = o;});
+        const g = mesh.geometry; g.applyMatrix4(mesh.matrixWorld);
+        const BASE_X = .7, TIP_X = -.95, sc = LEAF_L / (BASE_X - TIP_X);
+        const P = g.attributes.position; let yb = 0, nb = 0;
+        for (let k = 0; k < P.count; k++) if (Math.abs(P.getX(k) - BASE_X) < .05 && Math.abs(P.getZ(k)) < .05) {yb += P.getY(k); nb++;}
+        yb = nb ? yb / nb : 0;
+        // xoay: x model → -y lá, y model → z lá, z model → -x lá
+        const m4 = new THREE.Matrix4().set(0, 0, -1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1)
+          .multiply(new THREE.Matrix4().makeScale(sc, sc, sc)).multiply(new THREE.Matrix4().makeTranslation(-BASE_X, -yb, 0));
+        g.applyMatrix4(m4); g.computeBoundingBox(); g.computeBoundingSphere();
+        const leaf = new THREE.Mesh(g, mesh.material); leaf.material.side = THREE.DoubleSide;
+        leafPiv.add(leaf); leafPick.push(leaf); freeze(leaf);
+        buildLeafMap(g.attributes.position); buildLeafFx();
+        resolve();
+      }, e => {if (e.total) leafProgress(e.loaded / e.total);}, reject);
+    });
+    let leafProgress = () => {};
     const leafVap = vaporSys(gLeaf, 120, 0xe8f6ff, .05, {rise: .25, life: 2, opacity: .45});
-    const leafC = () => W(leafPiv, V3(0, LEAF_L * .5, leafZ(0, LEAF_L * .5)));
+    const leafC = () => W(leafPiv, V3(0, LEAF_L * .5, leafSurf(0, LEAF_L * .5)));
 
     /* =====================================================================
        CẢNH 2: lớp biểu bì mặt dưới lá dưới kính hiển vi – khí khổng
@@ -2339,70 +2265,63 @@
         img.data[o + 3] = 255;
       }
       g.putImageData(img, 0, 0);
-      const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(4.2, 2.8); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
-      const plane = new THREE.Mesh(new THREE.PlaneGeometry(13, 8.6), std(0xffffff, {map: t, bumpMap: t, bumpScale: 2.5, roughness: .55}));
+      const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(12.9, 9.1); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+      const plane = new THREE.Mesh(new THREE.PlaneGeometry(40, 28), std(0xffffff, {map: t, bumpMap: t, bumpScale: 2.5, roughness: .55}));
       plane.rotation.x = -Math.PI / 2; gMicro.add(plane);
     }
-    const GL = .42;
-    const guardMat = std(0xc9eaa0, {roughness: .4, emissive: 0x1a3a0a, emissiveIntensity: .12});
-    const STOMA = [[-2.2, -.9, .4], [-.75, -1.25, -.3], [.8, -.85, .25], [2.25, -1.1, -.45], [-1.55, .7, -.2], [0, .2, .12], [1.5, .9, .5], [-.35, 1.55, -.6], [2.75, .55, 1.2], [-2.8, 1.45, .9], [3.3, -2.1, .3], [-3.5, -1.7, -.8], [.9, 2.3, .2]];
-    const stomata = STOMA.map(([x, z, a]) => {
-      const s = new THREE.Group(); s.position.set(x, .04, z); s.rotation.set(-Math.PI / 2, 0, a); gMicro.add(s);
-      const up = new THREE.Mesh(new THREE.BufferGeometry(), guardMat), dn = new THREE.Mesh(new THREE.BufferGeometry(), guardMat);
-      const pore = new THREE.Mesh(new THREE.CircleGeometry(1, 40), new THREE.MeshBasicMaterial({color: 0x15301c})); pore.position.z = -.02;
-      const caps = [-1, 1].map(sx => {const c = new THREE.Mesh(ball, guardMat); c.position.x = sx * GL; return c;});
-      s.add(up, dn, pore, ...caps); s.userData = {up, dn, pore, caps}; return s;
-    });
-    const chloro = new THREE.InstancedMesh(ball, std(0x2e8a2a, {roughness: .5}), stomata.length * 10); gMicro.add(chloro); chloro.frustumCulled = false;
-    let guardGeos = [];
-    function guardGeo(sign, w) {
-      const rMid = .1 * (.78 + .4 * w), gap = .17 * Math.pow(w, 1.2), h = rMid + gap;
-      const curve = new THREE.CatmullRomCurve3([V3(-GL, 0, 0), V3(-GL * .66, sign * h * .8, 0), V3(0, sign * h, 0), V3(GL * .66, sign * h * .8, 0), V3(GL, 0, 0)], false, 'centripetal');
-      const tub = 36, rad = 12, geo = new THREE.TubeGeometry(curve, tub, 1, rad, false), pos = geo.attributes.position, v = new THREE.Vector3(), c = new THREE.Vector3();
-      for (let i = 0; i <= tub; i++) {
-        const t = i / tub; curve.getPointAt(t, c); const r = rMid * (.5 + .5 * Math.sin(Math.PI * t));
-        for (let j = 0; j <= rad; j++) {const k = i * (rad + 1) + j; v.fromBufferAttribute(pos, k).sub(c).normalize().multiplyScalar(r); v.z *= .85; v.add(c); pos.setXYZ(k, v.x, v.y, v.z);}
-      }
-      geo.computeVertexNormals(); return {geo, curve, rMid, gap};
-    }
-    let water = .5;
-    const cTurg = new THREE.Color(0xc9eaa0), cFlac = new THREE.Color(0xdcd9a6);
+    // model khí khổng (GLB): hai tế bào hạt đậu có 1 morph (0 = khí khổng mở rộng, 1 = khép lại);
+    // các hạt trong model đi theo clip B3 (đầu clip = khép, cuối clip = mở)
+    let water = .5, stomaAct = null, stomaMixer = null, stomaGuard = null;
+    const stomaMorphs = [], stomaGuards = [], stomaPores = [];   // mọi khí khổng (bản chính + bản sao)
+    const stomaRoot = new THREE.Group(); stomaRoot.position.set(0, .05, 0); gMicro.add(stomaRoot);
     function setWater(w) {
-      water = w; const a = guardGeo(1, w), b = guardGeo(-1, w);
-      guardGeos.forEach(g => g.dispose()); guardGeos = [a.geo, b.geo];
-      guardMat.color.copy(cFlac).lerp(cTurg, w);
-      const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = V3(.05, .028, .03), p = new THREE.Vector3(); let n = 0;
-      stomata.forEach(st => {
-        const u = st.userData; u.up.geometry = a.geo; u.dn.geometry = b.geo;
-        u.pore.scale.set(GL * .62, Math.max(a.gap * .95, .004), 1); u.caps.forEach(c => c.scale.setScalar(a.rMid * .5));
-        st.updateMatrix();
-        [a, b].forEach(gg => [.18, .34, .5, .66, .82].forEach(t => {gg.curve.getPointAt(t, p); p.z += gg.rMid * .5; q.setFromEuler(new THREE.Euler(0, 0, t * 2)); m4.compose(p, q, s).premultiply(st.matrix); chloro.setMatrixAt(n++, m4);}));
-      });
-      chloro.instanceMatrix.needsUpdate = true;
+      water = w;
+      if (!stomaAct) return;
+      stomaAct.time = w * stomaAct.getClip().duration * .999; stomaMixer.update(0);
+      stomaMorphs.forEach(m => {m.morphTargetInfluences[0] = 1 - w;});   // độ mở tỉ lệ thuận với lượng nước
     }
+    const stomaReady = new Promise((resolve, reject) => {
+      new GLTFLoader().load('https://3d-cdn.yoolife.com.vn/uH_yTjuhYLj0Wu0QpA/uH_yTjuhYLj0Wu0QpA.glb', gltf => {
+        const src = gltf.scene, box = new THREE.Box3().setFromObject(src), size = box.getSize(new THREE.Vector3()), ctr = box.getCenter(new THREE.Vector3());
+        const k = 2.9 / Math.max(size.x, size.z);
+        src.scale.setScalar(k); src.position.set(-ctr.x * k, -box.min.y * k, -ctr.z * k); stomaRoot.add(src);
+        stomaGuard = src.getObjectByName('0');
+        // tăng độ đậm các lớp tế bào bán trong suốt
+        src.traverse(o => {if (o.isMesh && o.material.transparent) {o.material.opacity = Math.max(.55, o.material.opacity * 2);}});
+        // rải thêm khí khổng quanh khí khổng chính (bản sao bỏ các hạt khí để nhẹ)
+        const SPOTS = [[-3.5, -1.3, .5], [3.4, -.9, -.4], [-1.7, 2.7, .25], [1.9, 3.0, -.6], [.1, -3.5, .8], [-5.3, 2.0, -.2], [5.3, 2.3, .4], [-5.2, -3.9, .1], [5.0, -4.0, -.7], [-.4, 6.3, .3], [-6.8, -.9, .9], [7.0, -1.2, -.3]];
+        SPOTS.forEach(([x, z, a]) => {
+          // three.js bỏ dấu chấm khỏi tên node (Plane.002 → Plane002): xoá hẳn các hạt khí khỏi bản sao
+          const c = src.clone(true), rmP = []; c.traverse(o => {if (/^(Plane\d|Icosphere)/.test(o.name)) rmP.push(o);}); rmP.forEach(o => o.parent.remove(o));
+          const g = new THREE.Group(); g.position.set(x, .05, z); g.rotation.y = a; g.add(c); gMicro.add(g); freeze(g);
+        });
+        gMicro.updateMatrixWorld(true);
+        gMicro.traverse(o => {
+          if (o.isMesh && o.morphTargetInfluences?.length) stomaMorphs.push(o);
+          if (o.name === '0') {stomaGuards.push(o); stomaPores.push(new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()).sub(GP.micro));}
+        });
+        stomaMixer = new THREE.AnimationMixer(src);
+        const clip = gltf.animations.find(c => c.name === 'B3') || gltf.animations[0];
+        stomaAct = stomaMixer.clipAction(clip); stomaAct.play(); stomaAct.paused = true;
+        gMicro.updateMatrixWorld(true); stomaC = new THREE.Box3().setFromObject(stomaGuard).getCenter(new THREE.Vector3());
+        setWater(water); resolve();
+      }, e => {if (e.total) stomaProgress(e.loaded / e.total);}, reject);
+    });
+    let stomaProgress = () => {};
+    // model của các bước sau chỉ bắt đầu tải khi lá + khí khổng (bước 1) đã xong, để vào bài nhanh hơn
+    const coreReady = Promise.all([leafReady, stomaReady]);
+    let stomaC = GP.micro.clone();   // tâm lỗ khí (toạ độ thế giới), cập nhật khi model tải xong
+    const stomaAt = (dx = 0, dy = 0, dz = 0) => stomaC.clone().add(V3(dx, dy, dz));
     const microVap = vaporSys(gMicro, 420, 0xeaf7ff, .075, {rise: .55, life: 2.6, drift: .12, opacity: .55});
 
     /* =====================================================================
        CẢNH 3: hai khu vườn – ngày mát / ngày hè nóng bức
        ===================================================================== */
     const gGarden = new THREE.Group(); gGarden.position.copy(GP.garden); scene.add(gGarden);
-    const PLOTS = [{k: 'cool', x: -2.35, grass: 0x5f9e45}, {k: 'hot', x: 2.35, grass: 0x9da04c}];
-    const cLo = new THREE.Color(0x3c8a35), cHi = new THREE.Color(0x9bdc6c);
+    const PLOTS = [{k: 'cool', x: -2.35, soil: 0xffffff}, {k: 'hot', x: 2.35, soil: 0xf6dfbf}];   // đất ngày nóng nhạt màu, khô hơn
     PLOTS.forEach(pl => {
       const g = new THREE.Group(); g.position.x = pl.x; gGarden.add(g); pl.g = g;
-      const box = new THREE.Mesh(new RoundedBoxGeometry(4.2, .5, 3.0, 3, .06), std(0x7a5232, {roughness: 1})); box.position.y = -.25; g.add(box);
-      const top = new THREE.Mesh(new THREE.PlaneGeometry(4.1, 2.9), std(pl.grass, {roughness: .9})); top.rotation.x = -Math.PI / 2; top.position.y = .006; g.add(top);
-      const gl = []; for (let i = 0; i < 160; i++) gl.push({p: V3(R(-2, 2), 0, R(-1.4, 1.4)), s: V3(1, R(.6, 1.4), 1), q: qE(R(-.3, .3), R(0, 3), R(-.3, .3))});
-      const gg = new THREE.ConeGeometry(.016, .12, 4); gg.translate(0, .06, 0);
-      g.add(instanced(gg, std(pl.k === 'hot' ? 0x8a9a3a : 0x3f8a2c, {roughness: .8}), gl));
-      pl.tops = [];
-      [[-1.15, -.45, .95], [.15, .35, 1.05], [1.15, -.55, .9]].forEach(([x, z, s]) => {
-        const t = new THREE.Group(); t.position.set(x, 0, z); t.scale.setScalar(s); g.add(t);
-        t.add(taperTube([[0, 0, 0], [.03, .55, 0], [0, 1.05, 0]], .09, .05, M.stem, {seg: 12, rad: 8}));
-        const B = [[0, 1.4, 0, .55], [-.38, 1.18, .12, .42], [.38, 1.2, -.08, .44], [0, 1.78, 0, .4]];
-        B.forEach(b => blob(t, b, cLo, cHi, .9, 1.2));
-        for (let i = 0; i < 26; i++) {const b = B[i % B.length], n = V3(R(-1, 1), R(.25, 1), R(-1, 1)).normalize(); pl.tops.push(V3(b[0], b[1], b[2]).addScaledVector(n, b[3]).multiplyScalar(s).add(V3(x + pl.x, 0, z)));}
-      });
+      pl.tops = []; pl.plants = [];
       // ống đo nước trong đất
       const tube = new THREE.Mesh(new THREE.CylinderGeometry(.14, .14, 1.3, 24, 1, true), new THREE.MeshPhysicalMaterial({color: 0xe8f7ff, transparent: true, opacity: .3, roughness: .05, depthWrite: false, side: THREE.DoubleSide}));
       tube.position.set(1.75, .65, 1.15); g.add(tube);
@@ -2410,6 +2329,66 @@
       fill.position.set(1.75, .04, 1.15); g.add(fill); pl.fill = fill;
       const cap = new THREE.Mesh(new THREE.CylinderGeometry(.16, .16, .05, 24), std(0x7a8a8a)); cap.position.set(1.75, .02, 1.15); g.add(cap);
     });
+    // mỗi khu vườn: 1 luống đất nổi trồng cà chua (3 khóm cây liền nhau lấy từ luống giữa của model GLB)
+    // model: các luống chạy dọc trục z, luống giữa có 2 hàng khóm tại x ≈ -0.28 và x ≈ 0.21, mỗi khóm cách nhau ~0.46
+    const cWilt = new THREE.Color(0xc9a43c), BED_YK = 1.3;
+    const glbLoader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+    coreReady.then(() => glbLoader.load('https://3d-cdn.yoolife.com.vn/sKDR8x4OvKHFDXmjpV/sKDR8x4OvKHFDXmjpV.glb', gltf => {
+      const src = gltf.scene, rm = [];
+      // nền đất phẳng: dùng chính tấm "mặt đất" của model (ground.003, mép mờ dần), kéo vừa khung mỗi khu vườn
+      src.updateMatrixWorld(true);
+      let ground = null; src.traverse(o => {if (!ground && o.isMesh && o.material.name === 'ground.003') ground = o;});
+      if (ground) {
+        const gb = new THREE.Box3().setFromObject(ground), gs = gb.getSize(new THREE.Vector3()), gc = gb.getCenter(new THREE.Vector3());
+        PLOTS.forEach(pl => {
+          const gm = new THREE.Mesh(ground.geometry, ground.material.clone()); ground.matrixWorld.decompose(gm.position, gm.quaternion, gm.scale);
+          gm.material.color.set(pl.soil); gm.position.sub(gc);
+          const w = new THREE.Group(); w.add(gm); w.scale.set(4.6 / gs.x, 1, 3.4 / gs.z); w.position.y = .005; pl.g.add(w); freeze(w);
+        });
+      }
+      src.traverse(o => {if (o.isMesh && !(/tomato/.test(o.material.name) && o.position.x > -.5 && o.position.x < 0 && Math.abs(o.position.z) < .6)) rm.push(o);});
+      rm.forEach(o => o.parent.remove(o));
+      const box = new THREE.Box3().setFromObject(src), size = box.getSize(new THREE.Vector3()), ctr = box.getCenter(new THREE.Vector3());
+      const k = 3.7 / size.z;   // luống dài 3.7 theo chiều ngang khu vườn
+      PLOTS.forEach(pl => {
+        const m = src.clone(true), inner = new THREE.Group(), bed = new THREE.Group();
+        m.position.set(-ctr.x, -box.min.y, -ctr.z); inner.add(m); inner.scale.set(k, k * BED_YK, k);
+        bed.add(inner); bed.rotation.y = Math.PI / 2; bed.position.set(-.15, .01, -.2); pl.g.add(bed);
+        pl.bed = inner;
+        const mats = {};
+        m.traverse(o => {if (o.isMesh) {o.material = mats[o.material.name] ||= o.material.clone(); pl.plants.push({o, q0: o.quaternion.clone(), ax: V3(R(-1, 1), 0, R(-1, 1)).normalize()});}});   // vật liệu riêng mỗi khu vườn để đổi màu
+        pl.mats = Object.values(mats).map(mt => ({mt, c0: mt.color.clone()}));
+        gGarden.updateMatrixWorld(true);
+        const bb = new THREE.Box3().setFromObject(bed), lo = gGarden.worldToLocal(bb.min.clone()), hi = gGarden.worldToLocal(bb.max.clone());
+        for (let j = 0; j < 60; j++) pl.tops.push(V3(R(lo.x, hi.x), R(lo.y + (hi.y - lo.y) * .5, hi.y), R(lo.z, hi.z)));
+      });
+      setSoil();
+    }, undefined, e => console.warn('Không tải được model luống cà chua', e)));
+    // luồng nắng ngày nóng: tỏa từ mặt trời phía sau khu vườn thứ 2 xuống mặt luống (mép mờ, nhạt dần ở hai đầu)
+    {
+      const N = 64, c = document.createElement('canvas'); c.width = c.height = N; const g = c.getContext('2d'), img = g.createImageData(N, N);
+      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+        const u = x / (N - 1), v = y / (N - 1), a = Math.pow(Math.sin(Math.PI * u), 1.6) * Math.pow(Math.sin(Math.PI * Math.min(1, v * 1.15)), .8) * (.35 + .65 * (1 - v)), o = (y * N + x) * 4;
+        img.data[o] = 255; img.data[o + 1] = 244; img.data[o + 2] = 200; img.data[o + 3] = 255 * a;
+      }
+      g.putImageData(img, 0, 0);
+      const tex = new THREE.CanvasTexture(c), mat = new THREE.MeshBasicMaterial({map: tex, transparent: true, opacity: .55, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide});
+      const sun = V3(.6, 3.7, -1.5), shafts = new THREE.Group(); PLOTS[1].g.add(shafts);
+      [[-1.75, .15, .55], [-1.05, -.35, .45], [-.35, .3, .65], [.35, -.2, .5], [1.05, .25, .6], [1.7, -.3, .45]].forEach(([x, z, w]) => {
+        const b = V3(x, 0, z), t = sun.clone().lerp(b, .12), side = V3(1, 0, 0), tw = w * .22;
+        const p = [t.clone().addScaledVector(side, -tw), t.clone().addScaledVector(side, tw), b.clone().addScaledVector(side, -w), b.clone().addScaledVector(side, w)];
+        const geo = new THREE.BufferGeometry().setFromPoints(p); geo.setIndex([0, 2, 1, 1, 2, 3]); geo.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 1, 1], 2));
+        const m = new THREE.Mesh(geo, mat); m.renderOrder = 6; shafts.add(m);
+      });
+    }
+    // hình dáng cây theo thời tiết: w = 0 tươi tốt, w = 1 héo rũ, lá ngả vàng
+    const qTmp = new THREE.Quaternion();
+    function setWilt(pl, w) {
+      if (!pl.mats) return;
+      pl.bed.scale.y = pl.bed.scale.x * BED_YK * (1 - .4 * w);
+      pl.plants.forEach(({o, q0, ax}) => {qTmp.setFromAxisAngle(ax, .18 * w); o.quaternion.copy(qTmp).multiply(q0);});
+      pl.mats.forEach(({mt, c0}) => {mt.color.copy(c0).lerp(cWilt, .8 * w); mt.emissive.setRGB(.32, .22, 0).multiplyScalar(w);});   // texture lá tối nên thêm sắc vàng phát sáng cho rõ úa
+    }
     makeSun(gGarden, V3(2.95, 3.9, -1.3), .5);
     {
       makeSun(gGarden, V3(-1.85, 4.0, -1.6), .32);
@@ -2434,44 +2413,47 @@
       const sp = new THREE.SpotLight(0xffdca0, 1.3, 0, .6, .7, 0); sp.position.set(2.6, 5.5, 1.6); sp.target.position.set(2.6, 0, 0); gLab.add(sp, sp.target);
     }
     const toolPick = [];
-    const leafMatLab = std(0x56a640, {roughness: .55, side: THREE.DoubleSide});
-    function makePot(kind) {
-      const g = new THREE.Group(); gLab.add(g); const pick = [];
-      const potM = std(kind === 'odd' ? 0x5f86b0 : 0xc4683f, {roughness: .7});
-      const body = new THREE.Mesh(new THREE.CylinderGeometry(.36, .27, .52, 36), potM); body.position.y = .26;
-      const rim = new THREE.Mesh(new THREE.TorusGeometry(.36, .035, 10, 36), potM); rim.rotation.x = Math.PI / 2; rim.position.y = .52;
-      const soil = new THREE.Mesh(new THREE.CylinderGeometry(.34, .34, .02, 32), std(0x4a2f1a, {roughness: 1})); soil.position.y = .5;
-      g.add(body, rim, soil); pick.push(body, rim, soil);
-      const leaves = [];
-      if (kind === 'same') {
-        const st = taperTube([[0, .5, 0], [.02, .8, 0], [-.01, 1.1, 0], [0, 1.32, 0]], .034, .018, M.gstem, {seg: 20, rad: 8}); g.add(st); pick.push(st);
-        const lgeo = leafGeo(.34, .15, .3, 1.4);
-        for (let i = 0; i < 9; i++) {
-          const y = .64 + i * .075, a = i * 2.4, d = V3(Math.cos(a), .55 + i * .05, Math.sin(a)).normalize();
-          const pv = new THREE.Group(); pv.position.set(0, y, 0); pv.quaternion.setFromUnitVectors(V3(0, 1, 0), d); g.add(pv);
-          const lf = new THREE.Mesh(lgeo, leafMatLab); lf.rotation.y = R(-.4, .4); pv.add(lf); pick.push(lf);
-          pv.userData.home = {parent: g, p: pv.position.clone(), q: pv.quaternion.clone()}; leaves.push(pv);
-        }
-      } else {
-        const cm = std(0x3f8a4f, {roughness: .6});
-        const cb = new THREE.Mesh(new THREE.CapsuleGeometry(.15, .42, 8, 16), cm); cb.position.y = .86; g.add(cb); pick.push(cb);
-        [[-1, .82, .36], [1, .95, .3]].forEach(([s, y, l]) => {
-          const arm = new THREE.Mesh(new THREE.CapsuleGeometry(.07, l * .5, 6, 12), cm); arm.position.set(s * .2, y + .1, 0); g.add(arm); pick.push(arm);
-          const j = new THREE.Mesh(new THREE.CapsuleGeometry(.065, .08, 6, 12), cm); j.rotation.z = Math.PI / 2; j.position.set(s * .13, y - .05, 0); g.add(j);
-        });
-        const sp = []; for (let i = 0; i < 70; i++) {const a = R(0, 6.28), y = R(.6, 1.2), n = V3(Math.cos(a), 0, Math.sin(a)); sp.push({p: V3(0, y, 0).addScaledVector(n, .155), q: new THREE.Quaternion().setFromUnitVectors(V3(0, 1, 0), n), s: V3(.008, .05, .008)});}
-        g.add(instanced(new THREE.ConeGeometry(1, 1, 4), std(0xf4ecd0), sp));
-        const fm = std(0xff6fa8, {roughness: .4}); for (let i = 0; i < 6; i++) {const p = new THREE.Mesh(ball, fm); const a = i / 6 * 6.28; p.position.set(Math.cos(a) * .06, 1.33, Math.sin(a) * .06); p.scale.set(.06, .03, .06); g.add(p);}
-        g.scale.setScalar(.85);
-      }
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(.48, .03, 8, 48), new THREE.MeshBasicMaterial({color: 0xffc83d})); ring.rotation.x = Math.PI / 2; ring.position.y = .02; ring.visible = false; g.add(ring);
-      g.userData = {kind, leaves, ring, pick};
+    function makePot() {
+      const g = new THREE.Group(); gLab.add(g);
+      g.userData = {leaves: [], pick: []};
       return g;
     }
-    const pots = [makePot('same'), makePot('odd'), makePot('same')];
-    const POT_HOME = [V3(-3.75, 0, -.4), V3(-2.5, 0, -.4), V3(-1.25, 0, -.4)];
+    const pots = [makePot(), makePot()];   // chậu A, chậu B (cùng loài, cùng cỡ)
+    const POT_HOME = [V3(-3.2, 0, -.4), V3(-1.8, 0, -.4)];
     const SUN_SPOT = [V3(1.7, 0, -.25), V3(3.2, 0, -.25)];
     pots.forEach((p, i) => {p.userData.tool = 'pot' + i;});
+    // chậu cà chua A, B dùng model GLB: chậu sứ + đất + thân + lá; khối lá được tách thành ~12 cụm để rơi xuống khi cắt
+    let POT_SOIL = .33;   // độ cao mặt đất trong chậu (nơi buộc túi), cập nhật theo model
+    coreReady.then(() => {
+      new GLTFLoader().load('https://3d-cdn.yoolife.com.vn/lmlOwKA7bX2AZZwrB2/lmlOwKA7bX2AZZwrB2.glb', gltf => {
+        const src = gltf.scene; src.updateMatrixWorld(true);
+        const box = new THREE.Box3().setFromObject(src), ctr = box.getCenter(new THREE.Vector3()), k = 1.4 / box.getSize(new THREE.Vector3()).y;
+        const bake = o => o.geometry.clone().applyMatrix4(new THREE.Matrix4().makeScale(k, k, k).multiply(new THREE.Matrix4().makeTranslation(-ctr.x, -box.min.y, -ctr.z)).multiply(o.matrixWorld));
+        const parts = {}; src.traverse(o => {if (o.isMesh) parts[o.material.name] = o;});
+        const soilM = parts['Material.001'];
+        POT_SOIL = new THREE.Box3().setFromBufferAttribute(bake(soilM).attributes.position).max.y + .01;
+        // tách lá: gom tam giác theo vị trí quanh thân (6 hướng × 2 tầng)
+        const lg = bake(parts.tomato_leafs), lp = lg.attributes.position, idx = lg.index.array, groups = {};
+        const lb = new THREE.Box3().setFromBufferAttribute(lp), midY = (lb.min.y + lb.max.y) / 2;
+        for (let t = 0; t < idx.length; t += 3) {
+          let x = 0, y = 0, z = 0; for (let c = 0; c < 3; c++) {x += lp.getX(idx[t + c]); y += lp.getY(idx[t + c]); z += lp.getZ(idx[t + c]);}
+          const key = Math.floor((Math.atan2(z, x) + Math.PI) / (Math.PI / 3)) % 6 + (y / 3 > midY ? 6 : 0);
+          (groups[key] ||= []).push(idx[t], idx[t + 1], idx[t + 2]);
+        }
+        const clusters = Object.values(groups).map(ix => {const g = lg.clone(); g.setIndex(ix); return g;});
+        const fixed = ['Porcelain002_1K-JPG_NORMAL', 'Material.001', 'tomato_stems'].map(n => [bake(parts[n]), parts[n].material]);
+        pots.forEach(p => {
+          const u = p.userData;
+          fixed.forEach(([geo, mat]) => {const m = new THREE.Mesh(geo, mat); p.add(m); u.pick.push(m); toolPick.push(m);});
+          clusters.forEach(geo => {
+            const c = new THREE.Box3().setFromBufferAttribute(geo.attributes.position).getCenter(new THREE.Vector3());
+            const pv = new THREE.Group(); pv.position.copy(c); p.add(pv);
+            const m = new THREE.Mesh(geo.clone().translate(-c.x, -c.y, -c.z), parts.tomato_leafs.material); pv.add(m); u.pick.push(m); toolPick.push(m);
+            pv.userData.home = {parent: p, p: pv.position.clone(), q: pv.quaternion.clone()}; u.leaves.push(pv);
+          });
+        });
+      }, undefined, e => console.warn('Không tải được model chậu cây', e));
+    });
     // túi nilon (phần mở: trùm cây, buộc quanh gốc thân)
     const BAG_PROF = [[.035, 0], [.1, .05], [.3, .17], [.48, .36], [.55, .6], [.53, .84], [.42, .99], [.22, 1.08], [0, 1.1]];
     const bagRad = h => {for (let i = 1; i < BAG_PROF.length; i++) if (BAG_PROF[i][1] >= h) {const [r0, h0] = BAG_PROF[i - 1], [r1, h1] = BAG_PROF[i]; return r0 + (r1 - r0) * (h - h0) / (h1 - h0);} return 0;};
@@ -2524,7 +2506,7 @@
     const SCIS_HOME = {p: V3(-4.2, .03, 1.3), q: qE(0, .5, 0)};
     pots.forEach(p => toolPick.push(...p.userData.pick));
     bags.forEach(b => toolPick.push(b.userData.folded));
-    const lab = {stage: 0, busy: false, sel: [], A: -1, B: -1, inSun: [false, false, false], pred: -1, time: 0, ff: false};
+    const lab = {stage: 1, busy: false, A: 0, B: 1, inSun: [false, false], pred: -1, time: 0, ff: false};
     function bagOn(pi) {return bags.find(b => b.userData.pot === pi);}
     function setFog() {
       const kB = clamp((lab.time - 5) / 38, 0, 1);
@@ -2539,7 +2521,7 @@
       $('mHand').setAttribute('transform', `rotate(${lab.time * 6} 30 30)`); $('hHand').setAttribute('transform', `rotate(${lab.time * .5} 30 30)`);
     }
     function placeLabHome() {
-      pots.forEach((p, i) => {p.position.copy(POT_HOME[i]); p.quaternion.identity(); p.userData.home = POT_HOME[i].clone(); p.userData.ring.visible = false;});
+      pots.forEach((p, i) => {p.position.copy(POT_HOME[i]); p.quaternion.identity(); p.userData.home = POT_HOME[i].clone();});
       pots.forEach(p => p.userData.leaves.forEach(pv => {const h = pv.userData.home; h.parent.add(pv); pv.position.copy(h.p); pv.quaternion.copy(h.q); pv.scale.setScalar(1);}));
       bags.forEach((b, i) => {gLab.add(b); b.position.copy(BAG_HOME[i]); b.quaternion.copy(qE(0, i ? .3 : -.2, 0)); b.scale.setScalar(1); b.userData.folded.visible = true; b.userData.open.visible = false; b.userData.pot = null; b.userData.home = BAG_HOME[i].clone();});
       gScis.position.copy(SCIS_HOME.p); gScis.quaternion.copy(SCIS_HOME.q); setBlades(.18);
@@ -2550,74 +2532,71 @@
        CẢNH 5: cây lớn giữa trưa nắng – vai trò của thoát hơi nước
        ===================================================================== */
     const gTree = new THREE.Group(); gTree.position.copy(GP.tree); scene.add(gTree);
-    const TW = (x, y, z) => V3(x, y, z).add(GP.tree);
-    const CANOPY = [[0, 3.35, 0, 1.0], [-1.0, 3.05, .1, .82], [1.0, 3.1, -.1, .82], [.35, 2.95, -.85, .76], [-.35, 2.9, .82, .76], [0, 3.95, 0, .72], [-.6, 3.72, -.42, .62], [.62, 3.68, .42, .62], [0, 2.75, 0, .8], [.85, 2.75, .65, .55], [-.85, 2.8, -.6, .55]];
-    let treeBranches;
-    const kid = new THREE.Group();
-    {
-      const ground = new THREE.Mesh(new THREE.CircleGeometry(5.6, 64), std(0x7bb35a, {roughness: .95})); ground.rotation.x = -Math.PI / 2; gTree.add(ground);
-      const rimG = new THREE.Mesh(new THREE.CylinderGeometry(5.6, 5.5, .3, 64, 1, true), std(0x7a5232, {roughness: 1, side: THREE.DoubleSide})); rimG.position.y = -.15; gTree.add(rimG);
-      const gg = new THREE.ConeGeometry(.018, .13, 4); gg.translate(0, .065, 0);
-      const list = []; for (let i = 0; i < 520; i++) {const a = R(0, 6.28), r = Math.sqrt(rand()) * 5.4; const x = Math.cos(a) * r, z = Math.sin(a) * r; if (Math.hypot(x, z) < .45) continue; list.push({p: V3(x, 0, z), s: V3(1, R(.6, 1.5), 1), q: qE(R(-.35, .35), R(0, 3), R(-.35, .35))});}
-      const im = instanced(gg, std(0xffffff, {roughness: .8}), list); const ca = [0x3f7f2c, 0x4f9636, 0x5fa840, 0x6aae48].map(h => new THREE.Color(h)); list.forEach((_, i) => im.setColorAt(i, ca[i % 4])); gTree.add(im);
-      const sh = new THREE.Mesh(new THREE.CircleGeometry(1.9, 48), new THREE.MeshBasicMaterial({color: 0x163a12, transparent: true, opacity: .3, depthWrite: false})); sh.rotation.x = -Math.PI / 2; sh.position.set(.45, .012, .35); sh.scale.set(1.2, 1, 1); gTree.add(sh);
-      const SR = .24;
-      gTree.add(taperTube([[0, 0, 0], [0, 1, 0], [0, 1.95, 0]], SR, SR * .72, M.stem, {seg: 20, rad: 24}));
-      const flare = new THREE.Mesh(new THREE.CylinderGeometry(SR, SR * 1.5, .32, 32), M.stem); flare.position.y = .16; gTree.add(flare);
-      treeBranches = [
-        [[0, 1.62, 0], [-.22, 2.05, .04], [-.6, 2.5, .08], [-.95, 2.92, .08], [-1.2, 3.3, .04]],
-        [[0, 1.7, 0], [.22, 2.12, -.04], [.6, 2.55, -.08], [.95, 2.95, -.06], [1.18, 3.35, 0]],
-        [[0, 1.85, 0], [.05, 2.4, .06], [-.03, 2.95, .04], [.04, 3.45, 0], [0, 3.95, 0]],
-        [[0, 1.68, 0], [.08, 2.1, -.3], [.24, 2.5, -.65], [.38, 2.9, -.95], [.44, 3.22, -1.1]],
-        [[0, 1.68, 0], [-.08, 2.1, .3], [-.22, 2.48, .62], [-.32, 2.85, .9], [-.38, 3.15, 1.02]],
-      ].map(p => {const m = taperTube(p, .14, .03, M.branch, {seg: 40, rad: 10}); gTree.add(m); return m.userData.curve;});
-      CANOPY.forEach(b => blob(gTree, b, cLo, cHi, 2.3, 2.2).renderOrder = 5);
-      const lg = leafGeo(.2, .085), ll = [], Z = V3(0, 0, 1);
-      for (let i = 0; i < 1400; i++) {const [x, y, z, r] = CANOPY[i % CANOPY.length], n = V3(R(-1, 1), R(-.55, 1), R(-1, 1)).normalize(), p = V3(x, y, z).addScaledVector(n, r * R(.98, 1.08)); ll.push({p, q: new THREE.Quaternion().setFromUnitVectors(Z, n).multiply(qE(0, 0, R(0, 6.28))), s: R(.8, 1.25)});}
-      const lim = instanced(lg, M.leaves, ll); const lc = [0x4f9c3c, 0x63b247, 0x7cc95a, 0x3f8a33, 0x8fd468].map(h => new THREE.Color(h));
-      ll.forEach((o, i) => lim.setColorAt(i, lc[(i * 7) % 5].clone().lerp(new THREE.Color(0xa6e07a), clamp((o.p.y - 2.3) / 2.2, 0, 1) * .35))); lim.renderOrder = 6; gTree.add(lim);
-      makeSun(gTree, V3(-3.3, 5.7, -2.8), .5);
-      // bạn nhỏ đứng dưới tán cây
-      kid.position.set(1.05, 0, 1.05); kid.rotation.y = -.35; gTree.add(kid);
-      const skin = std(0xf1c8a0, {roughness: .6}), navy = std(0x24365c, {roughness: .7}), shirt = std(0xffffff, {roughness: .7});
-      [-1, 1].forEach(s => {
-        const leg = new THREE.Mesh(new THREE.CylinderGeometry(.045, .05, .42, 12), navy); leg.position.set(s * .065, .21, 0); kid.add(leg);
-        const shoe = new THREE.Mesh(new RoundedBoxGeometry(.1, .06, .16, 2, .02), std(0x2b2b2b)); shoe.position.set(s * .065, .03, .03); kid.add(shoe);
-        const arm = new THREE.Mesh(new THREE.CapsuleGeometry(.038, .26, 6, 10), shirt); arm.position.set(s * .17, .66, 0); arm.rotation.z = s * .18; kid.add(arm);
-        const hand = new THREE.Mesh(ball, skin); hand.scale.setScalar(.04); hand.position.set(s * .2, .5, 0); kid.add(hand);
-      });
-      const shorts = new THREE.Mesh(new THREE.CylinderGeometry(.13, .125, .16, 16), navy); shorts.position.y = .46; kid.add(shorts);
-      const torso = new THREE.Mesh(new THREE.CapsuleGeometry(.125, .2, 6, 14), shirt); torso.position.y = .66; kid.add(torso);
-      const scarf = new THREE.Mesh(new THREE.ConeGeometry(.05, .14, 3), std(0xd92b2b)); scarf.rotation.x = Math.PI; scarf.position.set(0, .76, .11); kid.add(scarf);
-      const head = new THREE.Mesh(new THREE.SphereGeometry(.12, 24, 16), skin); head.position.y = .98; kid.add(head);
-      const hair = new THREE.Mesh(new THREE.SphereGeometry(.127, 24, 12, 0, Math.PI * 2, 0, Math.PI * .55), std(0x2a1d14)); hair.position.y = .99; hair.rotation.x = -.25; kid.add(hair);
-      [-1, 1].forEach(s => {const e = new THREE.Mesh(ball, std(0x1d1d1d)); e.scale.setScalar(.014); e.position.set(s * .042, 1.0, .112); kid.add(e);});
-      const smile = new THREE.Mesh(new THREE.TorusGeometry(.03, .006, 6, 16, Math.PI), std(0xb0413e)); smile.rotation.z = Math.PI; smile.position.set(0, .95, .115); kid.add(smile);
-    }
-    // dòng nước đi lên trong thân (nhìn xuyên vỏ)
-    const pullIM = (() => {
-      const paths = treeBranches.map(c => {
-        const pts = [V3(0, .05, 0), V3(0, c.getPointAt(0).y * .5, 0)]; for (let i = 0; i <= 14; i++) pts.push(c.getPointAt(i / 14 * .97));
-        const end = pts[pts.length - 1]; let best = CANOPY[0]; CANOPY.forEach(b => {if (end.distanceTo(V3(b[0], b[1], b[2])) < end.distanceTo(V3(best[0], best[1], best[2]))) best = b;});
-        pts.push(end.clone().lerp(V3(best[0], best[1] + .4, best[2]), .6)); return poly(smooth(pts, 180));
-      });
-      return flowSys(gTree, [...paths, ...paths], 5, 0x4aa8ff, .03, .7, true);
-    })();
-    const treeTops = []; CANOPY.forEach(([x, y, z, r]) => {for (let i = 0; i < 14; i++) {const n = V3(R(-1, 1), R(.2, 1), R(-1, 1)).normalize(); treeTops.push(V3(x, y, z).addScaledVector(n, r * 1.05));}});
+    // cây sồi + bé gái + nền đất, cỏ, mây, mặt trời: model GLB. Các hiệu ứng bám theo tán lá / thân cây đọc từ model
+    const TREE = {trunk: V3(0, 0, 0), crownY: 1.8, top: V3(0, 4.6, 0), ctr: V3(0, 3.2, 0), r: 1.6, leaves: [], kid: V3(1, 1, 1)};
+    const TL = v => v.clone().add(GP.tree);
+    const treeTops = [];
+    let pullIM = null, co2IM = null, o2IM = null;
     const treeVap = vaporSys(gTree, 700, 0xe8f6ff, .085, {rise: .5, life: 2.6, drift: .1, opacity: .5});
     const heatSys = vaporSys(gTree, 260, 0xff8a3d, .04, {rise: .7, life: 2.0, drift: .08, opacity: .75});
     function gasSys(color, size, inward, n) {
       const im = new THREE.InstancedMesh(ball, new THREE.MeshStandardMaterial({color, roughness: .3, emissive: color, emissiveIntensity: .3}), n);
       im.frustumCulled = false; im.renderOrder = 9; gTree.add(im);
-      const P = Array.from({length: n}, (_, i) => {const b = CANOPY[i % CANOPY.length]; return {c: V3(b[0], b[1], b[2]), r: b[3], dir: V3(R(-1, 1), R(-.15, 1), R(-1, 1)).normalize(), u: rand(), v: R(.18, .28)};});
+      const P = Array.from({length: n}, () => {const c = TREE.leaves[(rand() * TREE.leaves.length) | 0]; return {c, dir: c.clone().sub(TREE.ctr).setY(0).normalize().add(V3(R(-.4, .4), R(-.1, .6), R(-.4, .4))).normalize(), u: rand(), v: R(.18, .28)};});
       const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3();
       im.userData.update = dt => {
-        P.forEach((o, i) => {o.u = (o.u + dt * o.v) % 1; const d = inward ? 1 - o.u : o.u; p.copy(o.c).addScaledVector(o.dir, o.r * .95 + 1.6 * d); s.setScalar(size * Math.min(1, o.u * 6, (1 - o.u) * 6)); m4.compose(p, q, s); im.setMatrixAt(i, m4);});
+        P.forEach((o, i) => {o.u = (o.u + dt * o.v) % 1; const d = inward ? 1 - o.u : o.u; p.copy(o.c).addScaledVector(o.dir, .1 + 1.6 * d); s.setScalar(size * Math.min(1, o.u * 6, (1 - o.u) * 6)); m4.compose(p, q, s); im.setMatrixAt(i, m4);});
         im.instanceMatrix.needsUpdate = true;
       };
       return im;
     }
-    const co2IM = gasSys(0x5b6270, .075, true, 70), o2IM = gasSys(0x8fe3ff, .065, false, 70);
+    coreReady.then(() => {
+      glbLoader.load('https://3d-cdn.yoolife.com.vn/mjSuzEmaf9jB3QK7xj/mjSuzEmaf9jB3QK7xj.glb', gltf => {
+        const src = gltf.scene; src.updateMatrixWorld(true);
+        const meshes = []; src.traverse(o => {if (o.isMesh) meshes.push(o);});
+        const isOak = o => /^Oak/.test(o.material.name), isLeaf = o => /Cluster/.test(o.material.name);
+        const tb = new THREE.Box3(); meshes.filter(isOak).forEach(o => tb.expandByObject(o));
+        const tc = tb.getCenter(new THREE.Vector3()), k = 4.6 / tb.getSize(new THREE.Vector3()).y;
+        // cỏ/hoa trong model là hàng nghìn bản lặp (mỗi mảng cỏ ~22.700 tam giác) → chỉ giữ các bản gần gốc cây, tối đa ~700 nghìn tam giác mỗi loại
+        meshes.filter(o => o.isInstancedMesh).forEach(o => {
+          const m4 = new THREE.Matrix4(), p = new THREE.Vector3(), list = [];
+          for (let i = 0; i < o.count; i++) {o.getMatrixAt(i, m4); p.setFromMatrixPosition(m4).applyMatrix4(o.matrixWorld); list.push([Math.hypot(p.x - tc.x, p.z - tc.z), m4.clone()]);}
+          const g = o.geometry, tris = (g.index ? g.index.count : g.attributes.position.count) / 3, keep = clamp(Math.floor(7e5 / tris), 12, 160);
+          list.sort((a, b) => a[0] - b[0]).slice(0, keep).forEach(([, m], i) => o.setMatrixAt(i, m));
+          o.count = Math.min(o.count, keep); o.instanceMatrix.needsUpdate = true; o.computeBoundingSphere?.();
+        });
+        const holder = new THREE.Group(); holder.scale.setScalar(k); holder.position.set(-tc.x * k, -tb.min.y * k, -tc.z * k);
+        holder.add(src); gTree.add(holder); freeze(holder); gTree.updateMatrixWorld(true);
+        // mặt trời + mây của model trông thiếu tự nhiên → bỏ, thay bằng mặt trời phát sáng giống các cảnh khác
+        const sunM = meshes.find(o => o.material.name === 'Mat troi');
+        if (sunM) makeSun(gTree, gTree.worldToLocal(new THREE.Box3().setFromObject(sunM).getCenter(new THREE.Vector3())), .55);
+        meshes.filter(o => /^(Mat troi|Cloud)$/.test(o.material.name)).forEach(o => o.parent.remove(o));
+        const loc = (o, i, out) => gTree.worldToLocal(out.fromBufferAttribute(o.geometry.attributes.position, i).applyMatrix4(o.matrixWorld));
+        // điểm trên tán lá (lấy mẫu đỉnh của các cụm lá)
+        const leafMs = meshes.filter(isLeaf), total = leafMs.reduce((n, o) => n + o.geometry.attributes.position.count, 0), step = Math.max(1, Math.floor(total / 1500));
+        leafMs.forEach(o => {for (let i = 0; i < o.geometry.attributes.position.count; i += step) TREE.leaves.push(loc(o, i, new THREE.Vector3()));});
+        TREE.ctr = TREE.leaves.reduce((a, p) => a.add(p), V3(0, 0, 0)).divideScalar(TREE.leaves.length);
+        TREE.r = TREE.leaves.reduce((a, p) => a + Math.hypot(p.x - TREE.ctr.x, p.z - TREE.ctr.z), 0) / TREE.leaves.length;
+        TREE.top = TREE.leaves.reduce((a, p) => p.y > a.y ? p : a, TREE.leaves[0]).clone();
+        TREE.crownY = TREE.leaves.reduce((a, p) => Math.min(a, p.y), 1e9);
+        // thân cây: tâm các đỉnh vỏ cây ở đoạn thấp
+        const bark = meshes.filter(o => isOak(o) && !isLeaf(o)), tp = V3(0, 0, 0), v = new THREE.Vector3(); let nb = 0;
+        bark.forEach(o => {for (let i = 0; i < o.geometry.attributes.position.count; i += 7) {loc(o, i, v); if (v.y < Math.max(.6, TREE.crownY * .5)) {tp.add(v); nb++;}}});
+        if (nb) TREE.trunk.copy(tp.divideScalar(nb)).setY(0);
+        const girl = meshes.find(o => o.material.name === 'Em be');
+        if (girl) {const gb = new THREE.Box3().setFromObject(girl); TREE.kid = gTree.worldToLocal(gb.getCenter(new THREE.Vector3()).setY(gb.max.y));}
+        TREE.leaves.forEach(p => {if (p.y > TREE.ctr.y - .2) treeTops.push(p);});
+        // dòng nước đi lên: từ gốc theo thân rồi tỏa vào tán
+        const paths = [];
+        for (let i = 0; i < 12; i++) {
+          const t = TREE.leaves[(rand() * TREE.leaves.length) | 0], x = TREE.trunk.x, z = TREE.trunk.z;
+          paths.push(poly(smooth([V3(x, .05, z), V3(x, TREE.crownY * .5, z), V3(x, TREE.crownY, z), V3(x, TREE.crownY, z).lerp(t, .5), t], 160)));
+        }
+        pullIM = flowSys(gTree, [...paths, ...paths], 5, 0x4aa8ff, .03, .7, true);
+        co2IM = gasSys(0x5b6270, .075, true, 70); o2IM = gasSys(0x8fe3ff, .065, false, 70);
+        setTreeMode(treeMode);
+      }, undefined, e => console.warn('Không tải được model cây sồi', e));
+    });
     let treeMode = null;
 
     const GROUPS = {leaf: gLeaf, micro: gMicro, garden: gGarden, lab: gLab, tree: gTree};
@@ -2635,12 +2614,12 @@
     const VIEWS = {
       leaf: () => fitView(leafC(), 2.0, V3(.25, .12, 1)),
       under: () => {const n = V3(0, 0, -1).applyQuaternion(leafPiv.getWorldQuaternion(new THREE.Quaternion())); return fitView(leafC(), .6, n.add(V3(0, -.12, 0)));},
-      micro: () => fitView(GP.micro.clone().add(V3(0, .1, 0)), 1.9, V3(0, 1.25, .75)),
-      garden: () => fitView(GP.garden.clone().add(V3(0, 1.5, 0)), 4.6, V3(0, .32, 1)),
+      micro: () => fitView(GP.micro.clone().add(V3(0, .1, 0)), 2.7, V3(0, 1.25, .75)),
+      garden: () => fitView(GP.garden.clone().add(V3(0, 1.2, 0)), 4.6, V3(0, .5, 1)),
       lab: () => lab.stage < 3 ? fitView(LW(-2.45, .6, .45), 2.6, V3(0, .55, 1)) : fitView(LW(-.3, .6, .1), 4.5, V3(0, .5, 1)),
       sun: () => fitView(LW(2.0, .8, 0), 2.9, V3(0, .55, 1)),
-      bags: () => fitView(LW(2.45, 1.05, -.2), 1.75, V3(0, .2, 1)),
-      tree: () => fitView(TW(.1, 2.5, 0), 3.8, V3(.25, .12, 1)),
+      bags: () => fitView(LW(2.45, .85, -.2), 1.75, V3(0, .2, 1)),
+      tree: () => fitView(TL(TREE.trunk.clone().lerp(TREE.kid, .35).setY(TREE.top.y * .42)), 3.7, V3(1, .42, .62)),   // nhìn từ phía bé gái đang hướng mặt, hơi cao
     };
     let tween = null, currentView = 'leaf';
     function goView(name, instant, dur = 1000) {
@@ -2667,34 +2646,31 @@
     /* ---------- nhãn gắn với vị trí 3D ---------- */
     const lines = $('lines'), NS = 'http://www.w3.org/2000/svg';
     const LBL = {
-      leafTap: {text: 'Chạm để soi mặt dưới lá', anchor: () => W(leafPiv, V3(.15, LEAF_L * .45, leafZ(.15, LEAF_L * .45))), off: [1, .3], click: () => onZoom()},
-      leafVein: {text: 'Nước theo gân lá tới các tế bào', anchor: () => W(leafPiv, V3(0, LEAF_L * .22, leafZ(0, LEAF_L * .22) + .03)), off: [-1, .6], info: 1, cls: 'water'},
-      stoma: {text: 'Khí khổng', anchor: () => W(stomata[5], V3(0, 0, .02)), off: [-1, -.9], cls: 'cell', click: () => {sfx('pop'); toast('Khí khổng: lỗ nhỏ giữa hai tế bào hạt đậu – hơi nước thoát ra ngoài qua đây');}},
-      guard: {text: 'Tế bào hạt đậu', anchor: () => W(stomata[5], V3(.12, -.2, .05)), off: [1, 1.1], cls: 'cell', click: () => {sfx('pop'); toast('Tế bào hạt đậu (tế bào khí khổng): có lục lạp; trương nước thì khí khổng mở');}},
+      leafTap: {text: 'Chạm để soi mặt dưới lá', anchor: () => W(leafPiv, V3(.15, LEAF_L * .45, leafSurf(.15, LEAF_L * .45))), off: [1, .3], click: () => onZoom()},
+      leafVein: {text: 'Nước theo gân lá tới các tế bào', anchor: () => W(leafPiv, V3(0, LEAF_L * .22, leafSurf(0, LEAF_L * .22) + .03)), off: [-1, .6], info: 1, cls: 'water'},
+      stoma: {text: 'Khí khổng', anchor: () => stomaAt(0, .1, 0), off: [-1, -.9], cls: 'cell', click: () => {sfx('pop'); toast('Khí khổng: lỗ nhỏ giữa hai tế bào hạt đậu – hơi nước thoát ra ngoài qua đây');}},
+      guard: {text: 'Tế bào hạt đậu', anchor: () => stomaAt(.6, .15, .2), off: [1, 1.1], cls: 'cell', click: () => {sfx('pop'); toast('Tế bào hạt đậu (tế bào khí khổng): có lục lạp; trương nước thì khí khổng mở');}},
       epi: {text: 'Tế bào biểu bì', anchor: () => GP.micro.clone().add(V3(1.35, 0, .1)), off: [1, -.4], info: 1},
-      vapM: {text: 'Hơi nước thoát ra', anchor: () => GP.micro.clone().add(V3(.8, .75, -.85)), off: [1, -.8], info: 1, cls: 'vap'},
+      vapM: {text: 'Hơi nước thoát ra', anchor: () => stomaAt(0, .7, -.25), off: [1, -.8], info: 1, cls: 'vap'},
       gCool: {text: 'Ngày mát · 25°C', anchor: () => GP.garden.clone().add(V3(-2.35, 2.6, 0)), off: [0, -1.4], info: 1, cls: 'cool'},
       gHot: {text: 'Ngày hè nóng bức · 37°C', anchor: () => GP.garden.clone().add(V3(2.35, 2.6, 0)), off: [0, -1.4], info: 1, cls: 'sun'},
       gwC: {text: 'Nước trong đất', anchor: () => GP.garden.clone().add(V3(-2.35 + 1.75, .1, 1.15)), off: [0, 1.6], info: 1, cls: 'water'},
       gwH: {text: 'Nước trong đất', anchor: () => GP.garden.clone().add(V3(2.35 + 1.75, .1, 1.15)), off: [0, 1.6], info: 1, cls: 'water'},
       vapG: {text: 'Hơi nước thoát ra từ lá', anchor: () => GP.garden.clone().add(V3(2.5, 2.9, -.4)), off: [1, -.6], info: 1, cls: 'vap'},
-      pot0: {text: 'Chậu 1', anchor: () => W(pots[0], V3(0, .3, .36)), off: [0, 1.5], click: () => choosePot(0)},
-      pot1: {text: 'Chậu 2', anchor: () => W(pots[1], V3(0, .3, .36)), off: [0, 1.5], click: () => choosePot(1)},
-      pot2: {text: 'Chậu 3', anchor: () => W(pots[2], V3(0, .3, .36)), off: [0, 1.5], click: () => choosePot(2)},
-      potA: {text: 'Chậu A', anchor: () => W(pots[Math.max(lab.A, 0)], V3(0, .3, .36)), off: [0, 1.5], click: () => tapTool('pot' + lab.A)},
-      potB: {text: 'Chậu B', anchor: () => W(pots[Math.max(lab.B, 0)], V3(0, .3, .36)), off: [0, 1.5], click: () => tapTool('pot' + lab.B)},
+      potA: {text: 'Chậu A', anchor: () => W(pots[Math.max(lab.A, 0)], V3(0, .2, .22)), off: [0, 1.5], click: () => tapTool('pot' + lab.A)},
+      potB: {text: 'Chậu B', anchor: () => W(pots[Math.max(lab.B, 0)], V3(0, .2, .22)), off: [0, 1.5], click: () => tapTool('pot' + lab.B)},
       tScis: {text: 'Kéo', anchor: () => W(gScis, V3(.1, 0, 0)), off: [-1, -.9], click: () => tapTool('scis')},
       tBag: {text: 'Túi nilon trong suốt', anchor: () => W(bags.find(b => b.userData.pot == null) || bags[1], V3(0, .03, 0)), off: [1, .9], click: () => {const b = bags.findIndex(b => b.userData.pot == null); if (b >= 0) tapTool('bag' + b);}},
       sunL: {text: 'Chỗ có ánh sáng', anchor: () => LW(2.6, 0, 1.55), off: [1, .5], info: 1, cls: 'sun'},
       shadeL: {text: 'Bóng râm', anchor: () => LW(-.6, 0, 1.55), off: [-1, .5], info: 1},
-      resA: {text: 'Túi chậu A: vẫn trong', anchor: () => W(pots[Math.max(lab.A, 0)], V3(0, .3, .36)), off: [0, 1.5], info: 1},
-      resB: {text: 'Túi chậu B: mờ, đọng giọt nước', anchor: () => W(pots[Math.max(lab.B, 0)], V3(0, .3, .36)), off: [0, 1.5], info: 1, cls: 'vap'},
-      pullL: {text: 'Lực kéo: nước + chất khoáng đi lên', anchor: () => TW(0, 1.1, .2), off: [-1, .2], info: 1, cls: 'water'},
-      vapL: {text: 'Hơi nước thoát ra qua khí khổng', anchor: () => TW(.2, 4.5, 0), off: [1, -.4], info: 1, cls: 'vap'},
-      co2L: {text: 'CO₂ đi vào lá', anchor: () => TW(-2.1, 3.6, .6), off: [-1, -.3], info: 1, cls: 'gas'},
-      o2L: {text: 'O₂ thoát ra ngoài', anchor: () => TW(2.1, 3.9, .4), off: [1, -.3], info: 1, cls: 'vap'},
-      coolL: {text: 'Nước bốc hơi lấy đi nhiệt → lá mát hơn', anchor: () => TW(-1.0, 3.9, .6), off: [-1, -.6], info: 1, cls: 'sun'},
-      kidL: {text: 'Dưới tán cây: mát, dễ chịu', anchor: () => W(kid, V3(0, 1.05, 0)), off: [1, .5], info: 1, cls: 'cool'},
+      resA: {text: 'Túi chậu A: vẫn trong', anchor: () => W(pots[Math.max(lab.A, 0)], V3(0, .2, .22)), off: [0, 1.5], info: 1},
+      resB: {text: 'Túi chậu B: mờ, đọng giọt nước', anchor: () => W(pots[Math.max(lab.B, 0)], V3(0, .2, .22)), off: [0, 1.5], info: 1, cls: 'vap'},
+      pullL: {text: 'Lực kéo: nước + chất khoáng đi lên', anchor: () => TL(TREE.trunk).add(V3(0, TREE.crownY * .55, .2)), off: [-1, .2], info: 1, cls: 'water'},
+      vapL: {text: 'Hơi nước thoát ra qua khí khổng', anchor: () => TL(TREE.top), off: [1, -.4], info: 1, cls: 'vap'},
+      co2L: {text: 'CO₂ đi vào lá', anchor: () => TL(TREE.ctr).add(V3(-TREE.r * 1.3, .2, .4)), off: [-1, -.3], info: 1, cls: 'gas'},
+      o2L: {text: 'O₂ thoát ra ngoài', anchor: () => TL(TREE.ctr).add(V3(TREE.r * 1.3, .5, .3)), off: [1, -.3], info: 1, cls: 'vap'},
+      coolL: {text: 'Nước bốc hơi lấy đi nhiệt → lá mát hơn', anchor: () => TL(TREE.ctr).add(V3(-TREE.r * .6, .6, .5)), off: [-1, -.6], info: 1, cls: 'sun'},
+      kidL: {text: 'Dưới tán cây: mát, dễ chịu', anchor: () => TL(TREE.kid), off: [1, .5], info: 1, cls: 'cool'},
     };
     Object.entries(LBL).forEach(([k, o]) => {
       o.tag = document.createElement('button'); o.tag.type = 'button'; o.tag.className = 'tag' + (o.info ? ' info' : '') + (o.cls ? ' ' + o.cls : ''); o.tag.textContent = o.text;
@@ -2890,6 +2866,7 @@
       PLOTS[0].fill.scale.y = Math.max(.02, wc / 100); PLOTS[1].fill.scale.y = Math.max(.02, wh / 100);
       $('wtC').textContent = wc + '%'; $('wtH').textContent = wh + '%'; $('sbC').style.width = wc + '%'; $('sbH').style.width = wh + '%';
       LBL.gwC.tag.textContent = `Nước trong đất: ${wc}%`; LBL.gwH.tag.textContent = `Nước trong đất: ${wh}%`;
+      setWilt(PLOTS[0], 0); setWilt(PLOTS[1], .25 + .75 * k);   // ngày nóng: cây úa sẵn, héo dần khi đất cạn nước
       const vk = garden.started ? Math.min(1, k * 6) : 0; $('vbC').style.width = 24 * vk + '%'; $('vbH').style.width = 90 * vk + '%';
     }
     $('btnCmp').onclick = () => {
@@ -2916,11 +2893,10 @@
     mcq('q2', 'fbq2', {ok: V.q2ok, no: V.q2no, hint: 'Cô gợi ý: so sánh vạch "Nước trong đất" ở hai khu vườn – bên nào cạn nhanh hơn?', okKey: 'q2ok', noKey: 'q2no', onOk: () => $('kc1').classList.remove('hide')});
 
     /* ===== Bước 3: thí nghiệm chứng minh lá thoát hơi nước ===== */
-    const TOOL_OBJ = {scis: gScis, bag0: bags[0], bag1: bags[1], pot0: pots[0], pot1: pots[1], pot2: pots[2]};
+    const TOOL_OBJ = {scis: gScis, bag0: bags[0], bag1: bags[1], pot0: pots[0], pot1: pots[1]};
     const labView = () => lab.stage >= 6 ? 'bags' : lab.stage >= 4 ? 'sun' : 'lab';
     function labLabels() {
       const s = lab.stage, a = [];
-      if (s === 0) a.push('pot0', 'pot1', 'pot2', 'shadeL');
       if (s >= 1) a.push('potA', 'potB');
       if (s === 1) a.push('tScis');
       if (s === 2) a.push('tBag');
@@ -2930,41 +2906,22 @@
     }
     function nudgeTool() {
       if (cur !== 2) return; const s = lab.stage;
-      if (s === 0) nudgeTag(lab.sel.length ? (lab.sel[0] === 0 ? 'pot2' : 'pot0') : 'pot0', 3000);
       if (s === 1) nudgeTag('tScis', 2500);
       if (s === 2) nudgeTag('tBag', 2500);
       if (s === 3) nudgeTag(!lab.inSun[lab.A] ? 'potA' : 'potB', 2500);
     }
     function syncLabList() {
-      const done = [0, 1, 2, 3, 4, 4, 5][lab.stage];
+      const done = [0, 0, 1, 2, 3, 3, 4][lab.stage];
       [...$('labList').children].forEach((c, k) => {c.classList.toggle('done', k < done); c.classList.toggle('cur', k === done && lab.stage < 6);});
-      $('cntL').textContent = `Đã xong ${done}/5`;
+      $('cntL').textContent = `Đã xong ${done}/4`;
     }
     function labNext(stage, key) {
       lab.stage = stage; sfx('ding'); syncLabList(); labLabels(); nudgeTool();
       if (stage === 3 && cur === 2) goView('lab');
       if (key) sayV(key);
     }
-    function choosePot(i) {
-      if (cur !== 2 || lab.stage !== 0 || lab.busy) return;
-      if (pots[i].userData.kind === 'odd') {
-        sfx('wrong'); toast('Chậu này khác loài với hai chậu còn lại – hai chậu cần cùng loài, cùng cỡ'); sayV('labWrong');
-        const r = pots[i].userData.ring; r.material = r.material.clone(); r.material.color.set(0xe04848); r.visible = true; setTimeout(() => {r.visible = false;}, 900);
-        lab.sel.forEach(k => pots[k].userData.ring.visible = false); lab.sel = []; return;
-      }
-      if (lab.sel.includes(i)) {lab.sel = lab.sel.filter(k => k !== i); pots[i].userData.ring.visible = false; sfx('click'); return;}
-      lab.sel.push(i); pots[i].userData.ring.visible = true; sfx('pop'); $('fbL').className = 'fb';
-      if (lab.sel.length === 1) {toast(`Chậu ${i + 1} là chậu A. Em chọn thêm một chậu giống hệt nhé`); nudgeTool(); return;}
-      lab.A = lab.sel[0]; lab.B = lab.sel[1];
-      const odd = pots.findIndex(p => p.userData.kind === 'odd');
-      pots[odd].userData.home = V3(-2.5, 0, -1.5); moveTo(pots[odd], pots[odd].userData.home, pots[odd].quaternion, 700);
-      toast('Đã chọn 2 chậu cùng loài, cùng cỡ: chậu A và chậu B');
-      setTimeout(() => {lab.sel.forEach(k => pots[k].userData.ring.visible = false);}, 900);
-      labNext(1, 'lab1');
-    }
     function tapTool(k) {
       if (cur !== 2 || lab.busy) return;
-      if (k.startsWith('pot') && lab.stage === 0) return choosePot(+k.slice(3));
       if (!canUse(k)) return toast(lab.stage === 4 ? 'Em chọn một dự đoán trước nhé' : lab.stage === 5 ? 'Em bấm nút Tua nhanh phía trên hai chậu nhé' : 'Em làm theo thứ tự: bước đang tô sáng là bước cần làm');
       doTool(k);
     }
@@ -3002,8 +2959,8 @@
         const pot = pots[pi], u = o.userData;
         await moveTo(o, pot.position.clone().add(V3(0, 2.4, 0)), qE(0, 0, 0), 600);
         u.folded.visible = false; u.open.visible = true; o.scale.setScalar(.6);
-        await play(700, t => {const e = ease(t); o.position.copy(pot.position).add(V3(0, 2.4 - 1.84 * e, 0)); o.scale.setScalar(.6 + .4 * e);});
-        pot.attach(o); o.position.set(0, .56, 0); o.quaternion.identity(); o.scale.setScalar(1);
+        await play(700, t => {const e = ease(t); o.position.copy(pot.position).add(V3(0, 2.4 - (2.4 - POT_SOIL) * e, 0)); o.scale.setScalar(.6 + .4 * e);});
+        pot.attach(o); o.position.set(0, POT_SOIL, 0); o.quaternion.identity(); o.scale.setScalar(1);
         u.pot = pi; sfx('place');
         const both = bagOn(lab.A) && bagOn(lab.B);
         toast(both ? 'Đã trùm túi và buộc kín ở cả hai chậu' : `Đã trùm túi lên chậu ${pi === lab.A ? 'A' : 'B'}, còn một chậu nữa`);
@@ -3042,7 +2999,7 @@
       }
     }
     function labReset() {
-      anims.clear(); Object.assign(lab, {stage: 0, busy: false, sel: [], A: -1, B: -1, inSun: [false, false, false], pred: -1, time: 0, ff: false});
+      anims.clear(); Object.assign(lab, {stage: 1, busy: false, A: 0, B: 1, inSun: [false, false], pred: -1, time: 0, ff: false});
       placeLabHome(); setFog(); LBL.potA.tag.textContent = 'Chậu A';
       document.querySelectorAll('#pred .opt').forEach(x => {x.disabled = false; x.classList.remove('pick');});
       ['predCard', 'resCard'].forEach(id => $(id).classList.add('hide')); $('fbL').className = 'fb'; resetRep(); syncRep();
@@ -3077,7 +3034,7 @@
         let grab = false;
         if (sceneName === 'lab' && cur === 2 && !lab.busy && e.pointerType === 'mouse' && !e.buttons) {
           setNdc(e); const h = ray.intersectObjects(toolPick, false)[0], k = h && toolOf(h.object);
-          grab = !!k && (canUse(k) || (lab.stage === 0 && k.startsWith('pot') && pots[+k.slice(3)].userData.kind !== 'odd'));
+          grab = !!k && canUse(k);
         }
         canvas.style.cursor = grab ? 'grab' : '';
         return;
@@ -3100,12 +3057,10 @@
       setNdc(e);
       if (sceneName === 'leaf' && cur === 0 && !zoomed) {if (ray.intersectObjects(leafPick, false)[0]) onZoom();}
       else if (sceneName === 'micro') {
-        const h = ray.intersectObjects(stomata.flatMap(s => [s.userData.up, s.userData.dn, s.userData.pore]), false)[0];
-        if (h) {sfx('pop'); toast(h.object === h.object.parent.userData.pore ? 'Khí khổng: hơi nước thoát ra ngoài qua lỗ này' : 'Tế bào hạt đậu: trương nước thì cong ra, khí khổng mở');}
+        if (ray.intersectObjects(stomaGuards, true)[0]) {sfx('pop'); toast('Tế bào hạt đậu: trương nước thì cong ra, khí khổng mở');}
       } else if (sceneName === 'lab' && cur === 2) {
         const h = ray.intersectObjects(toolPick, false)[0]; const k = h && toolOf(h.object);
-        if (k && lab.stage === 0 && k.startsWith('pot')) choosePot(+k.slice(3));
-        else if (k && !canUse(k)) tapTool(k);
+        if (k && !canUse(k)) tapTool(k);
       }
     });
 
@@ -3113,7 +3068,6 @@
     const scr = (p, w, h) => {const q = p.clone().project(camera); return {x: (q.x * .5 + .5) * w, y: (-q.y * .5 + .5) * h};};
     function labHint() {
       const s = lab.stage;
-      if (s === 0) {const i = [0, 2].find(k => !lab.sel.includes(k)); return i == null ? null : {tap: true, a: W(pots[i], V3(0, .9, 0))};}
       if (s === 1) return {k: 'scis', a: W(gScis, V3(.15, 0, 0)), b: W(pots[lab.A], V3(0, .95, 0))};
       if (s === 2) {const bi = bags.findIndex(b => b.userData.pot == null), pi = [lab.A, lab.B].find(p => !bagOn(p)); if (bi < 0 || pi == null) return null; return {k: 'bag' + bi, a: W(bags[bi], V3(0, .03, 0)), b: W(pots[pi], V3(0, .95, 0))};}
       if (s === 3) {const pi = [lab.A, lab.B].find(p => !lab.inSun[p]); if (pi == null) return null; return {k: 'pot' + pi, a: W(pots[pi], V3(0, .3, 0)), b: LW(...SUN_SPOT[pi === lab.A ? 0 : 1].toArray()).add(V3(0, .05, 0))};}
@@ -3123,7 +3077,7 @@
       const w = viewer.clientWidth, h = viewer.clientHeight, onLab = cur === 2 && gLab.visible && started && !lab.busy;
       const showFF = onLab && lab.stage === 5 && !lab.ff, showClock = onLab && lab.stage >= 5 && (lab.ff || lab.time > 0) && !(lab.stage >= 6 && w <= 900);
       $('btnFF').classList.toggle('show', showFF); $('lclock').classList.toggle('show', showClock);
-      if ((showFF || showClock) && lab.B >= 0) {const mid = W(pots[lab.A], V3(0, 0, 0)).lerp(W(pots[lab.B], V3(0, 0, 0)), .5).add(V3(0, 2.05, 0)), q = scr(mid, w, h); ['btnFF', 'lclock'].forEach(id => {
+      if ((showFF || showClock) && lab.B >= 0) {const mid = W(pots[lab.A], V3(0, 0, 0)).lerp(W(pots[lab.B], V3(0, 0, 0)), .5).add(V3(0, 1.8, 0)), q = scr(mid, w, h); ['btnFF', 'lclock'].forEach(id => {
         const el = $(id), ew = el.offsetWidth, eh = el.offsetHeight; // giữ trong khung, nằm dưới thanh công cụ
         el.style.left = clamp(q.x, ew / 2 + 8, w - ew / 2 - 8) + 'px'; el.style.top = Math.max(q.y, avail.top + 60 + eh) + 'px'; el.style.transform = 'translate(-50%, -100%)';
       });}
@@ -3174,7 +3128,8 @@
     /* ===== Bước 4: vai trò – thẻ lật ===== */
     const TREE_LBL = {null: [], pull: ['pullL', 'vapL'], gas: ['co2L', 'o2L'], cool: ['coolL', 'kidL', 'vapL'], all: ['pullL', 'co2L', 'o2L', 'kidL']};
     function setTreeMode(m) {
-      treeMode = m; pullIM.visible = m === 'pull' || m === 'all'; co2IM.visible = o2IM.visible = m === 'gas' || m === 'all';
+      treeMode = m;
+      if (pullIM) {pullIM.visible = m === 'pull' || m === 'all'; co2IM.visible = o2IM.visible = m === 'gas' || m === 'all';}
       if (cur === 3) setLabels(TREE_LBL[m]);
       if (m !== 'cool' && m !== 'all') heatSys.clear();
     }
@@ -3225,23 +3180,23 @@
       const dt = Math.min(clock.getDelta(), .05);
       stepTween(now); runAnims(now); controls.update();
       if (gLeaf.visible) {
-        leafFlow.userData.update(dt);
+        leafFlow?.userData.update(dt);
         const dots = leafPiv.userData.dots;
-        emitRate('leaf', leafVap, 10, dt, () => {const d = dots[(rand() * dots.length) | 0]; return gLeaf.worldToLocal(W(leafPiv, d.p.clone().setZ(d.p.z - .02)));});
+        if (dots) emitRate('leaf', leafVap, 10, dt, () => {const d = dots[(rand() * dots.length) | 0]; return gLeaf.worldToLocal(W(leafPiv, d.p.clone().setZ(d.p.z - .02)));});
         leafVap.update(dt);
       }
       if (gMicro.visible) {
         const rate = water < .04 ? 0 : 7 * water * water;
-        stomata.forEach((s, i) => emitRate('m' + i, microVap, rate, dt, () => vtmp.set(s.position.x + R(-.12, .12), .12, s.position.z + R(-.06, .06))));
+        stomaPores.forEach((p, i) => emitRate('m' + i, microVap, rate, dt, () => vtmp.copy(p).add(V3(R(-.08, .08), .1, R(-.25, .25)))));
         microVap.update(dt);
       }
       if (gGarden.visible) updateGarden(dt);
       if (gLab.visible && lab.ff && lab.stage === 5) setTime(lab.time + dt * 10);
       if (gTree.visible) {
-        if (pullIM.visible) pullIM.userData.update(dt);
-        if (co2IM.visible) {co2IM.userData.update(dt); o2IM.userData.update(dt);}
-        if (treeMode) emitRate('tv', treeVap, treeMode === 'gas' ? 12 : 30, dt, () => treeTops[(rand() * treeTops.length) | 0]);
-        if (treeMode === 'cool' || treeMode === 'all') emitRate('th', heatSys, 16, dt, () => treeTops[(rand() * treeTops.length) | 0]);
+        if (pullIM?.visible) pullIM.userData.update(dt);
+        if (co2IM?.visible) {co2IM.userData.update(dt); o2IM.userData.update(dt);}
+        if (treeMode && treeTops.length) emitRate('tv', treeVap, treeMode === 'gas' ? 12 : 30, dt, () => treeTops[(rand() * treeTops.length) | 0]);
+        if ((treeMode === 'cool' || treeMode === 'all') && treeTops.length) emitRate('th', heatSys, 16, dt, () => treeTops[(rand() * treeTops.length) | 0]);
         treeVap.update(dt); heatSys.update(dt);
       }
       updateLabHints(now); updateLabels();
@@ -3251,17 +3206,19 @@
     /* ---------- khởi động ---------- */
     const bar = $('introBar'), status = $('introStatus');
     setWater(.5); gaugeLevel(); setSoil(); setFog(); syncLabList(); setTreeMode(null); resize(); goStep(0); goView('leaf', true);
-    let pct = 0; const prog = setInterval(() => {
-      pct = Math.min(100, pct + 9); bar.style.width = pct + '%'; status.textContent = `Đang dựng mô hình 3D… ${pct}%`;
-      if (pct >= 100) {clearInterval(prog); status.textContent = 'Sẵn sàng!'; $('introLoader').classList.add('ready');}
-    }, 60);
+    // thanh tải chạy theo tiến độ tải model của bước 1 (lá ~19 MB, khí khổng ~5 MB); model các bước sau tải ngầm sau đó
+    const loadF = {leaf: 0, stoma: 0}, showLoad = () => {const pct = Math.round((loadF.leaf * 19 + loadF.stoma * 5) / 24 * 100); bar.style.width = pct + '%'; status.textContent = `Đang tải mô hình 3D… ${pct}%`;};
+    leafProgress = f => {loadF.leaf = f; showLoad();}; stomaProgress = f => {loadF.stoma = f; showLoad();};
+    showLoad();
+    coreReady.then(() => {bar.style.width = '100%'; status.textContent = 'Sẵn sàng!'; $('introLoader').classList.add('ready');})
+      .catch(() => {status.textContent = 'Không tải được mô hình 3D. Em kiểm tra kết nối mạng rồi tải lại trang nhé.';});
     $('btnExplore').onclick = () => {
       const l = $('introLoader'); l.classList.add('gone'); setTimeout(() => l.remove(), 600);
       resize(); goView(currentView, true); started = true; sfx('click'); sayV('step', cur);
       setTimeout(() => {$('hint').style.opacity = 0;}, 9000);
     };
     requestAnimationFrame(loop);
-    window.__app = {goStep, lab, THREE, camera, controls, scene, onZoom, setWater, doTool, setTime, labReset, choosePot, garden, setTreeMode, tapTool};
+    window.__app = {goStep, lab, THREE, camera, controls, scene, onZoom, setWater, doTool, setTime, labReset, garden, setTreeMode, tapTool};
   </script>
 </body>
 

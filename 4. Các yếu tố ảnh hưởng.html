@@ -2052,6 +2052,7 @@
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
     import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
     import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+    import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 
     const $ = id => document.getElementById(id);
     const STEP_NAMES = ['Nhà kính', 'Ghép yếu tố', 'Nên / Không nên'];
@@ -2132,9 +2133,6 @@
     const std = (color, o = {}) => new THREE.MeshStandardMaterial({color, roughness: .65, ...o});
     const tr = (color, opacity, o = {}) => new THREE.MeshStandardMaterial({color, transparent: true, opacity, depthWrite: false, side: THREE.DoubleSide, ...o});
     const M = {
-      pot: std(0xc0673f, {roughness: .8, side: THREE.DoubleSide}),
-      potIn: std(0x8f4a2c, {roughness: .9, side: THREE.DoubleSide}),
-      potFront: tr(0xd88a5f, .16, {roughness: .4}),
       soil: tr(0x5a3a1e, .4, {roughness: 1, side: THREE.FrontSide}),
       soilTop: std(0x5a3a1e, {roughness: 1}),
       grain: std(0x7a4f2a, {roughness: 1}),
@@ -2143,9 +2141,6 @@
       drop: new THREE.MeshStandardMaterial({color: 0x3fa3ff, transparent: true, opacity: .8, roughness: .2}),
       flood: tr(0x4aa8ff, 0, {roughness: .05, side: THREE.FrontSide}),
       root: std(0xe8d3a8, {roughness: .8}),
-      stem: std(0x5e9e3c, {roughness: .7}),
-      leaf: std(0x3e9a45, {roughness: .75, side: THREE.DoubleSide}),
-      vein: std(0x9ccf7e, {roughness: .9, side: THREE.DoubleSide}),
       frame: std(0xf2f6f5, {roughness: .45, metalness: .25}),
       glass: tr(0xd9f3ee, .14, {roughness: .05}),
       floor: std(0xffffff, {roughness: .95}),
@@ -2185,15 +2180,6 @@
         const k = (d - L[i - 1]) / ((L[i] - L[i - 1]) || 1); return out.lerpVectors(points[i - 1], points[i], k);
       }};
     }
-    function bend(g, len, k = .32, cup = 1.2) {
-      const p = g.attributes.position;
-      for (let i = 0; i < p.count; i++) {const x = p.getX(i), y = p.getY(i); p.setZ(i, k * len * (y / len) ** 2 - cup * x * x);}
-      g.computeVertexNormals(); return g;
-    }
-    function leafGeo(len, w) {
-      const s = new THREE.Shape(); s.moveTo(0, 0); s.bezierCurveTo(w, len * .25, w * .9, len * .75, 0, len); s.bezierCurveTo(-w * .9, len * .75, -w, len * .25, 0, 0);
-      return bend(new THREE.ShapeGeometry(s, 16), len);
-    }
     const softTex = (() => {
       const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
       const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.45, 'rgba(255,255,255,.75)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
@@ -2206,10 +2192,10 @@
     const gHouse = new THREE.Group(); scene.add(gHouse);
     const HW = 6.4, HD = 4.6, HH = 2.55, HR = 3.45;
     {
-      const base = new THREE.Mesh(new RoundedBoxGeometry(HW + .5, .16, HD + .5, 2, .05), std(0xb9c9c2, {roughness: .9})); base.position.y = -.09; gHouse.add(base);
+      const base = new THREE.Mesh(new RoundedBoxGeometry(HW + .5, .16, HD + .5, 2, .05), std(0x4f5b56, {roughness: .9})); base.position.y = -.09; gHouse.add(base);
       const tiles = []; for (let i = 0; i < 8; i++) for (let j = 0; j < 6; j++) tiles.push({p: V3(-HW / 2 + .4 + i * (HW - .8) / 7, .005, -HD / 2 + .4 + j * (HD - .8) / 5), s: V3(.74, .02, .7)});
       const im = instanced(new THREE.BoxGeometry(1, 1, 1), M.floor, tiles);
-      tiles.forEach((_, i) => im.setColorAt(i, new THREE.Color((i + Math.floor(i / 6)) % 2 ? 0xdfe6e1 : 0xd2dcd6))); gHouse.add(im);
+      tiles.forEach((_, i) => im.setColorAt(i, new THREE.Color((i + Math.floor(i / 6)) % 2 ? 0x7c8781 : 0x6f7a74))); gHouse.add(im);
       // khung
       const posts = [];
       for (const x of [-HW / 2, -HW / 6, HW / 6, HW / 2]) for (const z of [-HD / 2, HD / 2]) posts.push([x, z]);
@@ -2234,34 +2220,13 @@
       const tri = new THREE.Shape(); tri.moveTo(-HD / 2, 0); tri.lineTo(HD / 2, 0); tri.lineTo(0, HR - HH); tri.lineTo(-HD / 2, 0);
       for (const x of [-HW / 2, HW / 2]) add(new THREE.ShapeGeometry(tri), V3(x, HH, 0), new THREE.Euler(0, Math.PI / 2, 0));
     }
-    // bàn kê + vài chậu cây nhỏ ở góc
-    {
-      const bench = new THREE.Group(); bench.position.set(1.75, 0, -1.75); gHouse.add(bench);
-      const top = new THREE.Mesh(new RoundedBoxGeometry(2.1, .07, .62, 2, .02), std(0xa77a4f, {roughness: .8})); top.position.y = .62; bench.add(top);
-      for (const x of [-.95, .95]) for (const z of [-.25, .25]) {const l = new THREE.Mesh(new THREE.BoxGeometry(.05, .62, .05), M.metal); l.position.set(x, .31, z); bench.add(l);}
-      [-.65, 0, .65].forEach((x, i) => {
-        const p = new THREE.Mesh(new THREE.CylinderGeometry(.16, .12, .24, 20), M.pot); p.position.set(x, .78, 0); bench.add(p);
-        const n = 7 + i; for (let k = 0; k < n; k++) {const b = new THREE.Mesh(ball, std([0x4f9a45, 0x5fae4f, 0x3f8a3a][k % 3], {roughness: .8})); b.scale.setScalar(R(.09, .14)); b.position.set(x + R(-.12, .12), .98 + R(0, .2), R(-.1, .1)); bench.add(b);}
-      });
-    }
 
-    /* ---------- chậu cây lớn, cắt dọc thấy rễ ---------- */
+    /* ---------- chậu cây (model GLB tải về) + phần đất, rễ mô phỏng bên trong ---------- */
+    const POT_URL = 'https://3d-cdn.yoolife.com.vn/lmlOwKA7bX2AZZwrB2/lmlOwKA7bX2AZZwrB2.glb';
     const gPot = new THREE.Group(); gPot.position.y = .07; scene.add(gPot);
-    const PH = 1.0, PRT = .82, PRB = .6, WALL = .05;
+    // chậu sứ trong model cao ≈ 0,164 và bán kính ≈ 0,09 → phóng POT_S lần để cao ≈ 1 đơn vị
+    const POT_S = 6.1, PH = 1.0, PRT = .53, PRB = .5, WALL = .04;
     const rAt = y => PRB + (PRT - PRB) * y / PH;
-    {
-      const sau = new THREE.Mesh(new THREE.CylinderGeometry(PRB + .14, PRB + .08, .07, 48), M.pot); sau.position.y = -.035; gPot.add(sau);
-      const back = new THREE.Mesh(new THREE.CylinderGeometry(PRT, PRB, PH, 48, 1, true, Math.PI / 2, Math.PI), M.pot); back.position.y = PH / 2; gPot.add(back);
-      const backIn = new THREE.Mesh(new THREE.CylinderGeometry(PRT - WALL, PRB - WALL, PH, 48, 1, true, Math.PI / 2, Math.PI), M.potIn); backIn.position.y = PH / 2; gPot.add(backIn);
-      const front = new THREE.Mesh(new THREE.CylinderGeometry(PRT, PRB, PH, 48, 1, true, -Math.PI / 2, Math.PI), M.potFront); front.position.y = PH / 2; front.renderOrder = 8; gPot.add(front);
-      const rim = new THREE.Mesh(new THREE.TorusGeometry(PRT - .015, .04, 10, 72), M.pot); rim.rotation.x = Math.PI / 2; rim.position.y = PH; gPot.add(rim);
-      const bot = new THREE.Mesh(new THREE.CylinderGeometry(PRB, PRB, .04, 48), M.potIn); bot.position.y = .02; gPot.add(bot);
-      // mép cắt hai bên (độ dày thành chậu)
-      for (const sx of [-1, 1]) {
-        const s = new THREE.Shape(); s.moveTo(PRB - WALL, 0); s.lineTo(PRB, 0); s.lineTo(PRT, PH); s.lineTo(PRT - WALL, PH); s.lineTo(PRB - WALL, 0);
-        const m = new THREE.Mesh(new THREE.ShapeGeometry(s), M.pot); m.scale.x = sx; gPot.add(m);
-      }
-    }
     // đất
     const SOIL_LOOSE = .9, SOIL_COMPACT = .82;
     const soilBody = new THREE.Mesh(new THREE.CylinderGeometry(rAt(.86) - WALL, PRB - WALL, .82, 48).translate(0, .41, 0), M.soil); soilBody.renderOrder = 7; gPot.add(soilBody);
@@ -2307,38 +2272,36 @@
       }
     }
 
-    /* ---------- cây (thân thảo, có thể héo) ---------- */
-    const SEG_L = [.55, .3, .3, .28, .25, .2], SEG_R = [.055, .048, .042, .036, .03, .024, .017];
-    const BEND = [0, .1, .2, .3, .36, .42];
-    const segs = [];
-    {
-      let parent = gPot, y0 = SOIL_LOOSE - .12;
-      SEG_L.forEach((len, i) => {
-        const g = new THREE.Group(); g.position.y = i === 0 ? y0 : SEG_L[i - 1]; parent.add(g);
-        const m = new THREE.Mesh(new THREE.CylinderGeometry(SEG_R[i + 1], SEG_R[i], len, 12).translate(0, len / 2, 0), M.stem); g.add(m);
-        const knot = new THREE.Mesh(ball, M.stem); knot.scale.setScalar(SEG_R[i] * 1.05); g.add(knot);
-        segs.push(g); parent = g;
+    /* ---------- cây trong model: gom lá + thân vào một trục để làm héo ---------- */
+    const PLANT_S = 2.8;                       // cây cà chua trong model cao ≈ 0,55 → ≈ 1,55 đơn vị
+    const gPlant = new THREE.Group(); gPlant.position.y = SOIL_LOOSE - .02; gPot.add(gPlant);
+    const plantMats = [], leafPts = [];        // vật liệu lá/thân (đổi màu khi héo) + điểm trên lá (nơi hơi nước bay ra)
+    let leafMesh = null, modelReady = false;
+    new GLTFLoader().load(POT_URL, gltf => {
+      const src = gltf.scene; src.updateMatrixWorld(true);
+      const potModel = new THREE.Group(), plantModel = new THREE.Group();
+      const meshes = []; src.traverse(o => {if (o.isMesh) meshes.push(o);});
+      meshes.forEach(o => {
+        const name = o.material.name || '';
+        if (/tomato/i.test(name)) {
+          // model xuất với metalness = 1 làm lá xám như kim loại → đưa về vật liệu lá thường; lá dùng alphaTest để xếp lớp đúng
+          Object.assign(o.material, {metalness: 0, roughness: .8});
+          if (o.material.transparent) Object.assign(o.material, {transparent: false, alphaTest: .5, side: THREE.DoubleSide});
+          plantModel.attach(o); plantMats.push({m: o.material, c: o.material.color.clone()});
+          if (/leaf/i.test(name)) leafMesh = o;
+        } else if (/porcelain/i.test(name)) {
+          // chậu sứ làm trong mờ để nhìn thấy đất, rễ, hạt nước bên trong
+          potModel.attach(o); Object.assign(o.material, {transparent: true, opacity: .35, depthWrite: false, side: THREE.DoubleSide}); o.renderOrder = 8;
+        } else o.visible = false;              // mặt đất sẵn có trong model: dùng mặt đất mô phỏng thay thế
       });
-      const bud = new THREE.Mesh(new THREE.ConeGeometry(.035, .12, 10).translate(0, .06, 0), M.stem); bud.position.y = SEG_L[5]; segs[5].add(bud);
-    }
-    const leaves = [];
-    {
-      const LL = [0, .5, .46, .42, .36, .3, .22];
-      for (let i = 1; i <= 6; i++) {
-        const parent = i === 6 ? segs[5] : segs[i], yAt = i === 6 ? SEG_L[5] : 0, len = LL[i];
-        for (const side of [0, 1]) {
-          const piv = new THREE.Group(); piv.position.y = yAt; piv.rotation.y = (i % 2 ? 0 : Math.PI / 2) + side * Math.PI + (i === 6 ? .8 : 0); parent.add(piv);
-          const tilt = new THREE.Group(); piv.add(tilt);
-          const pet = new THREE.Mesh(new THREE.CylinderGeometry(.008, .012, .1, 6).translate(0, .05, 0), M.stem); tilt.add(pet);
-          const bladeG = leafGeo(len, len * .5); bladeG.rotateY(Math.PI / 2);
-          const veinG = new THREE.PlaneGeometry(.012, len * .92).translate(0, len * .46, .004); bend(veinG, len); veinG.rotateY(Math.PI / 2);
-          const blade = new THREE.Group(); blade.position.y = .09; tilt.add(blade);
-          blade.add(new THREE.Mesh(bladeG, M.leaf), new THREE.Mesh(veinG, M.vein));
-          const mark = new THREE.Object3D(); mark.position.set(0, len * .6, 0); blade.add(mark);
-          leaves.push({tilt, blade, mark, base: i === 6 ? .55 : .9 + i * .03, ph: rand() * 6.3});
-        }
+      potModel.scale.setScalar(POT_S); gPot.add(potModel);
+      plantModel.scale.setScalar(PLANT_S); plantModel.position.y = -.15 * PLANT_S; gPlant.add(plantModel);
+      if (leafMesh) {
+        const pos = leafMesh.geometry.attributes.position;
+        for (let i = 0; i < 60; i++) leafPts.push(V3(0, 0, 0).fromBufferAttribute(pos, Math.floor(rand() * pos.count)));
       }
-    }
+      modelReady = true;
+    }, undefined, () => {modelReady = true;});
 
     /* ---------- thiết bị: đèn, máy sưởi, nhiệt kế, máy phun sương, bình tưới ---------- */
     const LAMP_Y = 3.05;
@@ -2471,7 +2434,7 @@
     // hiển thị môi trường lên cảnh 3D
     const cSoilDry = new THREE.Color(0xc9a274), cSoilWet = new THREE.Color(0x5a3a1e), cSoilFlood = new THREE.Color(0x3b2814);
     const cGrainDry = new THREE.Color(0xc59a68), cGrainWet = new THREE.Color(0x7a4f2a);
-    const cLeaf = new THREE.Color(0x3e9a45), cLeafW = new THREE.Color(0x9aa23e);
+    const cWilt = new THREE.Color(0xc9b25a);
     function applyEnv() {
       const L = env.light, k = (env.temp - 15) / 25;
       spot.intensity = 3 + 42 * L; bulbM.emissiveIntensity = .15 + 2.6 * L; beamM.opacity = .02 + .2 * L;
@@ -2499,9 +2462,10 @@
     }
     function plantVisual(t) {
       const w = sim.dW;
-      segs.forEach((g, i) => {g.rotation.z = -w * BEND[i] + (i ? Math.sin(t * 1.3 + i) * .008 : 0); g.rotation.x = i ? Math.sin(t * .9 + i * .7) * .006 : 0;});
-      leaves.forEach(l => {l.tilt.rotation.z = -(l.base + w * 1.15 + Math.sin(t * 2.2 + l.ph) * .03 * (1 - w)); l.blade.scale.set(1, 1, 1 - .4 * w);});
-      M.leaf.color.copy(cLeaf).lerp(cLeafW, w * .85); M.stem.color.setHex(0x5e9e3c).lerp(new THREE.Color(0x8a9a4a), w * .6);
+      gPlant.rotation.z = -w * .38 + Math.sin(t * 1.3) * .006 * (1 - w);
+      gPlant.rotation.x = Math.sin(t * .9) * .005;
+      gPlant.scale.set(1 + .05 * w, 1 - .16 * w, 1 + .05 * w);
+      plantMats.forEach(({m, c}) => m.color.copy(c).lerp(cWilt, w * .7));
     }
 
     /* =====================================================================
@@ -2912,7 +2876,8 @@
       [[GE, sim.dE], [GU, sim.dU]].forEach(([g, v]) => g.needle.setAttribute('transform', `rotate(${-90 + 180 * v} 60 62)`));
       // hơi nước thoát ra từ lá
       vap.acc += dt * sim.dE * 70;
-      while (vap.acc > 1) {vap.acc--; const l = leaves[Math.floor(rand() * leaves.length)]; const p = l.mark.getWorldPosition(new THREE.Vector3()); vap.emit(p, V3(R(-.08, .08), R(.25, .45), R(-.08, .08)), R(1.4, 2.1), .06, .24, .5 + .3 * sim.dE);}
+      if (!leafMesh) vap.acc = 0;
+      while (vap.acc > 1) {vap.acc--; const p = leafMesh.localToWorld(leafPts[Math.floor(rand() * leafPts.length)].clone()); vap.emit(p, V3(R(-.08, .08), R(.25, .45), R(-.08, .08)), R(1.4, 2.1), .06, .24, .5 + .3 * sim.dE);}
       // sương từ máy phun
       mist.acc += dt * env.air * 55;
       while (mist.acc > 1) {mist.acc--; mist.emit(NOZZLE.clone().add(V3(-.18, 0, 0)), V3(R(-.9, -.55), R(-.15, .12), R(-.18, .18)), R(1.6, 2.4), .05, .3, .45);}
@@ -2930,7 +2895,7 @@
     const bar = $('introBar'), status = $('introStatus');
     applyLayers(); syncCtl(); sim.dE = sim.E; sim.dU = sim.U; resize(); goStep(0); goView('house', true);
     let pct = 0; const prog = setInterval(() => {
-      pct = Math.min(100, pct + 9); bar.style.width = pct + '%'; status.textContent = `Đang dựng mô hình 3D… ${pct}%`;
+      pct = Math.min(modelReady ? 100 : 90, pct + 9); bar.style.width = pct + '%'; status.textContent = `Đang dựng mô hình 3D… ${pct}%`;
       if (pct >= 100) {clearInterval(prog); status.textContent = 'Sẵn sàng!'; $('introLoader').classList.add('ready');}
     }, 60);
     $('btnExplore').onclick = () => {

@@ -2443,6 +2443,8 @@
     import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
     import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
     import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+    import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+    import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
 
     const $ = id => document.getElementById(id);
     const STEP_NAMES = ['Người làm vườn', 'Tưới, bón hợp lí'];
@@ -2517,7 +2519,7 @@
     const hemi = new THREE.HemisphereLight(0xffffff, 0x9fc9a4, 0.85); scene.add(hemi);
     const keyL = new THREE.DirectionalLight(0xffffff, 1.5); keyL.position.set(-4, 7, 3); scene.add(keyL);
     const rimL = new THREE.DirectionalLight(0xbfe8ff, 0.5); rimL.position.set(5, 3, -5); scene.add(rimL);
-    scene.fog = new THREE.Fog(0xe3f4f6, 24, 52);
+    scene.fog = new THREE.Fog(0xe3f4f6, 45, 120);
 
     const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 200);
     const controls = new OrbitControls(camera, canvas);
@@ -2578,19 +2580,87 @@
       const s = new THREE.Shape(); s.moveTo(0, 0); s.bezierCurveTo(w, len * .25, w * .9, len * .75, 0, len); s.bezierCurveTo(-w * .9, len * .75, -w, len * .25, 0, 0);
       const g = new THREE.ShapeGeometry(s, 10), p = g.attributes.position;
       for (let i = 0; i < p.count; i++) {const x = p.getX(i), y = p.getY(i); p.setZ(i, .3 * len * (y / len) ** 2 - 1.2 * x * x);}
+      const uv = g.attributes.uv; for (let i = 0; i < p.count; i++) uv.setXY(i, p.getX(i) / (2 * w) + .5, p.getY(i) / len);
       g.computeVertexNormals(); return g;
     }
     // phiến lá bưởi: hình trứng, gấp nhẹ theo gân giữa
     function bladeGeometry() {
-      const pos = [], idx = [], sections = 10;
+      const pos = [], idx = [], uvs = [], sections = 10;
       for (let i = 0; i <= sections; i++) {
         const t = i / sections, w = Math.pow(Math.sin(Math.PI * Math.min(1, t * 1.08)), .8) * .36;
-        for (let j = 0; j < 3; j++) pos.push((j - 1) * w, t, .12 * Math.sin(Math.PI * t) + (j === 1 ? .04 : 0));
+        for (let j = 0; j < 3; j++) {pos.push((j - 1) * w, t, .12 * Math.sin(Math.PI * t) + (j === 1 ? .04 : 0)); uvs.push(j / 2, t);}
         if (i < sections) {const k = i * 3; idx.push(k, k + 3, k + 1, k + 1, k + 3, k + 4, k + 1, k + 4, k + 2, k + 2, k + 4, k + 5);}
       }
-      const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals(); return geo;
+      const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2)); geo.setIndex(idx); geo.computeVertexNormals(); return geo;
     }
     const canvasTex = (w, h, draw) => {const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;};
+
+    /* ---------- texture vẽ bằng code (vỏ cây, lá, gỗ, đất, bao dứa…) cho vật thể tự dựng ---------- */
+    const trnd = (() => {let a = 9137; return () => {a = (a * 1664525 + 1013904223) >>> 0; return a / 4294967296;};})();
+    const rep2 = (t, x, y) => {t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(x, y); return t;};
+    const hsl = (h, s, l, a = 1) => `hsla(${h},${s}%,${l}%,${a})`;
+    // vỏ cây: các rãnh dọc thân (u chạy dọc ống → vẽ vệt theo chiều ngang của canvas)
+    const barkTex = rep2(canvasTex(512, 256, (g, w, h) => {
+      g.fillStyle = '#6b4c31'; g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 900; i++) {const y = trnd() * h, x = trnd() * w, l = 30 + trnd() * 120; g.strokeStyle = hsl(28, 30 + trnd() * 15, 14 + trnd() * 30, .55); g.lineWidth = 1 + trnd() * 4; g.beginPath(); g.moveTo(x, y); g.bezierCurveTo(x + l * .3, y + (trnd() - .5) * 6, x + l * .6, y + (trnd() - .5) * 6, x + l, y + (trnd() - .5) * 4); g.stroke();}
+      for (let i = 0; i < 400; i++) {g.fillStyle = hsl(80, 15, 45 + trnd() * 20, .25); g.fillRect(trnd() * w, trnd() * h, 2 + trnd() * 6, 1 + trnd() * 2);}
+    }), 3, 1);
+    // phiến lá: thang xám (nhân với màu lá) – gân giữa, gân phụ, mép tối hơn
+    const leafTex = canvasTex(256, 512, (g, w, h) => {
+      const gr = g.createLinearGradient(0, 0, w, 0); gr.addColorStop(0, '#9a9a9a'); gr.addColorStop(.5, '#ececec'); gr.addColorStop(1, '#9a9a9a'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 2500; i++) {const v = 190 + trnd() * 60 | 0; g.fillStyle = `rgba(${v},${v},${v},.18)`; g.fillRect(trnd() * w, trnd() * h, 2, 2);}
+      g.strokeStyle = 'rgba(255,255,240,.85)'; g.lineWidth = 7; g.beginPath(); g.moveTo(w / 2, h); g.lineTo(w / 2, 0); g.stroke();
+      g.lineWidth = 2.5; g.strokeStyle = 'rgba(255,255,235,.55)';
+      for (let k = 1; k < 11; k++) {const y = h - k * h / 11; [-1, 1].forEach(sd => {g.beginPath(); g.moveTo(w / 2, y); g.quadraticCurveTo(w / 2 + sd * w * .25, y - h * .04, w / 2 + sd * w * .46, y - h * .09); g.stroke();});}
+    });
+    // vân gỗ
+    function woodTexFn(base, planks) {
+      return canvasTex(512, 512, (g, w, h) => {
+        g.fillStyle = base; g.fillRect(0, 0, w, h);
+        for (let i = 0; i < 160; i++) {const y = trnd() * h, a = 2 + trnd() * 6; g.strokeStyle = hsl(28, 40, 22 + trnd() * 22, .35); g.lineWidth = .8 + trnd() * 2; g.beginPath(); g.moveTo(0, y); for (let x = 0; x <= w; x += 32) g.lineTo(x, y + Math.sin(x / 60 + i) * a); g.stroke();}
+        for (let i = 0; i < 4; i++) {const x = trnd() * w, y = trnd() * h; g.strokeStyle = hsl(25, 40, 22, .5); for (let r = 3; r < 16; r += 3) {g.beginPath(); g.ellipse(x, y, r * 2, r * .8, 0, 0, 6.29); g.stroke();}}
+        if (planks) for (let k = 1; k < planks; k++) {const y = k * h / planks; g.fillStyle = 'rgba(40,24,10,.75)'; g.fillRect(0, y - 3, w, 6); g.fillStyle = 'rgba(255,230,190,.25)'; g.fillRect(0, y + 3, w, 2);}
+      });
+    }
+    const woodTex = woodTexFn('#b98a55'), crateTex = woodTexFn('#c4935b', 3);
+    // đất tơi: hạt, cục đất, rễ nhỏ
+    const soilTex = rep2(canvasTex(256, 256, (g, w, h) => {
+      g.fillStyle = '#3e2a19'; g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 1800; i++) {g.fillStyle = hsl(25 + trnd() * 10, 25 + trnd() * 20, 8 + trnd() * 26, .7); g.beginPath(); g.arc(trnd() * w, trnd() * h, .6 + trnd() * 2.6, 0, 6.29); g.fill();}
+      for (let i = 0; i < 30; i++) {g.strokeStyle = 'rgba(190,160,120,.25)'; g.lineWidth = .8; g.beginPath(); const x = trnd() * w, y = trnd() * h; g.moveTo(x, y); g.lineTo(x + (trnd() - .5) * 30, y + (trnd() - .5) * 30); g.stroke();}
+    }), 2, 2);
+    // bao dứa (sợi đan) cho bao phân
+    const sackTex = rep2(canvasTex(256, 256, (g, w, h) => {
+      g.fillStyle = '#ece3cc'; g.fillRect(0, 0, w, h);
+      for (let y = 0; y < h; y += 4) {g.fillStyle = `rgba(150,130,90,${.12 + trnd() * .12})`; g.fillRect(0, y, w, 1.5);}
+      for (let x = 0; x < w; x += 4) {g.fillStyle = `rgba(255,255,245,${.15 + trnd() * .15})`; g.fillRect(x, 0, 1.5, h);}
+      for (let i = 0; i < 60; i++) {g.fillStyle = 'rgba(120,100,70,.12)'; g.fillRect(trnd() * w, trnd() * h, 10 + trnd() * 30, 2);}
+    }), 2, 2);
+    // vỏ bưởi: lỗ tinh dầu li ti (dùng làm bump)
+    const dimpleTex = canvasTex(256, 256, (g, w, h) => {g.fillStyle = '#bdbdbd'; g.fillRect(0, 0, w, h); for (let i = 0; i < 2200; i++) {g.fillStyle = trnd() < .5 ? '#8a8a8a' : '#e6e6e6'; g.beginPath(); g.arc(trnd() * w, trnd() * h, .8 + trnd() * 1.4, 0, 6.29); g.fill();}});
+    // lá lúa: gốc đậm, ngọn nhạt
+    const bladeTex = canvasTex(32, 256, (g, w, h) => {const gr = g.createLinearGradient(0, h, 0, 0); gr.addColorStop(0, '#9fb98a'); gr.addColorStop(.25, '#ffffff'); gr.addColorStop(1, '#e8f0b0'); g.fillStyle = gr; g.fillRect(0, 0, w, h); g.fillStyle = 'rgba(255,255,255,.6)'; g.fillRect(w / 2 - 1, 0, 2, h);});
+    // cánh hoa: trắng, gốc hơi vàng
+    const petalTex = canvasTex(64, 64, (g, w, h) => {const gr = g.createRadialGradient(w / 2, h / 2, 2, w / 2, h / 2, w / 2); gr.addColorStop(0, '#fff1b8'); gr.addColorStop(.45, '#ffffff'); gr.addColorStop(1, '#f6eef4'); g.fillStyle = gr; g.fillRect(0, 0, w, h);});
+
+    const setTex = (m, o) => {Object.assign(m, o); m.needsUpdate = true;};
+    setTex(M.bark, {map: barkTex, bumpMap: barkTex, bumpScale: 2.5, color: new THREE.Color(0xffffff), roughness: .95});
+    // lá bưởi: bóng như lá thật (phủ bóng nhẹ)
+    M.leaf = new THREE.MeshPhysicalMaterial({color: 0x2f7d32, map: leafTex, roughness: .38, clearcoat: .35, clearcoatRoughness: .4, side: THREE.DoubleSide});
+    setTex(M.plLeaf, {map: leafTex, roughness: .6}); setTex(M.oldLeaf, {map: leafTex, roughness: .7});
+    setTex(M.wood, {map: woodTex, bumpMap: woodTex, bumpScale: 1, color: new THREE.Color(0xffffff), roughness: .8});
+    M.crate = std(0xffffff, {map: crateTex, bumpMap: crateTex, bumpScale: 1.5, roughness: .82});
+    setTex(M.soilDark, {map: soilTex, bumpMap: soilTex, bumpScale: 3, color: new THREE.Color(0xffffff), roughness: 1});
+    M.sack = std(0xffffff, {map: sackTex, bumpMap: sackTex, bumpScale: 1, roughness: .9});
+    M.fruit = new THREE.MeshPhysicalMaterial({color: 0xbfd257, roughness: .55, bumpMap: dimpleTex, bumpScale: 1.2, clearcoat: .3});
+    M.tomato = new THREE.MeshPhysicalMaterial({color: 0xd8331f, roughness: .22, clearcoat: 1, clearcoatRoughness: .15});
+    M.calyx = std(0x3f7d2a, {roughness: .7, side: THREE.DoubleSide});
+    setTex(M.rice, {map: bladeTex, color: new THREE.Color(0x5aa83c), roughness: .6}); setTex(M.sprout, {map: bladeTex, color: new THREE.Color(0x8fd060), roughness: .6});
+    setTex(M.petal, {map: petalTex, roughness: .55});
+    setTex(M.stem, {color: new THREE.Color(0x5a9236), roughness: .6});
+    M.can = new THREE.MeshPhysicalMaterial({color: 0x23875a, metalness: .45, roughness: .32, clearcoat: .9, clearcoatRoughness: .2});
+    M.metal = std(0xc9ced4, {roughness: .3, metalness: .9});
+    M.red = new THREE.MeshPhysicalMaterial({color: 0xc8302a, roughness: .35, clearcoat: .6});
 
     /* =====================================================================
        BẦU TRỜI + MẶT TRỜI
@@ -2601,13 +2671,13 @@
       eve: {top: 0x6f7fcf, bot: 0xffcfa6, key: .95, kc: 0xffb27a, hemi: .7, sun: .85},
     };
     const skyU = {top: {value: new THREE.Color(SKY.normal.top)}, bot: {value: new THREE.Color(SKY.normal.bot)}};
-    const skyMesh = new THREE.Mesh(new THREE.SphereGeometry(70, 32, 16), new THREE.ShaderMaterial({
+    const skyMesh = new THREE.Mesh(new THREE.SphereGeometry(160, 32, 16), new THREE.ShaderMaterial({
       uniforms: skyU, side: THREE.BackSide, depthWrite: false, fog: false,
       vertexShader: 'varying vec3 vP;\nvoid main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
       fragmentShader: 'uniform vec3 top;\nuniform vec3 bot;\nvarying vec3 vP;\nvoid main(){ float h = clamp(vP.y * 1.8 + .06, 0., 1.); gl_FragColor = vec4(mix(bot, top, pow(h, .75)), 1.0);\n#include <colorspace_fragment>\n}',
     }));
     skyMesh.renderOrder = -1; scene.add(skyMesh);
-    const gSun = new THREE.Group(); gSun.position.set(-7, 3.8, -16); scene.add(gSun);
+    const gSun = new THREE.Group(); gSun.position.set(-34, 7, 3); scene.add(gSun);
     gSun.add(new THREE.Mesh(new THREE.SphereGeometry(.85, 24, 16), new THREE.MeshBasicMaterial({color: 0xfff4c0, fog: false})));
     const sunGlow = new THREE.Sprite(new THREE.SpriteMaterial({
       map: canvasTex(128, 128, (g, w) => {const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, 'rgba(255,240,180,1)'); gr.addColorStop(.25, 'rgba(255,220,120,.55)'); gr.addColorStop(1, 'rgba(255,210,120,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, w);}),
@@ -2627,46 +2697,28 @@
     }
 
     /* =====================================================================
-       KHU VƯỜN: mặt đất, cỏ, hàng rào, lối đi
+       KHU VƯỜN: model GLB (đảo vườn). Thềm dưới bên phải (luống đậu) là nơi chơi:
+       đặt model thấp xuống để mặt thềm nằm ở y = 0; ẩn cây đậu để đặt 3 luống A/B/C.
        ===================================================================== */
+    const GARDEN_URL = 'https://3d-cdn.yoolife.com.vn/IZ3qDx33MoE8YyGF4u/IZ3qDx33MoE8YyGF4u.glb';
+    const GROUND_Y = 1.865;
     const garden = new THREE.Group(); scene.add(garden);
-    {
-      const g = new THREE.Mesh(new THREE.CircleGeometry(48, 72), M.ground); g.rotation.x = -Math.PI / 2; garden.add(g);
-    }
-    const TREE_HOME = V3(-1.7, 0, .45), TREE_NEW = V3(-4.2, 0, -2.25);
-    const BED_X = 2.15, BED_Z = [-1.95, -.15, 1.65];
-    const BAG_HOME = V3(-3.5, 0, 1.75), CAN_HOME = V3(-.35, 0, 2.0), CRATE_P = V3(-.15, 0, -1.55);
-    const inBeds = (x, z) => x > BED_X - 1.75 && x < BED_X + 1.75 && z > -2.8 && z < 2.45;
-    // cỏ
-    {
-      const geo = new THREE.ConeGeometry(.02, .15, 4); geo.translate(0, .075, 0);
-      const list = []; for (let i = 0; i < 900; i++) {
-        const a = rand() * Math.PI * 2, r = Math.sqrt(rand()) * 8.5, x = Math.cos(a) * r, z = Math.sin(a) * r * .8;
-        if (inBeds(x, z) || Math.hypot(x - TREE_HOME.x, z - TREE_HOME.z) < .55 || Math.hypot(x - TREE_NEW.x, z - TREE_NEW.z) < .6 || Math.abs(x - .25) < .3 && Math.abs(z) < 2.9) continue;
-        list.push({p: V3(x, 0, z), s: V3(1, R(.6, 1.6), 1), q: qE(R(-.35, .35), R(0, 3), R(-.35, .35))});
-      }
-      const im = instanced(geo, std(0xffffff, {roughness: .8}), list);
-      const ca = [new THREE.Color(0x4f8f30), new THREE.Color(0x5fa23a), new THREE.Color(0x6db446), new THREE.Color(0x78b84e)];
-      list.forEach((_, i) => im.setColorAt(i, ca[i % 4])); garden.add(im);
-    }
-    // lối đi bằng đá
-    {
-      const list = []; for (let i = 0; i < 9; i++) {const z = 2.8 - i * .66; list.push({p: V3(.25 + Math.sin(i * 1.3) * .08, .01, z), s: V3(.24, .025, .2), q: qE(0, i * .7, 0)});}
-      garden.add(instanced(new THREE.CylinderGeometry(1, 1, 1, 9), M.stone, list));
-    }
-    // hàng rào gỗ
-    {
-      const posts = [], rails = [];
-      for (let x = -6.4; x <= 5.4; x += .6) posts.push({p: V3(x, .33, -3.95), s: V3(.07, .66, .07)});
-      for (let z = -3.95; z <= 3.2; z += .6) posts.push({p: V3(-6.4, .33, z), s: V3(.07, .66, .07)});
-      [.22, .48].forEach(y => {rails.push({p: V3(-.5, y, -3.95), s: V3(11.8, .05, .035)}); rails.push({p: V3(-6.4, y, -.37), s: V3(.035, .05, 7.15)});});
-      const box = new THREE.BoxGeometry(1, 1, 1);
-      garden.add(instanced(box, M.wood, posts), instanced(box, M.wood, rails));
-      const bushes = []; [[-5.6, -3.4, .55], [-4.6, -3.45, .42], [3.9, -3.4, .5], [4.8, -3.35, .4], [-5.8, 1.9, .5], [-5.75, 2.7, .38], [-2.6, -3.5, .36]].forEach(([x, z, s]) => {
-        for (let k = 0; k < 4; k++) bushes.push({p: V3(x + R(-.25, .25), s * .7 + R(-.05, .1), z + R(-.15, .15)), s: s * R(.55, .85)});
-      });
-      garden.add(instanced(ball, M.bush, bushes));
-    }
+    let gardenMixer = null;
+    const gardenLoad = new Promise((resolve, reject) => {
+      const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
+      loader.load(GARDEN_URL, gltf => {
+        const m = gltf.scene; m.position.y = -GROUND_Y;
+        m.children.forEach(o => {if (/^bean/i.test(o.name)) o.visible = false;});
+        m.traverse(o => {if (o.isMesh) o.frustumCulled = !o.isSkinnedMesh;});
+        scene.add(m);
+        if (gltf.animations.length) {gardenMixer = new THREE.AnimationMixer(m); gltf.animations.forEach(a => gardenMixer.clipAction(a).play());}
+        resolve(m);
+      }, e => {if (e.lengthComputable || e.total) onGardenProgress(e.loaded / (e.total || 16268996));}, reject);
+    });
+    let onGardenProgress = () => {};
+    const TREE_HOME = V3(6.7, 0, 4.9), TREE_NEW = V3(6.6, 0, -3.6);
+    const BED_X = 6.8, BED_Z = [-1.4, .05, 1.5];
+    const BAG_HOME = V3(5.5, 0, 5.8), CAN_HOME = V3(5.8, 0, 3.6), CRATE_P = V3(7.85, 0, 3.55);
 
     /* =====================================================================
        CÂY BƯỞI CON (có thể cắt tỉa, héo, vàng lá, ra quả)
@@ -2723,8 +2775,20 @@
     {
       const h = new THREE.Mesh(new THREE.CircleGeometry(.42, 28), M.soilDark); h.rotation.x = -Math.PI / 2; h.position.y = .008; gHole.add(h);
       const ring = new THREE.Mesh(new THREE.TorusGeometry(.5, .07, 8, 28), std(0x6b4424, {roughness: 1})); ring.rotation.x = -Math.PI / 2; ring.scale.z = .6; ring.position.y = .02; gHole.add(ring);
-      const sh = new THREE.Mesh(new THREE.BoxGeometry(.05, .9, .05), M.wood); sh.position.set(.62, .42, -.1); sh.rotation.z = -.25; gHole.add(sh);
-      const bl = new THREE.Mesh(new RoundedBoxGeometry(.2, .26, .03, 2, .02), M.metal); bl.position.set(.73, .02, -.1); bl.rotation.z = -.25; gHole.add(bl);
+      // đống đất vừa đào lên
+      const pile = new THREE.Group(); pile.position.set(.74, 0, -.02); gHole.add(pile);
+      [[0, 0, 0, .26, .075, .2], [.2, 0, .13, .12, .045, .1], [-.15, 0, .15, .1, .04, .09], [.12, 0, -.17, .1, .04, .08]].forEach(([x, y, z, a, b, c]) => {const m = new THREE.Mesh(ball, M.soilDark); m.position.set(x, y, z); m.scale.set(a, b, c); pile.add(m);});
+      // xẻng: lưỡi kim loại (mũi nhọn, cắm xuống đống đất) + cổ xẻng + cán gỗ tròn + tay cầm chữ T
+      const shovel = new THREE.Group();
+      const sp = new THREE.Shape(); sp.moveTo(0, 0); sp.quadraticCurveTo(.1, .03, .11, .12); sp.lineTo(.11, .27); sp.quadraticCurveTo(.06, .29, .025, .29); sp.lineTo(-.025, .29); sp.quadraticCurveTo(-.06, .29, -.11, .27); sp.lineTo(-.11, .12); sp.quadraticCurveTo(-.1, .03, 0, 0);
+      const bladeGeo = new THREE.ExtrudeGeometry(sp, {depth: .006, bevelEnabled: true, bevelThickness: .003, bevelSize: .003, bevelSegments: 2, curveSegments: 10});
+      bladeGeo.translate(0, 0, -.003); {const p = bladeGeo.attributes.position; for (let i = 0; i < p.count; i++) {const x = p.getX(i); p.setZ(i, p.getZ(i) - 1.4 * x * x);} bladeGeo.computeVertexNormals();}
+      const blade = new THREE.Mesh(bladeGeo, M.metal); shovel.add(blade);
+      const collar = new THREE.Mesh(new THREE.CylinderGeometry(.02, .032, .11, 14), M.metal); collar.position.y = .34; shovel.add(collar);
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(.017, .019, .78, 12), M.wood); shaft.position.y = .78; shovel.add(shaft);
+      const yoke = new THREE.Mesh(new THREE.CylinderGeometry(.014, .017, .08, 10), M.wood); yoke.position.y = 1.2; shovel.add(yoke);
+      const grip = new THREE.Mesh(new THREE.CylinderGeometry(.018, .018, .15, 12), M.wood); grip.rotation.z = Math.PI / 2; grip.position.y = 1.245; shovel.add(grip);
+      shovel.position.set(.76, -.02, -.02); shovel.rotation.set(.12, .5, -.2); gHole.add(shovel);
     }
 
     // trạng thái cây: hiện tại (TS) → đích (TT)
@@ -2779,10 +2843,15 @@
       const stake = new THREE.Mesh(new THREE.BoxGeometry(.015, .5, .015), M.wood); stake.position.set(.05, .25, 0); g.add(stake);
       g.add(taperTube([[0, 0, 0], [.02, .2, 0], [-.01, .4, .02]], .014, .008, M.stem, {seg: 6, rad: 5}));
       for (let i = 0; i < 5; i++) {const l = new THREE.Mesh(plLeafG, M.oldLeaf); l.position.y = .08 + i * .065; l.rotation.set(-1.05, i * 2.3, 0, 'YXZ'); g.add(l);}
-      for (let i = 0; i < 3; i++) {const t = new THREE.Mesh(ball, M.tomato); t.scale.setScalar(.04); t.position.set(Math.cos(i * 2) * .07, .18 + i * .07, Math.sin(i * 2) * .07); g.add(t);}
+      for (let i = 0; i < 3; i++) {const t = new THREE.Mesh(ball, M.tomato); t.scale.setScalar(.04); t.position.set(Math.cos(i * 2) * .07, .18 + i * .07, Math.sin(i * 2) * .07); g.add(t); const cx = new THREE.Mesh(calyxG, M.calyx); cx.position.copy(t.position).add(V3(0, .038, 0)); g.add(cx);}
     }
-    const bladeG = new THREE.ConeGeometry(.011, .42, 3); bladeG.translate(0, .21, 0);
-    const shootG = new THREE.ConeGeometry(.009, .2, 3); shootG.translate(0, .1, 0);
+    const calyxG = new THREE.CircleGeometry(.03, 5); calyxG.rotateX(-Math.PI / 2);
+    function strapGeo(wd, len) {
+      const g = new THREE.PlaneGeometry(wd, len, 1, 8); g.translate(0, len / 2, 0); const p = g.attributes.position;
+      for (let i = 0; i < p.count; i++) {const y = p.getY(i) / len; p.setX(i, p.getX(i) * (1 - y * .85)); p.setZ(i, .35 * len * y * y);}
+      g.computeVertexNormals(); return g;
+    }
+    const bladeG = strapGeo(.022, .42), shootG = strapGeo(.016, .2);
     function plantTiller(g) {
       for (let i = 0; i < 12; i++) {const b = new THREE.Mesh(bladeG, M.rice); const a = i / 12 * 6.28; b.rotation.set(Math.sin(a) * R(.1, .45), 0, Math.cos(a) * R(.1, .45)); b.scale.y = R(.75, 1.1); g.add(b);}
       for (let i = 0; i < 4; i++) {const s = new THREE.Mesh(shootG, M.sprout); const a = R(0, 6.28); s.position.set(Math.cos(a) * .07, 0, Math.sin(a) * .07); s.rotation.set(Math.sin(a) * .3, 0, Math.cos(a) * .3); g.add(s);}
@@ -2790,20 +2859,22 @@
     const bedPick = [];
     BEDS.forEach((bd, bi) => {
       const g = new THREE.Group(); g.position.set(BED_X, 0, BED_Z[bi]); garden.add(g); bd.g = g;
-      const box = new THREE.Mesh(new RoundedBoxGeometry(2.9, .24, 1.2, 2, .05), M.bed); box.position.y = .12; g.add(box); bedPick.push(box); box.userData.bed = bi;
-      const soil = new THREE.Mesh(new THREE.BoxGeometry(2.76, .02, 1.06), M.bedSoil); soil.position.y = .24; g.add(soil);
-      const plants = new THREE.Group(); plants.position.y = .25; g.add(plants); bd.plants = plants;
+      // vùng chạm (vô hình) – cây trồng thẳng xuống đất của model
+      const hit = new THREE.Mesh(new THREE.BoxGeometry(2.5, .5, .9), new THREE.MeshBasicMaterial({visible: false})); hit.position.y = .25; g.add(hit); bedPick.push(hit); hit.userData.bed = bi;
+      const plants = new THREE.Group(); g.add(plants); bd.plants = plants;
       for (let r = 0; r < 2; r++) for (let c = 0; c < 5; c++) {
-        const p = new THREE.Group(); p.position.set(-1.1 + c * .55 + R(-.04, .04), 0, r ? .26 : -.26); p.rotation.y = R(0, 6.28);
+        const x = -1.0 + c * .5 + (r ? .25 : 0) * .5, z = r ? .2 : -.2;
+        const mound = new THREE.Mesh(ball, M.soilDark); mound.scale.set(.1, .022, .1); mound.position.set(x, .004, z); g.add(mound);
+        const p = new THREE.Group(); p.position.set(x, .01, z); p.rotation.y = R(0, 6.28);
         ({flower: plantFlower, fruit: plantFruit, tiller: plantTiller})[bd.kind](p); plants.add(p);
       }
       // khung chọn luống (viền vàng)
       const frame = new THREE.Group(), fm = new THREE.MeshBasicMaterial({color: 0xffc23a});
-      [[0, .64, 3.1, .05], [0, -.64, 3.1, .05], [1.55, 0, .05, 1.33], [-1.55, 0, .05, 1.33]].forEach(([x, z, w, d]) => {const m = new THREE.Mesh(new THREE.BoxGeometry(w, .04, d), fm); m.position.set(x, .27, z); frame.add(m);});
+      [[0, .44, 2.6, .04], [0, -.44, 2.6, .04], [1.28, 0, .04, .92], [-1.28, 0, .04, .92]].forEach(([x, z, w, d]) => {const m = new THREE.Mesh(new THREE.BoxGeometry(w, .03, d), fm); m.position.set(x, .02, z); frame.add(m);});
       frame.visible = false; g.add(frame); bd.frame = frame;
       bd.perk = 0; bd.perkTo = 0;
       // biển tên luống
-      const sign = new THREE.Group(); sign.position.set(-1.62, 0, .45); g.add(sign);
+      const sign = new THREE.Group(); sign.position.set(1.42, 0, 0); sign.rotation.y = Math.PI / 2; g.add(sign);
       const st = new THREE.Mesh(new THREE.BoxGeometry(.035, .42, .035), M.wood); st.position.y = .21; sign.add(st);
       const pl = new THREE.Mesh(new THREE.BoxGeometry(.26, .18, .02), [M.wood, M.wood, M.wood, M.wood, new THREE.MeshStandardMaterial({map: canvasTex(128, 96, (c, w, h) => {c.fillStyle = '#f4e3c3'; c.fillRect(0, 0, w, h); c.fillStyle = '#5a3a20'; c.font = '800 70px Roboto, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('ABC'[bi], w / 2, h / 2 + 4);}), roughness: .8}), M.wood]);
       pl.position.y = .4; sign.add(pl);
@@ -2830,17 +2901,17 @@
     }
     const gBag = new THREE.Group(); garden.add(gBag);
     {
-      const body = new THREE.Mesh(new RoundedBoxGeometry(.44, .58, .2, 3, .05), std(0xf2ecdc, {roughness: .85})); body.position.y = .29; gBag.add(body);
+      const body = new THREE.Mesh(new RoundedBoxGeometry(.44, .58, .2, 3, .05), M.sack); body.position.y = .29; gBag.add(body);
       const lab = new THREE.Mesh(new THREE.PlaneGeometry(.36, .3), new THREE.MeshStandardMaterial({roughness: .8, map: canvasTex(256, 214, (c, w, h) => {
         c.fillStyle = '#ffffff'; c.fillRect(0, 0, w, h); c.fillStyle = '#2f8a4a'; c.fillRect(0, 0, w, 64); c.fillRect(0, h - 26, w, 26);
         c.fillStyle = '#fff'; c.font = '800 44px Roboto, sans-serif'; c.textAlign = 'center'; c.fillText('PHÂN BÓN', w / 2, 48);
         c.fillStyle = '#1f5a33'; c.font = '800 70px Roboto, sans-serif'; c.fillText('NPK', w / 2, 140); c.font = '600 26px Roboto, sans-serif'; c.fillText('16 – 16 – 8', w / 2, 176);
       })}));
       lab.position.set(0, .3, .102); gBag.add(lab);
-      const tie = new THREE.Mesh(new THREE.CylinderGeometry(.08, .2, .1, 12), std(0xf2ecdc, {roughness: .85})); tie.position.y = .62; gBag.add(tie);
+      const tie = new THREE.Mesh(new THREE.CylinderGeometry(.08, .2, .1, 12), M.sack); tie.position.y = .62; gBag.add(tie);
     }
     const BAG_MOUTH = V3(0, .66, 0);
-    const crate = new THREE.Mesh(new RoundedBoxGeometry(.6, .36, .42, 2, .03), M.wood); crate.position.copy(CRATE_P).add(V3(0, .18, 0)); garden.add(crate);
+    const crate = new THREE.Mesh(new RoundedBoxGeometry(.6, .36, .42, 2, .03), M.crate); crate.position.copy(CRATE_P).add(V3(0, .18, 0)); garden.add(crate);
     const gShear = new THREE.Group(); garden.add(gShear);
     const shA = new THREE.Group(), shB = new THREE.Group(); gShear.add(shA, shB);
     [shA, shB].forEach((h, i) => {
@@ -2897,13 +2968,13 @@
     }
     const TP = () => gTreeG.position.clone();
     const VIEWS = {
-      garden: () => fitView(V3(-.2, .5, 0), 4.3, V3(.12, .52, 1)),
-      tree: () => fitView(TP().add(V3(0, .7, 0)), 1.45, V3(.25, .28, 1)),
-      move: () => fitView(TREE_HOME.clone().lerp(TREE_NEW, .5).add(V3(0, .7, 0)), 2.7, V3(.35, .5, 1)),
-      sky: () => fitView(TP().add(V3(-.9, 1.5, -.6)), 3.0, V3(.4, .02, 1)),
-      beds: () => fitView(V3(BED_X, .3, -.15), 2.45, V3(-.1, 1.1, 1)),
-      bag: () => fitView(TP().lerp(BAG_HOME, .4).add(V3(0, .7, 0)), 1.9, V3(.25, .32, 1)),
-      soil: () => fitView(V3(BED_X, .3, BED_Z[2]), 1.0, V3(0, .9, 1)),
+      garden: () => fitView(V3(6.9, .3, 1.0), 4.4, V3(1, .8, .15)),
+      tree: () => fitView(TP().add(V3(0, .7, 0)), 1.45, V3(1, .3, .3)),
+      move: () => fitView(TREE_HOME.clone().lerp(TREE_NEW, .5).add(V3(0, .7, 0)), 4.8, V3(1, .7, .1)),
+      sky: () => fitView(TP().add(V3(-1.5, 1.6, 0)), 3.0, V3(1, .05, .15)),
+      beds: () => fitView(V3(BED_X, .2, BED_Z[1]), 2.2, V3(1, 1.45, .05)),
+      bag: () => fitView(TP().add(V3(.1, .7, 0)), 1.8, V3(1, .35, .25)),
+      soil: () => fitView(V3(BED_X, .3, BED_Z[2]), 1.0, V3(1, .9, 0)),
     };
     let tween = null, currentView = 'garden';
     function goView(name, instant) {
@@ -2931,9 +3002,9 @@
     const lines = $('lines'), NS = 'http://www.w3.org/2000/svg';
     const LBL = {
       newSpot: {text: 'Góc vườn mới', anchor: () => TREE_NEW.clone().add(V3(0, .05, 0)), off: [-1, .6], info: 1},
-      bed0: {text: 'Luống A · chuẩn bị ra hoa', anchor: () => V3(BED_X + (cur === 0 ? 1 : -1), .55, BED_Z[0]), get off() {return [cur === 0 ? 1 : -1, -.4];}, cls: 'bed', click: () => toggleBed(0)},
-      bed1: {text: 'Luống B · đang thu hoạch quả', anchor: () => V3(BED_X + (cur === 0 ? 1 : -1), .55, BED_Z[1]), get off() {return [cur === 0 ? 1 : -1, -.1];}, cls: 'bed', click: () => toggleBed(1)},
-      bed2: {text: 'Luống C · đâm chồi, đẻ nhánh', anchor: () => V3(BED_X + (cur === 0 ? 1 : -1), .5, BED_Z[2]), get off() {return [cur === 0 ? 1 : -1, .3];}, cls: 'bed', click: () => toggleBed(2)},
+      bed0: {text: 'Luống A · chuẩn bị ra hoa', anchor: () => V3(BED_X + (cur === 0 ? 0 : -1), .55, BED_Z[0]), get off() {return cur === 0 ? [0, -1.7] : [-1, -.4];}, cls: 'bed', click: () => toggleBed(0)},
+      bed1: {text: 'Luống B · đang thu hoạch quả', anchor: () => V3(BED_X + (cur === 0 ? 0 : -1), .55, BED_Z[1]), get off() {return cur === 0 ? [0, -1.7] : [-1, -.1];}, cls: 'bed', click: () => toggleBed(1)},
+      bed2: {text: 'Luống C · đâm chồi, đẻ nhánh', anchor: () => V3(BED_X + (cur === 0 ? 0 : -1), .5, BED_Z[2]), get off() {return cur === 0 ? [0, -1.7] : [-1, .3];}, cls: 'bed', click: () => toggleBed(2)},
       sun: {text: '☀️ Nắng gắt, khô hanh', anchor: () => gSun.position.clone(), off: [-1, .8], info: 1, cls: 'red'},
     };
     Object.entries(LBL).forEach(([k, o]) => {
@@ -3142,43 +3213,53 @@
     async function transplant() {
       goView('move'); sfx('whoosh');
       const p0 = gTreeG.position.clone();
-      await play(600, k => {gTreeG.position.y = ease(k) * .38;});
+      await play(600, k => {gTreeG.position.y = ease(k) * 1.3;});
       await play(1100, k => {k = ease(k); gTreeG.position.x = THREE.MathUtils.lerp(p0.x, TREE_NEW.x, k); gTreeG.position.z = THREE.MathUtils.lerp(p0.z, TREE_NEW.z, k); gTreeG.rotation.z = Math.sin(k * Math.PI) * .08;});
-      await play(500, k => {gTreeG.position.y = .38 * (1 - ease(k));});
+      await play(500, k => {gTreeG.position.y = 1.3 * (1 - ease(k));});
       sfx('place');
+    }
+    // nghiêng bình quanh trục riêng của nó (ghép quaternion, không ghi đè góc Euler → không bị lật ngược)
+    let canBaseQ = null;
+    function tiltCan(dur, f) {
+      if (!canBaseQ || f(0) < .5) canBaseQ = gCan.quaternion.clone();
+      const qz = new THREE.Quaternion(), Z = V3(0, 0, 1);
+      return play(dur, k => {gCan.quaternion.copy(canBaseQ).multiply(qz.setFromAxisAngle(Z, -.55 * f(k)));});
     }
     async function water(dur, target) {
       const tgt = target ? target.clone() : TP();
-      await moveTo(gCan, tgt.clone().add(V3(-.75, .55, .25)), qE(0, -.3, 0), 700);
-      await play(400, k => {gCan.rotation.z = -ease(k) * .55;});
+      await moveTo(gCan, tgt.clone().add(V3(.35, .55, .75)), qE(0, 2.0, 0), 700);
+      await tiltCan(400, k => ease(k));
       sfx('water'); if (!target) TT.wet = 1;
       const sp = V3(0, 0, 0);
       await emit(dur * 1000, () => {gCan.localToWorld(sp.copy(SPOUT)); drops.spawn(sp, V3(R(.5, 1), R(-.2, .3), R(-.25, .25)).applyQuaternion(gCan.quaternion), target ? .26 : .01);});
-      await play(350, k => {gCan.rotation.z = -.55 * (1 - ease(k));});
+      await tiltCan(350, k => 1 - ease(k));
       await moveTo(gCan, HOME.can.p, HOME.can.q, 700);
     }
     // tưới luống: bình đứng ở mép trước luống, cao hơn ngọn cây, vòi hướng vào giữa luống và đi dọc theo luống
     async function waterBed(i) {
-      const z = BED_Z[i] + .72, y = .88, x0 = BED_X - 1.15, x1 = BED_X + 1.15, q = qE(0, Math.PI / 2, 0);
+      const z = BED_Z[i] + .6, y = .62, x0 = BED_X - 1.15, x1 = BED_X + 1.15, q = qE(0, Math.PI / 2, 0);
       await moveTo(gCan, V3(x0, y, z), q, 800);
-      await play(400, k => {gCan.rotation.z = -ease(k) * .55;});
+      await tiltCan(400, k => ease(k));
       sfx('water');
       const sp = V3(0, 0, 0), dur = 2200;
       await Promise.all([
-        emit(dur, () => {gCan.localToWorld(sp.copy(SPOUT)); drops.spawn(sp, V3(R(.35, .8), R(-.15, .2), R(-.18, .18)).applyQuaternion(gCan.quaternion), .26);}),
+        emit(dur, () => {gCan.localToWorld(sp.copy(SPOUT)); drops.spawn(sp, V3(R(.35, .8), R(-.15, .2), R(-.18, .18)).applyQuaternion(gCan.quaternion), .02);}),
         play(dur, k => {gCan.position.x = THREE.MathUtils.lerp(x0, x1, k);}),
       ]);
-      await play(350, k => {gCan.rotation.z = -.55 * (1 - ease(k));});
+      await tiltCan(350, k => 1 - ease(k));
       await moveTo(gCan, HOME.can.p, HOME.can.q, 800);
     }
     async function fertilize(level) {
       const dur = [500, 1100, 2600][level];
-      await moveTo(gBag, TP().add(V3(.65, .55, .45)), qE(0, -.6, 0), 700);
-      await play(400, k => {gBag.rotation.z = ease(k) * 1.6;});
+      // đứng ngoài mép tán (phía +z), thấp hơn tán lá; trục -x của bao hướng vào gốc cây → nghiêng là miệng bao chĩa xuống gốc
+      const off = V3(.25, 0, 1.05), toTree = off.clone().negate().normalize(), yaw = Math.atan2(toTree.z, -toTree.x);
+      const base = qE(0, yaw, 0), qz = new THREE.Quaternion(), Zax = V3(0, 0, 1), tilt = k => gBag.quaternion.copy(base).multiply(qz.setFromAxisAngle(Zax, 1.9 * k));
+      await moveTo(gBag, TP().add(off).add(V3(0, .45, 0)), base, 700);
+      await play(450, k => tilt(ease(k)));
       const mp = V3(0, 0, 0);
-      await emit(dur, () => {gBag.localToWorld(mp.copy(BAG_MOUTH)); grains.spawn(mp, V3(R(-.4, -.1), R(-.2, .2), R(-.3, .3)));});
+      await emit(dur, () => {gBag.localToWorld(mp.copy(BAG_MOUTH)); grains.spawn(mp, toTree.clone().multiplyScalar(R(.25, .55)).add(V3(R(-.12, .12), R(-.1, .1), R(-.12, .12))));});
       TT.fert = [.25, .5, 1.3][level];
-      await play(350, k => {gBag.rotation.z = 1.6 * (1 - ease(k));});
+      await play(350, k => tilt(1 - ease(k)));
       await moveTo(gBag, HOME.bag.p, HOME.bag.q, 700);
     }
     async function resetForTry() {
@@ -3202,10 +3283,10 @@
       setSky('normal');
       if (TT.prune > 0 || gTreeG.position.distanceTo(TREE_HOME) > .01) {gTreeG.position.copy(TREE_HOME); Object.assign(TT, restState()); TT.prune = 0; goView('tree', true); await wait(500);}
       if (idx === 0) {
-        await snip(); await wait(300); await transplant(); TT.wilt = 0; await wait(500);
+        await snip(); await wait(300); await transplant(); goView('tree'); TT.wilt = 0; await wait(1200);
         result(0, true, V.sc1ok, 'sc1ok'); setLabels(['s0', 's1', 's2', 's3']); return true;
       }
-      await transplant();
+      await transplant(); goView('tree'); await wait(900);
       if (idx === 2) {await water(1.4); setSky('hot'); toast('Cây được để giữa trời nắng gắt…');}
       await wait(400); TT.wilt = 1; TT.yellow = .12; await wait(1000);
       result(0, false, V.sc1no, 'sc1no'); return false;
@@ -3459,6 +3540,7 @@
       const dt = Math.min(clock.getDelta(), .05);
       stepTween(now); runAnims(now); controls.update();
       stepSky(dt); stepTree(dt); stepBeds(dt); stepEmit(now, dt);
+      if (gardenMixer) gardenMixer.update(dt);
       TT.wet = Math.max(0, TT.wet - dt * .03);
       sunGlow.material.rotation += dt * .05;
       updateLabels();
@@ -3468,10 +3550,13 @@
     /* ---------- khởi động ---------- */
     const bar = $('introBar'), status = $('introStatus');
     resize(); goStep(0); goView('garden', true);
-    let pct = 0; const prog = setInterval(() => {
-      pct = Math.min(100, pct + 9); bar.style.width = pct + '%'; status.textContent = `Đang dựng khu vườn 3D… ${pct}%`;
-      if (pct >= 100) {clearInterval(prog); status.textContent = 'Sẵn sàng!'; $('introLoader').classList.add('ready');}
-    }, 60);
+    // tải model khu vườn: thanh tiến trình theo dung lượng tải; lỗi mạng thì báo, không có bản dự phòng
+    onGardenProgress = f => {const p = Math.min(99, Math.round(f * 100)); bar.style.width = p + '%'; status.textContent = `Đang tải khu vườn 3D… ${p}%`;};
+    gardenLoad.then(() => {
+      bar.style.width = '100%'; status.textContent = 'Sẵn sàng!'; $('introLoader').classList.add('ready'); goView(currentView, true);
+    }).catch(() => {
+      status.textContent = 'Không tải được khu vườn 3D. Em kiểm tra kết nối mạng rồi tải lại trang nhé.';
+    });
     $('btnExplore').onclick = () => {
       const l = $('introLoader'); l.classList.add('gone'); setTimeout(() => l.remove(), 600);
       resize(); goView(currentView, true); started = true; sfx('click'); say('step0');
