@@ -2513,6 +2513,13 @@
       voice = new Audio(AUDIO[key]); voice.play().catch(() => {});
     }
     const sayV = (key, idx) => say(idx == null ? key : key + idx);
+    const speaking = () => !!voice && !voice.paused && !voice.ended;
+    // đọc trước độ dài các file thuyết minh của hoạt ảnh bước 2 để mỗi chặng kéo dài vừa đủ lời đọc
+    const AUDIO_DUR = {};
+    ['stage0', 'stage1', 'stage2', 'stage3', 'up'].forEach(k => {
+      if (!AUDIO[k]) return; const a = new Audio(); a.preload = 'metadata';
+      a.onloadedmetadata = () => {if (isFinite(a.duration)) AUDIO_DUR[k] = a.duration;}; a.src = AUDIO[k];
+    });
     $('btnNarration').onclick = () => {
       muted = !muted; stopVoice();
       $('btnNarration').setAttribute('aria-pressed', !muted);
@@ -2629,13 +2636,22 @@
       [...$('stageList').children].forEach((c, k) => {c.classList.toggle('done', anim.t >= (k + 1) * STG); c.classList.toggle('cur', anim.stage === k && anim.t < (k + 1) * STG && anim.t > 0);});
     }
     function animReset() {anim.t = 0; anim.stage = -1; anim.done = false; upGroup.visible = false; setGlow(null); placeSecParts(); setLabels(stageLabels()); goView('sec');}
-    $('aPlay').onclick = () => {if (anim.done) animReset(); anim.playing = !anim.playing; if (anim.playing && anim.t === 0) goView('sec'); syncAnimBtns();};
+    $('aPlay').onclick = () => {
+      if (anim.done) animReset(); anim.playing = !anim.playing; if (anim.playing && anim.t === 0) goView('sec');
+      if (voice && !voice.ended) {if (anim.playing) voice.play().catch(() => {}); else voice.pause();} // tạm dừng / tiếp tục cả lời thuyết minh
+      syncAnimBtns();
+    };
     $('aSlow').onclick = () => {anim.speed = .5; syncAnimBtns();};
     $('aNorm').onclick = () => {anim.speed = 1; syncAnimBtns();};
     $('aReplay').onclick = () => {animReset(); anim.playing = true; syncAnimBtns();};
     function updateAnim(dt) {
       if (!anim.playing) return;
-      anim.t = Math.min(T_END, anim.t + dt * anim.speed);
+      // mỗi chặng kéo dài theo lời thuyết minh của chặng đó; lời chưa đọc xong thì chờ ở cuối chặng
+      const k0 = anim.t < T_IN ? Math.floor(anim.t / STG) : 4, base = k0 < 4 ? STG : T_END - T_IN, end = k0 < 4 ? (k0 + 1) * STG : T_END;
+      const dur = muted ? 0 : AUDIO_DUR[k0 < 4 ? 'stage' + k0 : 'up'] || 0, len = Math.max(base, dur + .3);
+      let nt = anim.t + dt * anim.speed * base / len;
+      if (nt >= end && speaking()) nt = end - 1e-3;
+      anim.t = Math.min(T_END, nt);
       const k = anim.t < T_IN ? Math.floor(anim.t / STG) : 4;
       if (k !== anim.stage) {
         anim.stage = k;
