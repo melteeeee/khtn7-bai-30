@@ -2763,13 +2763,20 @@
       land: '<b>Cây trên cạn:</b> rễ mọc trong đất, nước và muối khoáng đi vào cây chủ yếu qua <b>lông hút của rễ</b>.',
       aqua: '<b>Cây thủy sinh</b> (rong, bèo) sống ngập trong nước: nước và muối khoáng thấm qua <b>bề mặt các tế bào biểu bì</b> của cây.',
     };
+    // đọc `key` sau khi lời đang phát kết thúc `gap` ms (nếu lúc đó lại có lời khác đang đọc thì chờ tiếp)
+    function sayAfterVoice(key, gap) {
+      let t = null;
+      const go = () => {if (cur !== 3) return; if (speaking()) return wait(voice); say(key);};
+      const wait = v => {const h = () => {v.removeEventListener('ended', h); v.removeEventListener('pause', h); clearTimeout(t); t = setTimeout(go, gap);}; v.addEventListener('ended', h); v.addEventListener('pause', h);};
+      setTimeout(() => {if (speaking()) wait(voice); else t = setTimeout(go, gap);}, 0); // chờ lời của cảnh vừa bấm bắt đầu phát
+    }
     function setEnv(e, instant) {
       env = e; envSeen.add(e);
       document.querySelectorAll('#envSeg button').forEach(b => b.classList.toggle('on', b.dataset.env === e));
       $('envCap').innerHTML = ENV_CAP[e]; $('cnt3').textContent = `Đã xem ${envSeen.size}/2`;
       const apply = () => {showScene(e === 'land' ? 'plant' : 'aqua'); setLabels(e === 'land' ? ['landHair'] : ['aquaSurf']); goView(e === 'land' ? 'land' : 'aqua', true);};
       instant ? apply() : fadeSwap(apply);
-      if (envSeen.size === 2 && $('q4card').classList.contains('hide')) {$('q4card').classList.remove('hide'); clearNudge(); setTimeout(() => {say('q4');}, 5200);}
+      if (envSeen.size === 2 && $('q4card').classList.contains('hide')) {$('q4card').classList.remove('hide'); clearNudge(); sayAfterVoice('q4', 4000);}
     }
     document.querySelectorAll('#envSeg button').forEach(b => b.onclick = () => {if (cur !== 3) return; setEnv(b.dataset.env); say(b.dataset.env);});
     mcq('q4a', 'fbq4a', {ok: V.q4aOk, no: V.q4no, hint: 'Cô gợi ý: ở cảnh cây trên cạn, các hạt nước đi tới những sợi lông nhỏ ở đầu rễ.', okKey: 'q4aOk', noKey: 'q4no'});
