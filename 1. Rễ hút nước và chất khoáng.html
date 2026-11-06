@@ -1385,6 +1385,24 @@
       color: #1f5a92
     }
 
+    .tag.apo {
+      background: #fde7ec;
+      border-color: #f19aac;
+      color: #b0173a
+    }
+
+    .tag.sym {
+      background: #e6e9fb;
+      border-color: #9fa9ea;
+      color: #2a3fc0
+    }
+
+    .legend i.ln {
+      width: 22px;
+      height: 4px;
+      border-radius: 2px
+    }
+
     .tag.nudge {
       animation: tagBlink 1s ease-in-out infinite
     }
@@ -1699,7 +1717,9 @@
                   <p class="lead">Chúng mình <b>cắt ngang rễ</b> để nhìn vào bên trong. Bấm <b>Bắt đầu</b> và theo
                     dõi các hạt nước và ion khoáng.</p>
                   <div class="legend"><span><i style="background:#3fa3ff"></i>Nước</span><span><i
-                        style="background:#f7c53c"></i>Ion khoáng</span></div>
+                        style="background:#f7c53c"></i>Ion khoáng</span><span><i class="ln"
+                        style="background:#d61f45"></i>Con đường gian bào</span><span><i class="ln"
+                        style="background:#2a3fc0"></i>Con đường tế bào chất</span></div>
                   <div class="card">
                     <span class="chip">Hoạt ảnh</span>
                     <div class="seg" id="animSeg">
@@ -1712,8 +1732,8 @@
                       <div class="check"><b>1</b><div>Lông hút<small>hút nước và muối khoáng từ đất</small></div></div>
                       <div class="check"><b>2</b><div>Biểu bì<small>nước và muối khoáng đi qua lớp biểu bì</small></div>
                       </div>
-                      <div class="check"><b>3</b><div>Thịt vỏ<small>tiếp tục đi qua lớp thịt vỏ</small></div></div>
-                      <div class="check"><b>4</b><div>Mạch gỗ<small>vào mạch gỗ của rễ, rồi lên thân và lá</small></div>
+                      <div class="check"><b>3</b><div>Thịt vỏ<small>đi qua thịt vỏ theo 2 con đường: <span style="color:#d61f45;font-weight:700">gian bào</span> (giữa các tế bào) và <span style="color:#2a3fc0;font-weight:700">tế bào chất</span> (xuyên qua tế bào)</small></div></div>
+                      <div class="check"><b>4</b><div>Mạch gỗ<small>qua nội bì (đai Caspary buộc nước đi vào tế bào) rồi vào mạch gỗ, lên thân và lá</small></div>
                       </div>
                     </div>
                     <p class="muted" style="font-size:13px;margin:10px 0 0">Mẹo: chạm vào từng lớp trên lát cắt để xem
@@ -2180,14 +2200,40 @@
       hair: {name: 'Lông hút', info: 'tế bào biểu bì kéo dài ra, hút nước và muối khoáng từ đất', color: 0xfff3d6, glow: 0xffd36b},
       epi: {name: 'Biểu bì', info: 'lớp tế bào ngoài cùng của rễ', color: 0x76bf45, glow: 0xb6ff5e},
       cortex: {name: 'Thịt vỏ', info: 'nhiều lớp tế bào nằm giữa biểu bì và trụ giữa', color: 0xb4e08f, glow: 0x8fe04a},
-      stele: {name: 'Trụ giữa', info: 'phần giữa rễ, chứa mạch gỗ và mạch rây', color: 0xf2aebd, glow: 0xff6f8f},
+      stele: {name: 'Trụ giữa', info: 'phần giữa rễ, chứa mạch gỗ và mạch rây', color: 0xe8553f, glow: 0xff7a5c},
       xylem: {name: 'Mạch gỗ', info: 'dẫn nước và muối khoáng đi lên thân, lá', color: 0xf2c230, glow: 0xffe066},
-      endo: {name: 'Nội bì', info: 'lớp tế bào xếp khít bao quanh trụ giữa, chỉ cho nước và muối khoáng đi vào', color: 0xe8553f, glow: 0xff7a5c},
+      endo: {name: 'Nội bì', info: 'lớp tế bào xếp khít bao quanh trụ giữa; đai Caspary trên vách buộc nước và muối khoáng phải đi vào trong tế bào', color: 0xa92f2a, glow: 0xff5a4a},
       peri: {name: 'Vỏ trụ', info: 'mô bao quanh mạch gỗ ở giữa trụ', color: 0x5f95dc, glow: 0x7fb4ff},
     };
     Object.values(LAYER).forEach(L => {L.mat = std(L.color, {roughness: .5}); glowMats.add(L.mat);});
     LAYER.hair.mat.transparent = true; LAYER.hair.mat.opacity = .95;
     const secPick = [];
+    /* --- hai con đường nước vào rễ (theo vị trí tế bào trên lát cắt) ---
+       gian bào: đi theo vách và khe giữa các tế bào, tới nội bì bị đai Caspary chặn nên phải đi vào tế bào nội bì
+       tế bào chất: đi xuyên qua các tế bào, từ tế bào này sang tế bào khác */
+    const TAU = Math.PI * 2;
+    const secRingN = (Rr, tt) => Math.floor(TAU * Rr / (2 * tt * 1.07));
+    const SEC_RINGS = [[2.07, .135, 0, .075], [1.915, .15, .5, .07], [1.765, .15, 0, .07], [1.615, .15, .5, .07]]; // [bán kính, nửa bề ngang, lệch, nửa bề dày]
+    const ENDO_RINGS = [[1.48, .06, .5], [1.39, .055, 0]];
+    const cellAng = ([Rr, tt, off], a) => {const n = secRingN(Rr, tt); return (Math.round(a / TAU * n - off) + off) / n * TAU;};
+    const wallAng = ([Rr, tt, off], a) => {const n = secRingN(Rr, tt); return (Math.round(a / TAU * n - off - .5) + off + .5) / n * TAU;};
+    function secRoute(a, near, apo, y) {
+      const P = (r, t) => V3(Math.cos(t) * r, y, Math.sin(t) * r);
+      const d = Math.atan2(Math.sin(near - a), Math.cos(near - a));
+      const ang = r => a + d * THREE.MathUtils.clamp((2.1 - r) / 1.25, 0, 1);
+      const hs = apo ? .013 : 0; // đường gian bào đi sát vách ngoài của lông hút
+      const st = [[P(3.45, a + hs), P(2.8, a + hs), P(2.2, a + hs)], [], [], []];
+      let cur = a;
+      SEC_RINGS.forEach((rg, i) => {
+        const [Rr, , , h] = rg, seg = i === 0 ? st[1] : st[2];
+        if (apo) {const w = wallAng(rg, ang(Rr) + (i % 2 ? 1 : -1) * TAU / secRingN(Rr, rg[1]) * .5); // lượn vòng qua vách bên trái / phải xen kẽ
+          seg.push(P(Rr + h + .006, cur), P(Rr + h + .006, w), P(Rr - h - .006, w)); cur = w;}
+        else seg.push(P(Rr, cellAng(rg, ang(Rr))));
+      });
+      ENDO_RINGS.forEach(rg => st[3].push(P(rg[0], cellAng(rg, ang(rg[0])))));
+      st[3].push(P(1.05, a + d), P(.86, a + d));
+      return st;
+    }
     const HAIR_A = [];
     {
       const cyl = new THREE.CylinderGeometry(1, 1, SH, 18);
@@ -2218,8 +2264,15 @@
         grid[lobeAt(x, z)].push({p: V3(x, -.004, z), s: V3(SP * .5, .97, SP * .5)});
       }
       const addC = (list, L) => {const im = instanced(cyl, LAYER[L].mat, list); im.userData.layer = L; gSec.add(im); secPick.push(im);};
-      addC(grid.endo, 'endo'); addC(grid.peri, 'peri'); addC(grid.xylem, 'xylem');
-      addB([...cells(1.39, .045, .055), ...cells(1.48, .045, .06, .5)], 'endo'); // viền nội bì
+      addC(grid.endo, 'stele'); addC(grid.peri, 'peri'); addC(grid.xylem, 'xylem');
+      addB(cells(1.39, .045, .055), 'stele');
+      addB(cells(1.48, .045, .06, .5), 'endo'); // nội bì
+      // đai Caspary: dải đen trên vách bên của các tế bào nội bì
+      {
+        const n = secRingN(1.48, .06), list = [];
+        for (let i = 0; i < n; i++) {const a = (i + .5 + .5) / n * Math.PI * 2; list.push({p: V3(Math.cos(a) * 1.48, TOP + .004, Math.sin(a) * 1.48), s: V3(.095, .012, .016), q: new THREE.Quaternion().setFromAxisAngle(Yax, -a)});}
+        gSec.add(instanced(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({color: 0x161616}), list));
+      }
       gSec.userData.xy = LOBE.map(a => [Math.cos(a) * LC, Math.sin(a) * LC, .2]);
       // lông hút
       for (let i = 0; i < 9; i++) {
@@ -2252,15 +2305,29 @@
         for (let j = 0; j < n; j++) {
           const a = HAIR_A[(j + off) % 9] + R(-.03, .03), da = (j % 2 ? 1 : -1) * R(.02, .06);
           const near = XA.reduce((b, x) => Math.abs(Math.atan2(Math.sin(x - a), Math.cos(x - a))) < Math.abs(Math.atan2(Math.sin(b - a), Math.cos(b - a))) ? x : b, XA[0]);
-          const s1 = [P(R(3.75, 4.05), a + R(-.1, .1)), P(3.4, a + da * .5), P(2.8, a + da), P(2.1, a)];
-          const s2 = [P(2.1, a), P(2.02, a + da * .3), P(1.97, a)];
-          const s3 = [P(1.97, a), P(1.75, a + da * 1.6), P(1.58, a - da * 1.2), P(1.42, a + da)];
-          const s4 = [P(1.42, a + da), P(1.18, (a + near) / 2), P(.95, near), P(.8, near), P(R(.72, .86), near + R(-.12, .12))];
+          const st = secRoute(a, near, j % 2 === 0, PY);
+          const s1 = [P(R(3.75, 4.05), a + R(-.1, .1)), ...st[0]];
+          const s2 = [s1[s1.length - 1], ...st[1]], s3 = [s2[s2.length - 1], ...st[2]], s4 = [s3[s3.length - 1], ...st[3]];
           list.push({segs: [poly(s1), poly(s2), poly(s3), poly(s4)], d: R(0, .3), up: V3(R(-.4, .4), 0, R(-.4, .4))});
         }
         return {im, list, size};
       };
       secParts.push(mk(30, M.water, .075, 0), mk(16, M.ion, .06, 4));
+    }
+    const routeLine = {};
+    {
+      const XA4 = [0, 1, 2, 3].map(k => k / 4 * TAU - Math.PI / 2);
+      const nearOf = a => XA4.reduce((b, x) => Math.abs(Math.atan2(Math.sin(x - a), Math.cos(x - a))) < Math.abs(Math.atan2(Math.sin(b - a), Math.cos(b - a))) ? x : b);
+      [['apo', 2, 0xd61f45], ['sym', 3, 0x2a3fc0]].forEach(([key, hi, col]) => {
+        const a = HAIR_A[hi], st = secRoute(a, nearOf(a), key === 'apo', TOP + .03), pts = st.flat();
+        const curve = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', .15), mat = new THREE.MeshBasicMaterial({color: col});
+        gSec.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 260, .02, 8, false), mat));
+        [.18, .5, 1].forEach(u => { // mũi tên chỉ hướng
+          const p = curve.getPointAt(Math.min(u, .999)), t = curve.getTangentAt(Math.min(u, .999));
+          const cone = new THREE.Mesh(new THREE.ConeGeometry(.055, .14, 14), mat); cone.position.copy(p); cone.quaternion.setFromUnitVectors(V3(0, 1, 0), t); gSec.add(cone);
+        });
+        routeLine[key] = {curve, a};
+      });
     }
     const anim = {t: 0, playing: false, speed: 1, stage: -1, done: false};
     const STG = 4, T_IN = 16, T_END = 21.5;
@@ -2384,6 +2451,9 @@
       s0: {text: '1 · Lông hút', anchor: () => secAnchor(2.9), off: [1, -1], info: 1},
       s1: {text: '2 · Biểu bì', anchor: () => secAnchor(2.08, 3), off: [1, 2.2], info: 1},
       s2: {text: '3 · Thịt vỏ', anchor: () => secAnchor(1.77, 3), off: [1, 1.2], info: 1},
+      apoL: {text: 'Con đường gian bào', anchor: () => S(routeLine.apo.curve.getPointAt(.42)), off: [1, 1.6], info: 1, cls: 'apo'},
+      symL: {text: 'Con đường tế bào chất', anchor: () => S(routeLine.sym.curve.getPointAt(.42)), off: [-1, 1.6], info: 1, cls: 'sym'},
+      caspL: {text: 'Đai Caspary', anchor: () => S(V3(Math.cos(routeLine.apo.a) * 1.48, TOP, Math.sin(routeLine.apo.a) * 1.48)), off: [1, -.6], info: 1},
       s3: {text: '4 · Mạch gỗ', anchor: () => S(V3(0, TOP, -.8)), off: [-1, -1.6], info: 1},
       up: {text: 'Lên mạch gỗ của thân → lá', anchor: () => S(V3(0, TOP + 4, 0)), off: [1, 0], info: 1, cls: 'water'},
       landHair: {text: 'Nước vào qua lông hút', anchor: () => zoneAnchor, off: [1, .2], info: 1, cls: 'water'},
@@ -2542,7 +2612,8 @@
     /* ===== Bước 2: lát cắt ngang rễ + hoạt ảnh 4 chặng ===== */
     const STAGE_LAYER = ['hair', 'epi', 'cortex', 'xylem'];
     let glowLayer = null; const setGlow = L => {glowLayer = L; Object.values(LAYER).forEach(o => o.mat.emissive.set(0));};
-    function stageLabels() {const k = anim.stage; if (anim.t >= T_IN) return ['s3', 'up']; return k >= 0 ? ['s' + k] : ['s0', 's1', 's2', 's3'];}
+    const ROUTE_L = ['apoL', 'symL'];
+    function stageLabels() {const k = anim.stage; if (anim.t >= T_IN) return ['s3', 'up']; return k >= 0 ? ['s' + k, ...ROUTE_L, ...(k === 3 ? ['caspL'] : [])] : ['s0', 's1', 's2', 's3', ...ROUTE_L, 'caspL'];}
     function syncAnimBtns() {
       $('aPlay').textContent = anim.playing ? '⏸ Tạm dừng' : anim.done ? '▶ Chạy lại' : anim.t > 0 ? '▶ Tiếp tục' : '▶ Bắt đầu';
       $('aPlay').classList.toggle('on', !anim.playing); $('aSlow').classList.toggle('on', anim.speed < 1); $('aNorm').classList.toggle('on', anim.speed === 1);
@@ -2559,7 +2630,7 @@
       const k = anim.t < T_IN ? Math.floor(anim.t / STG) : 4;
       if (k !== anim.stage) {
         anim.stage = k;
-        if (k < 4) {setGlow(STAGE_LAYER[k]); setLabels(['s' + k]); sayV('stage', k); toast(['Chặng 1: Lông hút hút nước và muối khoáng từ đất', 'Chặng 2: đi qua lớp biểu bì', 'Chặng 3: đi qua lớp thịt vỏ', 'Chặng 4: vào mạch gỗ của rễ'][k]);}
+        if (k < 4) {setGlow(STAGE_LAYER[k]); setLabels(stageLabels()); sayV('stage', k); toast(['Chặng 1: Lông hút hút nước và muối khoáng từ đất', 'Chặng 2: đi qua lớp biểu bì', 'Chặng 3: đi qua lớp thịt vỏ (theo 2 con đường: gian bào và tế bào chất)', 'Chặng 4: qua nội bì (đai Caspary) rồi vào mạch gỗ của rễ'][k]);}
         else {setGlow('xylem'); upGroup.visible = true; setLabels(['s3', 'up']); goView('secUp'); sayV('up'); toast('Mạch gỗ của rễ → mạch gỗ của thân → mạch gỗ của lá');}
       }
       if (anim.t >= T_END) {anim.playing = false; anim.done = true; $('ordCard').classList.remove('hide'); setTimeout(() => $('ordCard').scrollIntoView({block: 'nearest', behavior: 'smooth'}), 200);}
