@@ -2327,7 +2327,7 @@
       const hApo = nearestBy(HAIRS, Math.PI * .42, h => h.a), hSym = nearestBy(HAIRS.filter(h => h !== hApo), Math.PI * .7, h => h.a);
       [['apo', hApo, 0xd61f45], ['sym', hSym, 0x2a3fc0]].forEach(([key, hair, col]) => {
         const st = secRoute(hair, key === 'apo', TOP + .03), pts = st.flat();
-        const curve = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', .15), mat = new THREE.MeshBasicMaterial({color: col});
+        const curve = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', .15), mat = new THREE.MeshBasicMaterial({color: col, transparent: true, opacity: .4, depthWrite: false}); // mờ để không lấn át lát cắt
         gSec.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 300, .02, 8, false), mat));
         [.16, .5, 1].forEach(u => { // mũi tên chỉ hướng
           const p = curve.getPointAt(Math.min(u, .999)), t = curve.getTangentAt(Math.min(u, .999));
