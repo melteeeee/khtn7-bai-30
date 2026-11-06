@@ -1830,8 +1830,8 @@
                   <div class="card">
                     <span class="chip">Chuyển cảnh</span><span class="counter" id="cnt3">Đã xem 0/2</span>
                     <div class="seg" id="envSeg">
-                      <button data-env="land" class="on">🌱 Cây trên cạn</button>
-                      <button data-env="aqua">🌊 Cây thủy sinh</button>
+                      <button data-env="land" class="on">Cây trên cạn</button>
+                      <button data-env="aqua">Cây thủy sinh</button>
                     </div>
                     <p class="scene-cap" id="envCap"></p>
                   </div>
@@ -2610,8 +2610,8 @@
     /* ===== Bước 4: cây trên cạn ⇄ cây thủy sinh ===== */
     let env = 'land'; const envSeen = new Set();
     const ENV_CAP = {
-      land: '🌱 <b>Cây trên cạn:</b> rễ mọc trong đất, nước và muối khoáng đi vào cây chủ yếu qua <b>lông hút của rễ</b>.',
-      aqua: '🌊 <b>Cây thủy sinh</b> (rong, bèo) sống ngập trong nước: nước và muối khoáng thấm qua <b>bề mặt các tế bào biểu bì</b> của cây.',
+      land: '<b>Cây trên cạn:</b> rễ mọc trong đất, nước và muối khoáng đi vào cây chủ yếu qua <b>lông hút của rễ</b>.',
+      aqua: '<b>Cây thủy sinh</b> (rong, bèo) sống ngập trong nước: nước và muối khoáng thấm qua <b>bề mặt các tế bào biểu bì</b> của cây.',
     };
     function setEnv(e, instant) {
       env = e; envSeen.add(e);
