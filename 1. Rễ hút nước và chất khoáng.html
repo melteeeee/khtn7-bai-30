@@ -1352,6 +1352,31 @@
       opacity: .25
     }
 
+    /* kéo thả thẻ */
+    .chipcard,
+    .mslot.filled {
+      touch-action: none;
+      cursor: grab
+    }
+
+    .chipcard.dragghost {
+      position: fixed;
+      z-index: 9999;
+      pointer-events: none;
+      transform: translate(-50%, -50%) rotate(-3deg) scale(1.05);
+      box-shadow: 0 12px 26px rgba(0, 0, 0, .28);
+      cursor: grabbing
+    }
+
+    .mslot.drop {
+      outline: 3px solid #f0b43c;
+      outline-offset: 2px
+    }
+
+    .mslot.dragfrom {
+      opacity: .45
+    }
+
     .matchbtns {
       display: flex;
       gap: 8px;
@@ -1741,7 +1766,7 @@
                   </div>
                   <div class="card hide" id="ordCard">
                     <h3>Sắp xếp đúng thứ tự</h3>
-                    <p style="margin:0">Con đường nước đi vào rễ: chọn một thẻ rồi chạm vào ô trống.</p>
+                    <p style="margin:0">Con đường nước đi vào rễ: kéo thẻ thả vào ô trống (hoặc chọn thẻ rồi chạm vào ô).</p>
                     <div class="ordrow" id="ordRow"></div>
                     <div class="tray" id="ordTray"></div>
                     <div class="fb" id="fbOrd"></div>
@@ -1753,7 +1778,7 @@
                 <!-- Bước 3 · Hoạt động 1c -->
                 <section class="sec" data-step="2">
                   <h2>Hoàn thành sơ đồ con đường vận chuyển</h2>
-                  <p class="lead">Sơ đồ có <b>6 ô trống</b>. Em chọn một thẻ rồi chạm vào ô trống phù hợp. Ghép xong
+                  <p class="lead">Sơ đồ có <b>6 ô trống</b>. Em kéo thẻ thả vào ô trống phù hợp (hoặc chọn thẻ rồi chạm vào ô). Ghép xong
                     bấm <b>Kiểm tra</b>.</p>
                   <div class="card">
                     <span class="chip">Sơ đồ</span><span class="counter" id="cntD">Đã ghép 0/6</span>
@@ -2665,21 +2690,51 @@
     /* ---------- ghép thẻ dùng chung (sắp xếp + sơ đồ) ---------- */
     function matcher({slots, tray, chips, check, reset, fbId, counter, bounce, ok, no, hint, okKey, noKey, onWin, onDraw}) {
       const st = {sel: null, val: slots.map(() => null), fails: 0, won: false};
+      let drag = null, justDragged = 0; const wasDrag = () => performance.now() - justDragged < 350;
       const shuffled = [...chips].sort(() => rand() - .5);
       const draw = () => {
         slots.forEach((el, i) => {const v = st.val[i]; el.textContent = v || el.dataset.ph || '?'; el.classList.toggle('filled', !!v); if (!v) el.classList.remove('good', 'bad');});
         tray.innerHTML = shuffled.map(c => `<button class="chipcard ${st.sel === c ? 'sel' : ''} ${st.val.includes(c) ? 'used' : ''}" data-c="${c}">${c}</button>`).join('');
-        tray.querySelectorAll('.chipcard').forEach(b => b.onclick = () => {if (st.won) return; st.sel = st.sel === b.dataset.c ? null : b.dataset.c; draw();});
+        tray.querySelectorAll('.chipcard').forEach(b => b.onclick = () => {if (st.won || wasDrag()) return; st.sel = st.sel === b.dataset.c ? null : b.dataset.c; draw();});
         check.disabled = st.val.includes(null) || st.won;
         counter && (counter.textContent = `Đã ghép ${st.val.filter(Boolean).length}/${slots.length}`);
         onDraw && onDraw(st);
       };
       slots.forEach((el, i) => el.onclick = () => {
-        if (st.won) return; $(fbId).className = 'fb';
+        if (st.won || wasDrag()) return; $(fbId).className = 'fb';
         if (st.val[i] && !st.sel) {sfx('click'); st.val[i] = null; el.classList.remove('good', 'bad'); return draw();}
         if (!st.sel) return toast('Em chọn một thẻ trước nhé');
         sfx('place'); el.classList.remove('good', 'bad'); st.val[i] = st.sel; st.sel = null; draw();
       });
+      // kéo thả: kéo thẻ từ khay thả vào ô; kéo thẻ đã đặt sang ô khác để đổi chỗ, hoặc kéo ra ngoài để lấy thẻ ra
+      const slotAt = (x, y) => {const el = document.elementFromPoint(x, y); return slots.indexOf(el && el.closest('.mslot'));};
+      const startDrag = (e, c, from) => {if (st.won || e.button > 0) return; drag = {c, from, x0: e.clientX, y0: e.clientY, on: false, over: -1, id: e.pointerId};};
+      tray.addEventListener('pointerdown', e => {const b = e.target.closest('.chipcard'); if (b && !b.classList.contains('used')) startDrag(e, b.dataset.c, -1);});
+      slots.forEach((el, i) => el.addEventListener('pointerdown', e => {if (st.val[i]) startDrag(e, st.val[i], i);}));
+      window.addEventListener('pointermove', e => {
+        if (!drag || e.pointerId !== drag.id) return;
+        if (!drag.on) {
+          if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 6) return;
+          drag.on = true; st.sel = null; draw();
+          const g = document.createElement('div'); g.className = 'chipcard dragghost'; g.textContent = drag.c; document.body.appendChild(g); drag.ghost = g;
+          if (drag.from >= 0) slots[drag.from].classList.add('dragfrom');
+        }
+        e.preventDefault();
+        drag.ghost.style.left = e.clientX + 'px'; drag.ghost.style.top = e.clientY + 'px';
+        const i = slotAt(e.clientX, e.clientY);
+        if (i !== drag.over) {slots.forEach(s => s.classList.remove('drop')); if (i >= 0) slots[i].classList.add('drop'); drag.over = i;}
+      }, {passive: false});
+      const endDrag = e => {
+        if (!drag || e.pointerId !== drag.id) return; const d = drag; drag = null; if (!d.on) return;
+        justDragged = performance.now(); d.ghost.remove(); slots.forEach(s => s.classList.remove('drop', 'dragfrom'));
+        const i = e.type === 'pointerup' ? slotAt(e.clientX, e.clientY) : -2; $(fbId).className = 'fb';
+        if (i >= 0 && i !== d.from) {
+          if (d.from >= 0) {st.val[d.from] = st.val[i]; slots[d.from].classList.remove('good', 'bad');}
+          st.val[i] = d.c; slots[i].classList.remove('good', 'bad'); sfx('place');
+        } else if (i === -1 && d.from >= 0) {st.val[d.from] = null; slots[d.from].classList.remove('good', 'bad'); sfx('click');}
+        draw();
+      };
+      window.addEventListener('pointerup', endDrag); window.addEventListener('pointercancel', endDrag);
       check.onclick = () => {
         let good = 0; slots.forEach((el, i) => {const g = st.val[i] === el.dataset.ans; if (g) good++; el.classList.add(g ? 'good' : 'bad');});
         if (good === slots.length) {st.won = true; sfx('success'); fb(fbId, 'ok', ok); say(okKey); check.disabled = true; onWin && onWin(); return;}
