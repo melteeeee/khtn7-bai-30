@@ -2037,16 +2037,20 @@
 
     /* ---------- mô hình cây con (GLB) thay cho cây dựng bằng code ---------- */
     const PLANT_GLB = 'https://3d-cdn.yoolife.com.vn/Y59LynnFmORLYdLfNl/Y59LynnFmORLYdLfNl.glb';
-    async function loadSeedling() {
+    async function loadGLB(url) {
       const {GLTFLoader} = await import('three/addons/loaders/GLTFLoader.js');
-      const g = await new GLTFLoader().loadAsync(PLANT_GLB);
-      let mesh = null; g.scene.traverse(o => {if (o.isMesh && !mesh) mesh = o;});
+      return (await new GLTFLoader().loadAsync(url)).scene;
+    }
+    async function loadSeedling() {
+      const sc = await loadGLB(PLANT_GLB);
+      let mesh = null; sc.traverse(o => {if (o.isMesh && !mesh) mesh = o;});
       return mesh;
     }
-    const seedling = await loadSeedling().catch(e => {
-      const st = $('introStatus'); if (st) st.textContent = 'Không tải được mô hình 3D. Em kiểm tra kết nối mạng rồi tải lại trang nhé.';
-      throw e;
-    });
+    const glbFail = e => {const st = $('introStatus'); if (st) st.textContent = 'Không tải được mô hình 3D. Em kiểm tra kết nối mạng rồi tải lại trang nhé.'; throw e;};
+    // mô hình lát cắt ngang rễ: tải song song với cây con
+    const SEC_GLB = 'https://3d-cdn.yoolife.com.vn/WkWAYWsz_dM9U9xwtA/WkWAYWsz_dM9U9xwtA.glb';
+    const secGlbP = loadGLB(SEC_GLB); secGlbP.catch(() => {});
+    const seedling = await loadSeedling().catch(glbFail);
     const rootPick = [seedling], flowPaths = [];
     {
       const SC = 3.2, SOIL_Y = -.34; // mặt đất nằm ở gốc thân của mô hình
@@ -2195,138 +2199,141 @@
        CẢNH B: lát cắt ngang rễ
        ===================================================================== */
     const gSec = new THREE.Group(); gSec.position.set(34, 0, 0); scene.add(gSec);
-    const SH = .3, TOP = SH / 2, PY = TOP + .05;
+    const secRoot = await secGlbP.catch(glbFail);
+    const SEC_S = 2.2 / .0655;                       // bán kính biểu bì của mô hình → 2.2 đơn vị cảnh
+    const TOP = .0133 * SEC_S, PY = TOP + .05;       // mặt trên lát cắt
     const LAYER = {
-      hair: {name: 'Lông hút', info: 'tế bào biểu bì kéo dài ra, hút nước và muối khoáng từ đất', color: 0xfff3d6, glow: 0xffd36b},
-      epi: {name: 'Biểu bì', info: 'lớp tế bào ngoài cùng của rễ', color: 0x76bf45, glow: 0xb6ff5e},
-      cortex: {name: 'Thịt vỏ', info: 'nhiều lớp tế bào nằm giữa biểu bì và trụ giữa', color: 0xb4e08f, glow: 0x8fe04a},
-      stele: {name: 'Trụ giữa', info: 'phần giữa rễ, chứa mạch gỗ và mạch rây', color: 0xe8553f, glow: 0xff7a5c},
-      xylem: {name: 'Mạch gỗ', info: 'dẫn nước và muối khoáng đi lên thân, lá', color: 0xf2c230, glow: 0xffe066},
-      endo: {name: 'Nội bì', info: 'lớp tế bào xếp khít bao quanh trụ giữa; đai Caspary trên vách buộc nước và muối khoáng phải đi vào trong tế bào', color: 0xa92f2a, glow: 0xff5a4a},
-      peri: {name: 'Vỏ trụ', info: 'mô bao quanh mạch gỗ ở giữa trụ', color: 0x5f95dc, glow: 0x7fb4ff},
+      hair: {name: 'Lông hút', info: 'tế bào biểu bì kéo dài ra, hút nước và muối khoáng từ đất', glow: 0xffd36b},
+      epi: {name: 'Biểu bì', info: 'lớp tế bào ngoài cùng của rễ', glow: 0xffb35e},
+      cortex: {name: 'Thịt vỏ', info: 'nhiều lớp tế bào nằm giữa biểu bì và trụ giữa', glow: 0x8fe04a},
+      endo: {name: 'Nội bì', info: 'lớp tế bào xếp khít bao quanh trụ giữa; đai Caspary trên vách buộc nước và muối khoáng phải đi vào trong tế bào', glow: 0xff5a4a},
+      peri: {name: 'Trụ bì', info: 'lớp tế bào nằm sát trong nội bì, bao quanh mạch gỗ và mạch rây', glow: 0xffd9a0},
+      stele: {name: 'Trụ giữa', info: 'phần giữa rễ, chứa mạch gỗ và mạch rây', glow: 0xfff2c0},
+      proc: {name: 'Tầng phát sinh', info: 'vùng tế bào nằm giữa mạch gỗ và mạch rây (vẽ theo quy ước)', glow: 0x8fc8ff},
+      xylem: {name: 'Mạch gỗ', info: 'dẫn nước và muối khoáng đi lên thân, lá', glow: 0xb28aff},
+      phloem: {name: 'Mạch rây', info: 'dẫn chất hữu cơ từ lá đi nuôi các bộ phận của cây', glow: 0xff9ec0},
     };
-    Object.values(LAYER).forEach(L => {L.mat = std(L.color, {roughness: .5}); glowMats.add(L.mat);});
-    LAYER.hair.mat.transparent = true; LAYER.hair.mat.opacity = .95;
-    const secPick = [];
-    /* --- hai con đường nước vào rễ (theo vị trí tế bào trên lát cắt) ---
+    const MESH_LAYER = {'01_Epidermis': 'epi', '02_Root_hairs': 'hair', '03_Cortex': 'cortex', '04_Endodermis': 'endo', '05_Pericycle': 'peri', '06_Conjunctive_tissue': 'stele', '07_Procambium_schematic': 'proc', '08_Xylem': 'xylem', '09_Phloem': 'phloem'};
+    const secPick = [], secMesh = {};
+    secRoot.scale.setScalar(SEC_S); gSec.add(secRoot);
+    secRoot.traverse(o => {
+      const L = o.isMesh && MESH_LAYER[o.name]; if (!L) return;
+      o.material = o.material.clone(); LAYER[L].mat = o.material; o.userData.layer = L; secPick.push(o); secMesh[L] = o;
+    });
+    Object.values(LAYER).forEach(L => {if (!L.mat) L.mat = std(0xffffff);});
+    gSec.updateMatrixWorld(true);
+
+    /* --- đọc vị trí từng tế bào trong mô hình (mỗi tế bào là một khối rời) --- */
+    const TAU = Math.PI * 2, angDiff = (x, y) => Math.atan2(Math.sin(x - y), Math.cos(x - y));
+    function cellsOf(mesh) { // → [{x, z, r, a, verts}] theo toạ độ của gSec
+      const P = mesh.geometry.attributes.position, I = mesh.geometry.index.array, N = P.count;
+      const canon = new Int32Array(N), seen = new Map();
+      for (let i = 0; i < N; i++) {const k = Math.round(P.getX(i) * 1e5) + ',' + Math.round(P.getY(i) * 1e5) + ',' + Math.round(P.getZ(i) * 1e5); let c = seen.get(k); if (c === undefined) {c = i; seen.set(k, i);} canon[i] = c;}
+      const par = new Int32Array(N); for (let i = 0; i < N; i++) par[i] = i;
+      const find = x => {while (par[x] !== x) {par[x] = par[par[x]]; x = par[x];} return x;};
+      for (let t = 0; t < I.length; t += 3) {const a = find(canon[I[t]]); par[find(canon[I[t + 1]])] = a; par[find(canon[I[t + 2]])] = a;}
+      const comp = new Map();
+      for (let i = 0; i < N; i++) {const r = find(canon[i]); let c = comp.get(r); if (!c) comp.set(r, c = {x: 0, z: 0, verts: []}); c.x += P.getX(i); c.z += P.getZ(i); c.verts.push(i);}
+      return [...comp.values()].map(c => {const x = c.x / c.verts.length * SEC_S, z = c.z / c.verts.length * SEC_S; return {x, z, r: Math.hypot(x, z), a: Math.atan2(z, x), verts: c.verts};}).filter(c => c.r > .15);
+    }
+    // một vòng tế bào: sắp theo góc, kèm vị trí các vách giữa hai tế bào kề nhau
+    const mkRing = cells => {
+      cells.sort((p, q) => p.a - q.a);
+      const r = cells.reduce((t, c) => t + c.r, 0) / cells.length;
+      const walls = cells.map((c, i) => {const n = cells[(i + 1) % cells.length]; return c.a + angDiff(n.a, c.a) / 2;});
+      return {r, cells, walls, half: Math.PI / cells.length};
+    };
+    const nearestBy = (list, a, f = x => x) => list.reduce((b, x) => Math.abs(angDiff(f(x), a)) < Math.abs(angDiff(f(b), a)) ? x : b);
+    const EPI = mkRing(cellsOf(secMesh.epi));
+    const CORTEX = [];
+    cellsOf(secMesh.cortex).sort((p, q) => q.r - p.r).forEach(c => {const g = CORTEX.find(g => Math.abs(g.r0 - c.r) < .05); g ? g.list.push(c) : CORTEX.push({r0: c.r, list: [c]});});
+    CORTEX.forEach((g, i) => {CORTEX[i] = mkRing(g.list);});
+    const ENDO = mkRing(cellsOf(secMesh.endo)), PERI = mkRing(cellsOf(secMesh.peri));
+    const RINGS = [EPI, ...CORTEX];
+    RINGS.forEach((g, k) => {const rIn = (RINGS[k + 1] || ENDO).r; g.outer = k ? (RINGS[k - 1].r + g.r) / 2 : g.r + (g.r - rIn) / 2; g.inner = (g.r + rIn) / 2;});
+    // các cánh mạch gỗ (hình chữ X)
+    const XARMS = [0, 1, 2, 3].map(() => ({sx: 0, sz: 0, rMax: 0}));
+    cellsOf(secMesh.xylem).filter(c => c.r > .35).forEach(c => {const q = Math.floor(((c.a % TAU) + TAU) % TAU / (Math.PI / 2)); const A = XARMS[q]; A.sx += Math.cos(c.a); A.sz += Math.sin(c.a); A.rMax = Math.max(A.rMax, c.r);});
+    const XA = XARMS.map(A => Math.atan2(A.sz, A.sx)), XR = Math.min(...XARMS.map(A => A.rMax));
+    // lông hút: đường giữa của từng sợi, từ ngọn về gốc
+    const HAIRS = cellsOf(secMesh.hair).map(c => {
+      const P = secMesh.hair.geometry.attributes.position, pts = c.verts.map(i => V3(P.getX(i) * SEC_S, P.getY(i) * SEC_S, P.getZ(i) * SEC_S));
+      pts.forEach(p => {p.r = Math.hypot(p.x, p.z);});
+      const r0 = Math.min(...pts.map(p => p.r)), r1 = Math.max(...pts.map(p => p.r)), NB = 9, bins = [];
+      for (let k = 0; k < NB; k++) {const lo = r0 + (r1 - r0) * k / NB, hi = r0 + (r1 - r0) * (k + 1) / NB, inb = pts.filter(p => p.r >= lo && p.r <= hi); if (inb.length) bins.push(inb.reduce((t, p) => t.add(p), V3(0, 0, 0)).multiplyScalar(1 / inb.length));}
+      const line = bins.reverse(); // ngọn → gốc
+      return {line, a: Math.atan2(line[line.length - 1].z, line[line.length - 1].x)};
+    }).sort((p, q) => p.a - q.a);
+    const HAIR_A = HAIRS.map(h => h.a);
+    const nearArm = a => nearestBy(XA, a);
+
+    /* --- hai con đường nước vào rễ, men theo tế bào thật của mô hình ---
        gian bào: đi theo vách và khe giữa các tế bào, tới nội bì bị đai Caspary chặn nên phải đi vào tế bào nội bì
        tế bào chất: đi xuyên qua các tế bào, từ tế bào này sang tế bào khác */
-    const TAU = Math.PI * 2;
-    const secRingN = (Rr, tt) => Math.floor(TAU * Rr / (2 * tt * 1.07));
-    const SEC_RINGS = [[2.07, .135, 0, .075], [1.915, .15, .5, .07], [1.765, .15, 0, .07], [1.615, .15, .5, .07]]; // [bán kính, nửa bề ngang, lệch, nửa bề dày]
-    const ENDO_RINGS = [[1.48, .06, .5], [1.39, .055, 0]];
-    const cellAng = ([Rr, tt, off], a) => {const n = secRingN(Rr, tt); return (Math.round(a / TAU * n - off) + off) / n * TAU;};
-    const wallAng = ([Rr, tt, off], a) => {const n = secRingN(Rr, tt); return (Math.round(a / TAU * n - off - .5) + off + .5) / n * TAU;};
-    function secRoute(a, near, apo, y) {
+    function secRoute(hair, apo, y) {
       const P = (r, t) => V3(Math.cos(t) * r, y, Math.sin(t) * r);
-      const d = Math.atan2(Math.sin(near - a), Math.cos(near - a));
-      const ang = r => a + d * THREE.MathUtils.clamp((2.1 - r) / 1.25, 0, 1);
-      const hs = apo ? .013 : 0; // đường gian bào đi sát vách ngoài của lông hút
-      const st = [[P(3.45, a + hs), P(2.8, a + hs), P(2.2, a + hs)], [], [], []];
+      const a = hair.a, near = nearArm(a), d = angDiff(near, a);
+      const ang = r => a + d * THREE.MathUtils.clamp((EPI.r - r) / (EPI.r - ENDO.r), 0, 1);
+      const side = V3(-Math.sin(a), 0, Math.cos(a)).multiplyScalar(apo ? .028 : 0); // đường gian bào đi sát vách ngoài của lông hút
+      const base = hair.line[hair.line.length - 1];
+      const st = [[...hair.line.map(p => V3(p.x + side.x, p.y + .05 + (y - PY), p.z + side.z)), V3(base.x + side.x, y, base.z + side.z)], [], [], []]; // bám theo sợi lông hút rồi lên mặt cắt ở mép rễ
       let cur = a;
-      SEC_RINGS.forEach((rg, i) => {
-        const [Rr, , , h] = rg, seg = i === 0 ? st[1] : st[2];
-        if (apo) {const w = wallAng(rg, ang(Rr) + (i % 2 ? 1 : -1) * TAU / secRingN(Rr, rg[1]) * .5); // lượn vòng qua vách bên trái / phải xen kẽ
-          seg.push(P(Rr + h + .006, cur), P(Rr + h + .006, w), P(Rr - h - .006, w)); cur = w;}
-        else seg.push(P(Rr, cellAng(rg, ang(Rr))));
+      RINGS.forEach((g, k) => {
+        const seg = k === 0 ? st[1] : st[2];
+        if (apo) {const w = nearestBy(g.walls, ang(g.r) + (k % 2 ? 1 : -1) * g.half); seg.push(P(g.outer, cur), P(g.outer, w), P(g.inner, w)); cur = w;}
+        else {const c = nearestBy(g.cells, ang(g.r), c => c.a); seg.push(V3(c.x, y, c.z));}
       });
-      ENDO_RINGS.forEach(rg => st[3].push(P(rg[0], cellAng(rg, ang(rg[0])))));
-      st[3].push(P(1.05, a + d), P(.86, a + d));
+      [ENDO, PERI].forEach(g => {const c = nearestBy(g.cells, ang(g.r), c => c.a); st[3].push(V3(c.x, y, c.z));});
+      st[3].push(P(XR, near), P(XR * .55, near));
       return st;
     }
-    const HAIR_A = [];
     {
-      const cyl = new THREE.CylinderGeometry(1, 1, SH, 18);
-      const base = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, SH - .04, 64), std(0xf6f9ee)); gSec.add(base);
-      const Yax = V3(0, 1, 0), rb = new RoundedBoxGeometry(2, SH, 2, 3, .55);
-      const addB = (list, L) => {const im = instanced(rb, LAYER[L].mat, list); im.userData.layer = L; gSec.add(im); secPick.push(im); return im;};
-      // tế bào hình chữ nhật bo góc xếp thành vòng, xếp so le, dày khít như hình mẫu
-      const cells = (Rr, rr, tt, off = 0) => {
-        const n = Math.floor(2 * Math.PI * Rr / (2 * tt * 1.07)), o = [];
-        for (let i = 0; i < n; i++) {const a = (i + off) / n * Math.PI * 2; o.push({p: V3(Math.cos(a) * Rr, 0, Math.sin(a) * Rr), s: V3(rr, 1, tt * (2 * Math.PI * Rr / n) / (2 * tt * 1.07) * 1.0), q: new THREE.Quaternion().setFromAxisAngle(Yax, -a)});}
-        return o;
-      };
-      addB(cells(2.07, .075, .135), 'epi');
-      addB([...cells(1.915, .07, .15, .5), ...cells(1.765, .07, .15), ...cells(1.615, .07, .15, .5)], 'cortex');
-      // trụ giữa: lưới lục giác các tế bào nhỏ, tô màu theo vùng (nội bì đỏ, vỏ trụ xanh dương, mạch gỗ vàng)
-      const LOBE = [0, 1, 2, 3].map(k => k / 4 * Math.PI * 2 - Math.PI / 2), LC = .78;
-      const lobeAt = (x, z) => {
-        for (const a of LOBE) {
-          const ex = Math.cos(a), ez = Math.sin(a), u = x * ex + z * ez - LC, v = -x * ez + z * ex;
-          if ((u / .36) ** 2 + (v / .62) ** 2 < 1) return (((u - .02) / .17) ** 2 + (v / .4) ** 2 < 1) ? 'xylem' : 'peri';
-        }
-        return 'endo';
-      };
-      const grid = {xylem: [], peri: [], endo: []}, SP = .088;
-      for (let zi = -18; zi <= 18; zi++) for (let xi = -18; xi <= 18; xi++) {
-        const x = (xi + (zi & 1 ? .5 : 0)) * SP, z = zi * SP * .866;
-        if (Math.hypot(x, z) > 1.33) continue;
-        grid[lobeAt(x, z)].push({p: V3(x, -.004, z), s: V3(SP * .5, .97, SP * .5)});
-      }
-      const addC = (list, L) => {const im = instanced(cyl, LAYER[L].mat, list); im.userData.layer = L; gSec.add(im); secPick.push(im);};
-      addC(grid.endo, 'stele'); addC(grid.peri, 'peri'); addC(grid.xylem, 'xylem');
-      addB(cells(1.39, .045, .055), 'stele');
-      addB(cells(1.48, .045, .06, .5), 'endo'); // nội bì
       // đai Caspary: dải đen trên vách bên của các tế bào nội bì
-      {
-        const n = secRingN(1.48, .06), list = [];
-        for (let i = 0; i < n; i++) {const a = (i + .5 + .5) / n * Math.PI * 2; list.push({p: V3(Math.cos(a) * 1.48, TOP + .004, Math.sin(a) * 1.48), s: V3(.095, .012, .016), q: new THREE.Quaternion().setFromAxisAngle(Yax, -a)});}
-        gSec.add(instanced(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({color: 0x161616}), list));
-      }
-      gSec.userData.xy = LOBE.map(a => [Math.cos(a) * LC, Math.sin(a) * LC, .2]);
-      // lông hút
-      for (let i = 0; i < 9; i++) {
-        const a = i / 9 * Math.PI * 2 + R(-.12, .12); HAIR_A.push(a);
-        const pol = (r, da) => V3(Math.cos(a + da) * r, TOP - .07, Math.sin(a + da) * r);
-        const m = taperTube([pol(2.05, 0), pol(2.5, .03), pol(3.0, .09 * (i % 2 ? 1 : -1)), pol(3.55, .06 * (i % 2 ? 1 : -1))], .075, .055, LAYER.hair.mat, {seg: 30, rad: 10, round: true});
-        m.userData.layer = 'hair'; gSec.add(m); secPick.push(m);
-      }
+      const Yax = V3(0, 1, 0), list = ENDO.walls.map(a => ({p: V3(Math.cos(a) * ENDO.r, TOP + .004, Math.sin(a) * ENDO.r), s: V3(.1, .012, .018), q: new THREE.Quaternion().setFromAxisAngle(Yax, -a)}));
+      gSec.add(instanced(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({color: 0x161616}), list));
       // đất xung quanh
-      const sl = []; for (let i = 0; i < 80; i++) {const a = R(0, Math.PI * 2), r = R(2.45, 4.3); const p = V3(Math.cos(a) * r, R(-.12, .12), Math.sin(a) * r); if (HAIR_A.some(h => Math.abs(Math.atan2(Math.sin(a - h), Math.cos(a - h))) * r < .25)) continue; sl.push({p, s: R(.08, .17), q: new THREE.Quaternion().setFromEuler(new THREE.Euler(R(0, 3), R(0, 3), 0))});}
+      const sl = []; for (let i = 0; i < 80; i++) {const a = R(0, Math.PI * 2), r = R(3.05, 4.3); const p = V3(Math.cos(a) * r, R(-.12, .12), Math.sin(a) * r); if (HAIR_A.some(h => Math.abs(angDiff(a, h)) * r < .25)) continue; sl.push({p, s: R(.08, .17), q: new THREE.Quaternion().setFromEuler(new THREE.Euler(R(0, 3), R(0, 3), 0))});}
       const soilSec = instanced(rock, M.soilP, sl); gSec.add(soilSec); gSec.userData.soil = soilSec;
     }
     // mạch gỗ đi lên thân (hiện ở cuối hoạt ảnh)
     const upGroup = new THREE.Group(); gSec.add(upGroup);
     const upMat = new THREE.MeshStandardMaterial({color: 0x8fb8ff, transparent: true, opacity: .16, depthWrite: false, side: THREE.DoubleSide});
     {
-      const tube = new THREE.Mesh(new THREE.CylinderGeometry(.85, .85, 4.6, 40, 1, true), upMat); tube.position.y = TOP + 2.3; upGroup.add(tube);
+      const tube = new THREE.Mesh(new THREE.CylinderGeometry(PERI.r, PERI.r, 4.6, 48, 1, true), upMat); tube.position.y = TOP + 2.3; upGroup.add(tube);
       const vm = new THREE.MeshStandardMaterial({color: 0xb98ee0, transparent: true, opacity: .45, depthWrite: false});
-      gSec.userData.xy.map(([x, z, r]) => [x, z, r * 1.05]).forEach(([x, z, r]) => {const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 4.6, 16, 1, true), vm); c.position.set(x, TOP + 2.3, z); upGroup.add(c);});
+      [[0, 0, .2], ...XA.map(a => [Math.cos(a) * XR * .6, Math.sin(a) * XR * .6, .14])].forEach(([x, z, r]) => {const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 4.6, 16, 1, true), vm); c.position.set(x, TOP + 2.3, z); upGroup.add(c);});
     }
     upGroup.visible = false;
     // đường đi của từng hạt (4 chặng)
     const secParts = [];
     {
-      const XA = [0, 1, 2, 3].map(k => k / 4 * Math.PI * 2 - Math.PI / 2);
       const P = (r, a) => V3(Math.cos(a) * r, PY, Math.sin(a) * r);
       const mk = (n, mat, size, off) => {
         const im = new THREE.InstancedMesh(ball, mat, n); gSec.add(im);
         const list = [];
         for (let j = 0; j < n; j++) {
-          const a = HAIR_A[(j + off) % 9] + R(-.03, .03), da = (j % 2 ? 1 : -1) * R(.02, .06);
-          const near = XA.reduce((b, x) => Math.abs(Math.atan2(Math.sin(x - a), Math.cos(x - a))) < Math.abs(Math.atan2(Math.sin(b - a), Math.cos(b - a))) ? x : b, XA[0]);
-          const st = secRoute(a, near, j % 2 === 0, PY);
-          const s1 = [P(R(3.75, 4.05), a + R(-.1, .1)), ...st[0]];
+          const hair = HAIRS[(j + off) % HAIRS.length], st = secRoute(hair, j % 2 === 0, PY);
+          const s1 = [P(R(3.2, 3.6), hair.a + R(-.12, .12)), ...st[0]];
           const s2 = [s1[s1.length - 1], ...st[1]], s3 = [s2[s2.length - 1], ...st[2]], s4 = [s3[s3.length - 1], ...st[3]];
           list.push({segs: [poly(s1), poly(s2), poly(s3), poly(s4)], d: R(0, .3), up: V3(R(-.4, .4), 0, R(-.4, .4))});
         }
         return {im, list, size};
       };
-      secParts.push(mk(30, M.water, .075, 0), mk(16, M.ion, .06, 4));
+      secParts.push(mk(30, M.water, .075, 0), mk(16, M.ion, .06, 5));
     }
+    // hai đường mẫu có mũi tên, vẽ trên hai lông hút quay về phía người xem
     const routeLine = {};
     {
-      const XA4 = [0, 1, 2, 3].map(k => k / 4 * TAU - Math.PI / 2);
-      const nearOf = a => XA4.reduce((b, x) => Math.abs(Math.atan2(Math.sin(x - a), Math.cos(x - a))) < Math.abs(Math.atan2(Math.sin(b - a), Math.cos(b - a))) ? x : b);
-      [['apo', 2, 0xd61f45], ['sym', 3, 0x2a3fc0]].forEach(([key, hi, col]) => {
-        const a = HAIR_A[hi], st = secRoute(a, nearOf(a), key === 'apo', TOP + .03), pts = st.flat();
+      const hApo = nearestBy(HAIRS, Math.PI * .42, h => h.a), hSym = nearestBy(HAIRS.filter(h => h !== hApo), Math.PI * .7, h => h.a);
+      [['apo', hApo, 0xd61f45], ['sym', hSym, 0x2a3fc0]].forEach(([key, hair, col]) => {
+        const st = secRoute(hair, key === 'apo', TOP + .03), pts = st.flat();
         const curve = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', .15), mat = new THREE.MeshBasicMaterial({color: col});
-        gSec.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 260, .02, 8, false), mat));
-        [.18, .5, 1].forEach(u => { // mũi tên chỉ hướng
+        gSec.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 300, .02, 8, false), mat));
+        [.16, .5, 1].forEach(u => { // mũi tên chỉ hướng
           const p = curve.getPointAt(Math.min(u, .999)), t = curve.getTangentAt(Math.min(u, .999));
           const cone = new THREE.Mesh(new THREE.ConeGeometry(.055, .14, 14), mat); cone.position.copy(p); cone.quaternion.setFromUnitVectors(V3(0, 1, 0), t); gSec.add(cone);
         });
-        routeLine[key] = {curve, a};
+        routeLine[key] = {curve, a: hair.a, hair};
       });
     }
     const anim = {t: 0, playing: false, speed: 1, stage: -1, done: false};
@@ -2439,7 +2446,7 @@
     /* ---------- nhãn gắn với vị trí 3D ---------- */
     const lines = $('lines'), NS = 'http://www.w3.org/2000/svg';
     const S = p => p.clone().add(gSec.position);
-    const secAnchor = (r, i = 0) => S(V3(Math.cos(HAIR_A[i]) * r, TOP, Math.sin(HAIR_A[i]) * r));
+    const secAnchor = (r, a) => S(V3(Math.cos(a) * r, TOP, Math.sin(a) * r));
     const LBL = {
       zone: {text: 'Miền lông hút', anchor: () => zoneAnchor, off: [-1, -.6], click: () => onZone()},
       hairL: {text: 'Lông hút', anchor: () => zoneHairAnchor, off: [1, .7], click: () => onHair()},
@@ -2448,13 +2455,13 @@
       dEpi: {text: 'Tế bào biểu bì', anchor: () => H(V3(-1.98, .2, .2)), off: [-1, 1.3], info: 1},
       dSoil: {text: 'Hạt đất', anchor: () => H(hairDet.soil[1]), off: [-1, -.8], info: 1},
       dWater: {text: 'Nước + muối khoáng', anchor: () => H(hairDet.soil[3].clone().add(V3(.3, .2, 0))), off: [1, .5], info: 1, cls: 'water'},
-      s0: {text: '1 · Lông hút', anchor: () => secAnchor(2.9), off: [1, -1], info: 1},
-      s1: {text: '2 · Biểu bì', anchor: () => secAnchor(2.08, 3), off: [1, 2.2], info: 1},
-      s2: {text: '3 · Thịt vỏ', anchor: () => secAnchor(1.77, 3), off: [1, 1.2], info: 1},
+      s0: {text: '1 · Lông hút', anchor: () => S(routeLine.sym.hair.line[2]), off: [-1, 1.2], info: 1},
+      s1: {text: '2 · Biểu bì', anchor: () => secAnchor(EPI.r, routeLine.sym.a + .35), off: [1, 2.2], info: 1},
+      s2: {text: '3 · Thịt vỏ', anchor: () => secAnchor(CORTEX[2].r, routeLine.sym.a + .35), off: [1, 1.2], info: 1},
       apoL: {text: 'Con đường gian bào', anchor: () => S(routeLine.apo.curve.getPointAt(.42)), off: [1, 1.6], info: 1, cls: 'apo'},
       symL: {text: 'Con đường tế bào chất', anchor: () => S(routeLine.sym.curve.getPointAt(.42)), off: [-1, 1.6], info: 1, cls: 'sym'},
-      caspL: {text: 'Đai Caspary', anchor: () => S(V3(Math.cos(routeLine.apo.a) * 1.48, TOP, Math.sin(routeLine.apo.a) * 1.48)), off: [1, -.6], info: 1},
-      s3: {text: '4 · Mạch gỗ', anchor: () => S(V3(0, TOP, -.8)), off: [-1, -1.6], info: 1},
+      caspL: {text: 'Đai Caspary', anchor: () => secAnchor(ENDO.r, routeLine.apo.a - .25), off: [1, -.6], info: 1},
+      s3: {text: '4 · Mạch gỗ', anchor: () => secAnchor(XR * .6, XA[0]), off: [-1, -1.6], info: 1},
       up: {text: 'Lên mạch gỗ của thân → lá', anchor: () => S(V3(0, TOP + 4, 0)), off: [1, 0], info: 1, cls: 'water'},
       landHair: {text: 'Nước vào qua lông hút', anchor: () => zoneAnchor, off: [1, .2], info: 1, cls: 'water'},
       aquaSurf: {text: 'Nước thấm qua bề mặt cây', anchor: () => gAqua.position.clone().add(aquaTargets[20]), off: [1, -.5], info: 1, cls: 'water'},
